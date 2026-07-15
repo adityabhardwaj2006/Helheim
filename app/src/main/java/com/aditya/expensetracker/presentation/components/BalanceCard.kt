@@ -30,7 +30,8 @@ fun BalanceCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(200.dp),
+            .height(200.dp)
+            ,
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
@@ -38,7 +39,12 @@ fun BalanceCard(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    Color.Black
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF232526),
+                            Color(0xFF414345)
+                        )
+                    )
                 )
                 .padding(24.dp)
         ) {
@@ -66,15 +72,16 @@ fun BalanceCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
+
                     BalanceItem(
                         label = "Income",
                         amount = income,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = Color(0xFF4CAF50)
                     )
                     BalanceItem(
                         label = "Expenses",
                         amount = expense,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = Color(0xFFF44336)
                     )
                 }
             }

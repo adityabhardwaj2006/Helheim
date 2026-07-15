@@ -20,4 +20,8 @@ sealed class Routes{
 
     @Serializable
     object Statistics : Routes()
+
+    @Serializable
+    object Setting : Routes()
+
 }
