@@ -1,10 +1,15 @@
 package com.aditya.expensetracker.presentation.Screens.utils
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +38,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -71,6 +77,7 @@ private val GreenDark = Color(0xFF184D3F)
 private val RowGray = Color(0xFFF5F5F5)
 
 
+@SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScreen(
@@ -84,6 +91,7 @@ fun AddScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
         ModalBottomSheet(
+            tonalElevation = 0.dp,
             onDismissRequest = {
                 scope.launch{
                     sheetState.hide()
@@ -202,7 +210,7 @@ fun AddScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     OutlinedTextField(
                         value = paidTo,
@@ -212,7 +220,7 @@ fun AddScreen(
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
 
                     var categoryMenuOpen by remember { mutableStateOf(false) }
                     val categories = listOf("Food", "Transport", "Shopping", "Bills", "Entertainment", "Health", "Other")
@@ -227,12 +235,31 @@ fun AddScreen(
                                         categoryMenuOpen = true
                                     },
                                 )
-                                DropdownMenu(expanded = categoryMenuOpen, onDismissRequest = { categoryMenuOpen = false }) {
+                                DropdownMenu(expanded = categoryMenuOpen,
+                                    onDismissRequest = { categoryMenuOpen = false },
+                                    border = BorderStroke(1.dp, Color.LightGray),
+                                    shape = RoundedCornerShape(12.dp),
+                                    shadowElevation = 8.dp) {
                                     categories.forEach {
-                                        DropdownMenuItem(text = { Text(it) }, onClick = {
+                                        DropdownMenuItem(
+                                            modifier = Modifier.background(Color.Transparent),
+                                            text = {
+                                            Text(
+                                                text = it,
+                                                color = Color.Black
+                                            ) },
+                                            onClick = {
                                             category = it
                                             categoryMenuOpen = false
-                                        })
+                                        }, colors = MenuItemColors
+                                                (
+                                                textColor = Color.Black,
+                                                leadingIconColor = Color.Black,
+                                                trailingIconColor = Color.Black,
+                                                disabledTextColor = Color.Black,
+                                                disabledLeadingIconColor = Color.Black,
+                                                disabledTrailingIconColor = Color.Black
+                                            ))
                                     }
                                 }
                             }
@@ -240,7 +267,7 @@ fun AddScreen(
 
 
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
 
                     var paymentMenuOpen by remember { mutableStateOf(false) }
                     val paymentOptions = listOf("Cash", "Card", "UPI", "Bank Transfer")

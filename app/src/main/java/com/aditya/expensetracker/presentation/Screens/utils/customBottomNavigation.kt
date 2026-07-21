@@ -69,11 +69,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.CurrencyRupee
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.ReceiptLong
+import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.rounded.CurrencyRupee
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -226,7 +234,7 @@ fun MorphingFab(
     ) {
         // Pop-out FAB 1
         AnimatedFab(
-            icon = Icons.Default.PhotoCamera,
+            icon = Icons.Default.CurrencyRupee,
             modifier = Modifier
                 .padding(
                     PaddingValues(
@@ -238,7 +246,7 @@ fun MorphingFab(
         )
 
         AnimatedFab(
-            icon = Icons.Default.Settings,
+            icon = Icons.Default.Payments,
             modifier = Modifier.padding(
                 PaddingValues(
                     bottom = 88.dp,
@@ -250,7 +258,7 @@ fun MorphingFab(
 
         // Pop-out FAB 3
         AnimatedFab(
-            icon = Icons.Default.ShoppingCart,
+            icon = Icons.Default.Savings,
             modifier = Modifier.padding(
                 PaddingValues(
                     bottom = 72.dp,
@@ -274,7 +282,6 @@ fun MorphingFab(
                     isMenuExtended.value = true
                 }
             },
-            backgroundColor = Color.Transparent
         )
     }
 }
@@ -284,7 +291,6 @@ fun AnimatedFab(
     modifier: Modifier,
     icon: ImageVector? = null,
     opacity: Float = 1f,
-    backgroundColor: Color = MaterialTheme.colorScheme.secondary,
     onClick: () -> Unit = {}
 ) {
     FloatingActionButton(

@@ -15,6 +15,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.domain.model.Expense
 import com.aditya.expensetracker.domain.model.ExpenseType
 import com.aditya.expensetracker.presentation.components.BalanceCard
@@ -24,10 +26,10 @@ import java.util.*
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen()
+    HomeScreen(rememberNavController())
 }
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()

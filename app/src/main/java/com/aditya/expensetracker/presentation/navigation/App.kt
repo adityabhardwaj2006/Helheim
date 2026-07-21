@@ -1,5 +1,7 @@
 package com.aditya.expensetracker.presentation.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -12,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,6 +29,7 @@ import com.aditya.expensetracker.presentation.Screens.utils.AddScreen
 import com.aditya.expensetracker.presentation.Screens.utils.CustomBottomNavigation
 import com.aditya.expensetracker.presentation.Screens.utils.MorphingFab
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun App(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
@@ -40,7 +44,7 @@ fun App(modifier: Modifier = Modifier) {
     Scaffold(
         floatingActionButton = {
             Box(
-                modifier = Modifier.offset(y = 95.dp)
+                modifier = Modifier.offset(y = 90.dp)
             ) {
                 MorphingFab(
                     onSettingsClick = {
@@ -49,6 +53,7 @@ fun App(modifier: Modifier = Modifier) {
                 )
             }
         },
+        containerColor = Color.White,
         floatingActionButtonPosition = FabPosition.Center,
         bottomBar = {
             CustomBottomNavigation(
@@ -82,13 +87,13 @@ fun App(modifier: Modifier = Modifier) {
                 startDestination = Routes.HomeUi
             ) {
                 composable<Routes.HomeUi> {
-                    HomeScreen()
+                    HomeScreen(navController)
                 }
                 composable<Routes.Profile> {
                     ProfileScreen()
                 }
                 composable<Routes.Statistics> {
-                    StatisticsScreen()
+                    StatisticsScreen(navController)
                 }
                 composable<Routes.Setting> {
                     SettingScreen()
