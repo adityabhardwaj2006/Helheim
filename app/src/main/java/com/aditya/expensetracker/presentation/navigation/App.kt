@@ -29,7 +29,6 @@ import com.aditya.expensetracker.presentation.Screens.utils.AddScreen
 import com.aditya.expensetracker.presentation.Screens.utils.CustomBottomNavigation
 import com.aditya.expensetracker.presentation.Screens.utils.MorphingFab
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun App(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
@@ -47,7 +46,13 @@ fun App(modifier: Modifier = Modifier) {
                 modifier = Modifier.offset(y = 90.dp)
             ) {
                 MorphingFab(
-                    onSettingsClick = {
+                    onSavingClick = {
+                        showBottomSheet = true
+                    },
+                    onExpenseClick = {
+                        showBottomSheet = true
+                    },
+                    onPaymentClick = {
                         showBottomSheet = true
                     }
                 )

@@ -23,7 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.domain.model.ChartType
 import com.aditya.expensetracker.domain.model.Transaction
@@ -182,7 +181,7 @@ fun StatisticsScreen(navController: NavController) {
                 .take(3)
                 .forEach { transaction ->
                     SpendingItem(
-                        title = transaction.id,
+                        title = transaction.id.toString(),
                         date = transaction.date.toString(),
                         amount = "-₹${String.format(Locale.getDefault(), "%,.2f", transaction.amount)}",
                         icon = Icons.Default.Add
@@ -259,7 +258,7 @@ private fun generateSampleTransactions(): List<Transaction> {
         for (i in 1..3) {
             list.add(
                 Transaction(
-                    id = "Item $month-$i",
+                    id = 123,
                     amount = (1000..5000).random().toDouble(),
                     date = LocalDate.of(2026, month, (1..28).random()),
                     type = types.random()

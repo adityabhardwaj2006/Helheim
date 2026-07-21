@@ -206,9 +206,9 @@ fun NavigationItem(
 
 @Composable
 fun MorphingFab(
-    onCameraClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {},
-    onCartClick: () -> Unit = {}
+    onSavingClick: () -> Unit,
+    onExpenseClick: () -> Unit,
+    onPaymentClick : () -> Unit
 ) {
 
     var isMenuExtended = remember { mutableStateOf(false) }
@@ -241,7 +241,8 @@ fun MorphingFab(
                         bottom = 72.dp,
                         end = 210.dp
                     ) * FastOutSlowInEasing.transform(0f, 0.8f, fabAnimationProgress)
-                ),
+                )
+            , onClick = onPaymentClick,
             opacity = LinearEasing.transform(0.2f, 0.7f, fabAnimationProgress)
         )
 
@@ -251,7 +252,7 @@ fun MorphingFab(
                 PaddingValues(
                     bottom = 88.dp,
                 ) * FastOutSlowInEasing.transform(0.1f, 0.9f, fabAnimationProgress)
-            ),
+            ), onClick = onExpenseClick,
             opacity = LinearEasing.transform(0.3f, 0.8f, fabAnimationProgress)
         )
 
@@ -264,7 +265,7 @@ fun MorphingFab(
                     bottom = 72.dp,
                     start = 210.dp
                 ) * FastOutSlowInEasing.transform(0.2f, 1.0f, fabAnimationProgress)
-            ),
+            ), onClick = onSavingClick,
             opacity = LinearEasing.transform(0.4f, 0.9f, fabAnimationProgress)
         )
 
@@ -322,7 +323,11 @@ private fun CustomBottomNavigationPreview() {
                 onStatisticsClick = {},
                 onProfileClick = {}
             )
-            MorphingFab()
+            MorphingFab(
+                onSavingClick = {},
+                onExpenseClick = {},
+                onPaymentClick = {}
+            )
         }
     }
 }

@@ -247,18 +247,13 @@ fun StatisticsChart(
 @Composable
 fun StatisticsChartPreview() {
     val sampleTransactions = listOf(
-        Transaction("1", 5000.0, LocalDate.of(2026, 1, 15), com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction("2", 3000.0, LocalDate.of(2026, 2, 10), com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction("3", 7000.0, LocalDate.of(2026, 3, 5), com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction("4", 4000.0, LocalDate.of(2026, 4, 20), com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction("5", 9000.0, LocalDate.of(2026, 5, 12), com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction("6", 6000.0, LocalDate.of(2026, 6, 12), com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction("7", 8000.0, LocalDate.of(2026, 7, 12), com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction("8", 5000.0, LocalDate.of(2026, 8, 12), com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction("9", 7000.0, LocalDate.of(2026, 9, 12), com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction("10", 4000.0, LocalDate.of(2026, 10, 12), com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction("11", 9000.0, LocalDate.of(2026, 11, 12), com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction("12", 6000.0, LocalDate.of(2026, 12, 12), com.aditya.expensetracker.domain.model.TransactionType.INCOME)
+        Transaction(amount = 5000.0, date = LocalDate.of(2026, 1, 15), type = com.aditya.expensetracker.domain.model.TransactionType.INCOME),
+        Transaction(amount = 3000.0, date = LocalDate.of(2026, 2, 10), type = com.aditya.expensetracker.domain.model.TransactionType.INCOME),
+        Transaction(amount = 7000.0, date = LocalDate.of(2026, 3, 5), type =  com.aditya.expensetracker.domain.model.TransactionType.INCOME),
+        Transaction(amount = 4000.0, date =  LocalDate.of(2026, 4, 20), type = com.aditya.expensetracker.domain.model.TransactionType.INCOME),
+        Transaction(amount = 9000.0, date = LocalDate.of(2026, 5, 12), type = com.aditya.expensetracker.domain.model.TransactionType.INCOME),
+        Transaction( amount = 6000.0, date = LocalDate.of(2026, 6, 12), type =  com.aditya.expensetracker.domain.model.TransactionType.INCOME),
+        Transaction(amount = 8000.0, date = LocalDate.of(2026, 7, 12),type =   com.aditya.expensetracker.domain.model.TransactionType.INCOME),
     )
     
     StatisticsChart(

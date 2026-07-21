@@ -1,9 +1,16 @@
 package com.aditya.expensetracker.domain.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.time.LocalDate
 
+@Entity(
+    tableName = "transactions"
+)
 data class Transaction(
-    val id: String,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int ? = 0,
+
     val amount: Double,
     val date: LocalDate,
     val type: TransactionType
