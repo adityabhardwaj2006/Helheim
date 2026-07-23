@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,16 +43,24 @@ fun StatisticsScreen(navController: NavController) {
 
     Scaffold(
         topBar = {
+
             // Top Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(90.dp)
                     .background(Color.White)
-                    .padding(bottom = 24.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .padding(all = 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .fillMaxHeight(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start)
+                {
+
                 IconButton(
                     onClick = {
                         navController.popBackStack()
@@ -62,20 +71,35 @@ fun StatisticsScreen(navController: NavController) {
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black)
                 }
+
+                }
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .fillMaxHeight()
+                    , verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center)
+                {
+
                 Text(
                     text = "Statistics",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
-                IconButton(
-                    onClick = { },
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(Color.White, CircleShape)
-                ) {
-                    Icon(Icons.Default.Share, contentDescription = "Share", tint = Color.Black)
+
                 }
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .fillMaxHeight()){
+
+
+
+                }
+
+
+
             }
         }
     ) {innerPadding->
@@ -84,7 +108,6 @@ fun StatisticsScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFFF7F7F7))
-                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
                 .padding(innerPadding)
         ) {
@@ -176,20 +199,26 @@ fun StatisticsScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Reuse items or map from sample
-            sampleTransactions
-                .filter { it.type == TransactionType.EXPENSE }
-                .take(3)
-                .forEach { transaction ->
-                    SpendingItem(
-                        title = transaction.id.toString(),
-                        date = transaction.date.toString(),
-                        amount = "-₹${String.format(Locale.getDefault(), "%,.2f", transaction.amount)}",
-                        icon = Icons.Default.Add
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize()
+            ){
+                sampleTransactions
+                    .filter { it.type == TransactionType.EXPENSE }
+                    .take(3)
+                    .forEach { transaction ->
+                        SpendingItem(
+                            title = transaction.id.toString(),
+                            date = transaction.date.toString(),
+                            amount = "-₹${String.format(Locale.getDefault(), "%,.2f", transaction.amount)}",
+                            icon = Icons.Default.Add
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+            }
 
-            Spacer(modifier = Modifier.height(100.dp)) // Padding for Bottom Bar
+
         }
 
 

@@ -95,7 +95,7 @@ fun App(modifier: Modifier = Modifier) {
                     HomeScreen(navController)
                 }
                 composable<Routes.Profile> {
-                    ProfileScreen()
+                    ProfileScreen(navController)
                 }
                 composable<Routes.Statistics> {
                     StatisticsScreen(navController)
