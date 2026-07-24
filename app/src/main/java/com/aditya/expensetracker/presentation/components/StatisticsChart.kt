@@ -24,15 +24,18 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aditya.expensetracker.domain.model.ChartType
 import com.aditya.expensetracker.domain.model.Transaction
+import com.aditya.expensetracker.domain.model.TransactionType
 import com.aditya.expensetracker.presentation.Screens.utils.chart.ChartCalculator
 import com.aditya.expensetracker.presentation.Screens.utils.chart.ChartUtils
 import java.time.LocalDate
+import java.time.ZoneId
 import java.util.Locale
 
 @Composable
@@ -199,7 +202,7 @@ fun StatisticsChart(
                     color = if (index == selectedIndex) selectedColor else labelColor,
                     fontWeight = if (index == selectedIndex) FontWeight.Bold else FontWeight.Normal,
                     modifier = Modifier.width(itemWidth),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -247,13 +250,97 @@ fun StatisticsChart(
 @Composable
 fun StatisticsChartPreview() {
     val sampleTransactions = listOf(
-        Transaction(amount = 5000.0, date = LocalDate.of(2026, 1, 15), type = com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction(amount = 3000.0, date = LocalDate.of(2026, 2, 10), type = com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction(amount = 7000.0, date = LocalDate.of(2026, 3, 5), type =  com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction(amount = 4000.0, date =  LocalDate.of(2026, 4, 20), type = com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction(amount = 9000.0, date = LocalDate.of(2026, 5, 12), type = com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction( amount = 6000.0, date = LocalDate.of(2026, 6, 12), type =  com.aditya.expensetracker.domain.model.TransactionType.INCOME),
-        Transaction(amount = 8000.0, date = LocalDate.of(2026, 7, 12),type =   com.aditya.expensetracker.domain.model.TransactionType.INCOME),
+        Transaction(
+            amount = 5000.0,
+            date = LocalDate.of(2026, 1, (1..28).random())
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli(),
+            type = TransactionType.INCOME,
+            paidTo = "",
+            category = "",
+            savedFor = "",
+            receivedFrom = "",
+            paymentMethod = ""
+        ),
+        Transaction(
+            amount = 3000.0,
+            date = LocalDate.of(2026, 2, (1..28).random())
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli(),
+            paidTo = "",
+            category = "",
+            savedFor = "",
+            receivedFrom = "",
+            paymentMethod = "",
+            type = TransactionType.INCOME
+        ),
+        Transaction(
+            amount = 7000.0,
+            date = LocalDate.of(2026, 3, (1..28).random())
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli(),
+            paidTo = "",
+            category = "",
+            savedFor = "",
+            receivedFrom = "",
+            paymentMethod = "",
+            type = TransactionType.EXPENSE
+        ),
+        Transaction(
+            amount = 4000.0,
+            date = LocalDate.of(2026, 5, (1..28).random())
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli(),
+            paidTo = "",
+            category = "",
+            savedFor = "",
+            receivedFrom = "",
+            paymentMethod = "",
+            type = TransactionType.EXPENSE
+        ),
+        Transaction(
+            amount = 4700.0,
+            date = LocalDate.of(2026, 8, (1..28).random())
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli(),
+            paidTo = "",
+            category = "",
+            savedFor = "",
+            receivedFrom = "",
+            paymentMethod = "",
+            type = TransactionType.EXPENSE
+        ),
+        Transaction(
+            amount = 9000.0,
+            date = LocalDate.of(2026, 9, (1..28).random())
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli(),
+            paidTo = "",
+            category = "",
+            savedFor = "",
+            receivedFrom = "",
+            paymentMethod = "",
+            type = TransactionType.INCOME
+        ),
+        Transaction(
+            amount = 10000.0,
+            date = LocalDate.of(2026, 11, (1..28).random())
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli(),
+            paidTo = "",
+            category = "",
+            savedFor = "",
+            receivedFrom = "",
+            paymentMethod = "",
+            type = TransactionType.SAVINGS
+        )
     )
     
     StatisticsChart(

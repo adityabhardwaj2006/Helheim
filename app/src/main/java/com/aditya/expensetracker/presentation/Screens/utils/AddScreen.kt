@@ -81,7 +81,7 @@ fun AddScreen(
 
 
     var amount by remember { mutableStateOf("") }
-    var dateMillis by remember { mutableStateOf<Long?>(null) }
+    var dateMillis by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
     var paidTo by remember { mutableStateOf("") }
     var category by remember { mutableStateOf<String?>(null) }
     var paymentMethod by remember { mutableStateOf("Cash") }
@@ -111,8 +111,13 @@ fun AddScreen(
 
                                 viewModel.addTransaction(Transaction(
                                     amount = amount.toDouble(),
-                                    date = LocalDate.now(),
-                                    type = TransactionType.EXPENSE
+                                    date = dateMillis,
+                                    type = TransactionType.EXPENSE,
+                                    paidTo = paidTo,
+                                    category = category,
+                                    paymentMethod = paymentMethod,
+                                    savedFor = "",
+                                    receivedFrom = ""
                                 ))
                                 scope.launch{
                                     sheetState.hide()
@@ -191,7 +196,11 @@ fun AddScreen(
                         ) {
                             Icon(Icons.Default.DateRange, contentDescription = null, modifier = Modifier.height(16.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(dateText, color = Color.Gray, fontSize = 13.sp)
+                            Text(
+                                text = dateMillis?.let { convertMillisToDate(it) } ?: "Today",
+                                color = Color.Gray,
+                                fontSize = 13.sp
+                            )
                         }
                     }
 
@@ -201,9 +210,14 @@ fun AddScreen(
                             onDismissRequest = { showDatePicker = false },
                             confirmButton = {
                                 TextButton(onClick = {
-                                    dateMillis = state.selectedDateMillis
+                                    state.selectedDateMillis?.let {
+                                        dateMillis = it
+                                    }
                                     showDatePicker = false
-                                }) { Text("OK") }
+                                })
+                                {
+                                    Text("OK")
+                                }
                             },
                             dismissButton = {
                                 TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
@@ -328,8 +342,8 @@ private fun SimpleRow(
     }
 }
 
-fun convertMillisToDate(millis: Long): String {
-    val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+private fun convertMillisToDate(millis: Long): String {
+    val formatter = SimpleDateFormat("dd/MMMM/yyyy", Locale.getDefault())
     return formatter.format(Date(millis))
 }
 

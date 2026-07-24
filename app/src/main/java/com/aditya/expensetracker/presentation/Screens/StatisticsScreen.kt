@@ -12,13 +12,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +30,7 @@ import com.aditya.expensetracker.domain.model.Transaction
 import com.aditya.expensetracker.domain.model.TransactionType
 import com.aditya.expensetracker.presentation.components.StatisticsChart
 import java.time.LocalDate
+import java.time.ZoneId
 import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -253,7 +254,7 @@ fun ChartTypeFilterItem(
 }
 
 @Composable
-fun SpendingItem(title: String, date: String, amount: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+fun SpendingItem(title: String, date: String, amount: String, icon: ImageVector) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -282,22 +283,32 @@ fun SpendingItem(title: String, date: String, amount: String, icon: androidx.com
 private fun generateSampleTransactions(): List<Transaction> {
     val list = mutableListOf<Transaction>()
     val types = TransactionType.entries.toTypedArray()
-    
+
     for (month in 1..12) {
         for (i in 1..3) {
+
+            val dateMillis = LocalDate.of(2026, month, (1..28).random())
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+
             list.add(
                 Transaction(
-                    id = 123,
                     amount = (1000..5000).random().toDouble(),
-                    date = LocalDate.of(2026, month, (1..28).random()),
-                    type = types.random()
+                    date = dateMillis,
+                    type = types.random(),
+                    paidTo = "",
+                    category = "",
+                    savedFor = "",
+                    receivedFrom = "",
+                    paymentMethod = ""
                 )
             )
         }
     }
+
     return list
 }
-
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
 @Composable
 fun StatisticsScreenPreview() {

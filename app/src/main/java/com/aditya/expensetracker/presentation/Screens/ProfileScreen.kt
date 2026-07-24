@@ -67,10 +67,10 @@ import androidx.navigation.compose.rememberNavController
 @Composable
 fun ProfileScreen(navController: NavController) {
     val scrollState = rememberScrollState()
-    val progress = (scrollState.value/150f).coerceIn(0f,1f)
+    val progress = (scrollState.value/300f).coerceIn(0f,1f)
     
     val iconSize by animateDpAsState(
-        targetValue = lerp(96.dp,40.dp,progress)
+        targetValue = lerp(96.dp,30.dp,progress)
     )
     val nameSize by animateFloatAsState(
         targetValue = 20f - (4f*progress)

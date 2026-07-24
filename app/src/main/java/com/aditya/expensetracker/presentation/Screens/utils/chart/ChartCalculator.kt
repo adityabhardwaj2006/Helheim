@@ -6,7 +6,10 @@ import com.aditya.expensetracker.domain.model.ChartPoint
 import com.aditya.expensetracker.domain.model.ChartType
 import com.aditya.expensetracker.domain.model.Transaction
 import com.aditya.expensetracker.domain.model.TransactionType
+import java.time.Instant
+import java.time.LocalDate
 import java.time.Month
+import java.time.ZoneId
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -25,7 +28,11 @@ object ChartCalculator {
         val filtered = transactions.filter { it.type == targetType }
         
         // Group by month value (1-12)
-        val groupedByMonth = filtered.groupBy { it.date.monthValue }
+        val groupedByMonth = filtered.groupBy {
+            Instant.ofEpochMilli(it.date!!)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+            .monthValue }
         
         return Month.entries.map { month ->
             val monthName = month.getDisplayName(TextStyle.SHORT, Locale.getDefault())

@@ -74,6 +74,8 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CurrencyRupee
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.PhotoCamera
@@ -81,6 +83,7 @@ import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.WorkHistory
 import androidx.compose.material.icons.rounded.CurrencyRupee
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -153,7 +156,7 @@ fun CustomBottomNavigation(
                     onClick = onHomeClick
                 )
                 NavigationItem(
-                    icon = Icons.Default.AccountBalanceWallet,
+                    icon = Icons.Default.History,
                     label = "Wallet",
                     selected = false,
                     onClick = onWalletClick

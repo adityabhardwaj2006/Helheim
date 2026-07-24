@@ -25,16 +25,24 @@ import com.aditya.expensetracker.presentation.Screens.HomeScreen
 import com.aditya.expensetracker.presentation.Screens.ProfileScreen
 import com.aditya.expensetracker.presentation.Screens.SettingScreen
 import com.aditya.expensetracker.presentation.Screens.StatisticsScreen
+import com.aditya.expensetracker.presentation.Screens.utils.AddIncome
+import com.aditya.expensetracker.presentation.Screens.utils.AddSaving
 import com.aditya.expensetracker.presentation.Screens.utils.AddScreen
 import com.aditya.expensetracker.presentation.Screens.utils.CustomBottomNavigation
 import com.aditya.expensetracker.presentation.Screens.utils.MorphingFab
 
+enum class SheetType { NONE, INCOME, EXPENSE, SAVING }
+
 @Composable
 fun App(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
-    var showBottomSheet by remember{mutableStateOf(false)}
-    if(showBottomSheet){
-        AddScreen(onDismiss = {showBottomSheet = false})
+    var currentSheet by remember { mutableStateOf(SheetType.NONE) }
+    
+    when (currentSheet) {
+        SheetType.INCOME -> AddIncome(onDismiss = { currentSheet = SheetType.NONE })
+        SheetType.EXPENSE -> AddScreen(onDismiss = { currentSheet = SheetType.NONE })
+        SheetType.SAVING -> AddSaving(onDismiss = { currentSheet = SheetType.NONE })
+        SheetType.NONE -> {}
     }
     
     val currentEntry by navController.currentBackStackEntryAsState()
@@ -47,13 +55,13 @@ fun App(modifier: Modifier = Modifier) {
             ) {
                 MorphingFab(
                     onSavingClick = {
-                        showBottomSheet = true
+                        currentSheet = SheetType.SAVING
                     },
                     onExpenseClick = {
-                        showBottomSheet = true
+                        currentSheet = SheetType.EXPENSE
                     },
                     onPaymentClick = {
-                        showBottomSheet = true
+                        currentSheet = SheetType.INCOME
                     }
                 )
             }

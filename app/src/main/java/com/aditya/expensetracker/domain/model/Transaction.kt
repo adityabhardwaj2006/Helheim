@@ -9,11 +9,16 @@ import java.time.LocalDate
 )
 data class Transaction(
     @PrimaryKey(autoGenerate = true)
-    val id: Int ? = 0,
+    val id: Int? = null,
 
     val amount: Double,
-    val date: LocalDate,
-    val type: TransactionType
+    val date: Long?,
+    val type: TransactionType,
+    val paidTo: String,
+    val category: String?,
+    val savedFor : String,
+    val receivedFrom : String,
+    val paymentMethod: String
 )
 
 enum class TransactionType {
