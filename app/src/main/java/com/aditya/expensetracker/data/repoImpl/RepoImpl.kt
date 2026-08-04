@@ -1,10 +1,10 @@
-package com.aditya.expensetracker.data
+package com.aditya.expensetracker.data.repoImpl
 
 import com.aditya.expensetracker.data.DAO.TransactionDao
-import com.aditya.expensetracker.domain.Repo.Repo
-import com.aditya.expensetracker.domain.model.Transaction
-import javax.inject.Inject
+import com.aditya.expensetracker.data.model.Transaction
+import com.aditya.expensetracker.domain.repo.Repo
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
 class RepoImpl @Inject constructor(
     private val dao : TransactionDao

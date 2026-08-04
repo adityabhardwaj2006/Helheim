@@ -1,4 +1,4 @@
-package com.aditya.expensetracker.domain.model
+package com.aditya.expensetracker.data.model
 
 import java.util.Date
 

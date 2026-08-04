@@ -1,18 +1,20 @@
-package com.aditya.expensetracker.Di
+package com.aditya.expensetracker.data.Di
 
 import android.content.Context
-import androidx.compose.ui.platform.LocalContext
 import androidx.room.Room
+import com.aditya.expensetracker.data.Api.AuthApi
 import com.aditya.expensetracker.data.DAO.TransactionDao
 import com.aditya.expensetracker.data.Database.TransactionDatabase
-import com.aditya.expensetracker.data.RepoImpl
-import com.aditya.expensetracker.domain.Repo.Repo
+import com.aditya.expensetracker.data.repoImpl.RepoImpl
+import com.aditya.expensetracker.domain.repo.Repo
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
@@ -41,14 +43,32 @@ object DataModule {
         return transactionDatabase.transactionDao()
     }
 
-}
+    @Provides
+    @Singleton
+    fun provideRetrofit() : Retrofit{
+        return Retrofit.Builder()
+            .baseUrl("http://10.0.2.2:3000/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
 
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class RepoModule {
+    @Provides
+    @Singleton
+    fun provideAuthApi(
+        retrofit : Retrofit
+    ): AuthApi{
+        return retrofit.create(AuthApi::class.java)
+    }
+
     @Binds
     @Singleton
-    abstract fun bindRepo(repoImpl: RepoImpl): Repo
+    fun bindRepo(
+        repoImpl: RepoImpl
+    ): Repo {
+        return repoImpl
+    }
+
+
 }
 
 

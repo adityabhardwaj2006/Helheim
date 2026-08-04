@@ -1,8 +1,7 @@
-package com.aditya.expensetracker.domain.model
+package com.aditya.expensetracker.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.time.LocalDate
 
 @Entity(
     tableName = "transactions"

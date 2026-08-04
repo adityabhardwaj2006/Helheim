@@ -1,16 +1,12 @@
 package com.aditya.expensetracker.data.ViewModel
 
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aditya.expensetracker.data.Database.TransactionDatabase
-import com.aditya.expensetracker.domain.Repo.Repo
-import com.aditya.expensetracker.domain.model.Transaction
+import com.aditya.expensetracker.domain.repo.Repo
+import com.aditya.expensetracker.data.model.Transaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -39,13 +35,11 @@ class transactionViewModel @Inject constructor(
         }
     }
 
-    fun getTransaction(){
-        repo.getAllTransaction()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList()
-            )
-    }
+    val transactions = repo.getAllTransaction()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
 }

@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.aditya.expensetracker.domain.model.ChartType
-import com.aditya.expensetracker.domain.model.Transaction
-import com.aditya.expensetracker.domain.model.TransactionType
+import com.aditya.expensetracker.data.model.ChartType
+import com.aditya.expensetracker.data.model.Transaction
+import com.aditya.expensetracker.data.model.TransactionType
 import com.aditya.expensetracker.presentation.components.StatisticsChart
 import java.time.LocalDate
 import java.time.ZoneId

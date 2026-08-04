@@ -1,6 +1,6 @@
-package com.aditya.expensetracker.domain.Repo
+package com.aditya.expensetracker.domain.repo
 
-import com.aditya.expensetracker.domain.model.Transaction
+import com.aditya.expensetracker.data.model.Transaction
 import kotlinx.coroutines.flow.Flow
 
 interface Repo  {

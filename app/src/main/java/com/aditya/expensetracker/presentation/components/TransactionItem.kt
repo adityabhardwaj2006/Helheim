@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,8 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aditya.expensetracker.domain.model.Expense
-import com.aditya.expensetracker.domain.model.ExpenseType
+import com.aditya.expensetracker.data.model.Expense
+import com.aditya.expensetracker.data.model.ExpenseType
 import java.text.SimpleDateFormat
 import java.util.*
 

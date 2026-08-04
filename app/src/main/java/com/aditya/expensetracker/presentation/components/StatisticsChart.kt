@@ -29,9 +29,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aditya.expensetracker.domain.model.ChartType
-import com.aditya.expensetracker.domain.model.Transaction
-import com.aditya.expensetracker.domain.model.TransactionType
+import com.aditya.expensetracker.data.model.ChartType
+import com.aditya.expensetracker.data.model.Transaction
+import com.aditya.expensetracker.data.model.TransactionType
 import com.aditya.expensetracker.presentation.Screens.utils.chart.ChartCalculator
 import com.aditya.expensetracker.presentation.Screens.utils.chart.ChartUtils
 import java.time.LocalDate

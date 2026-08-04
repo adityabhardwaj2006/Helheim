@@ -1,29 +1,37 @@
-# Fix UNIQUE constraint failed on transactions.id
+# Implementation Plan - Login and Registration UI
 
-The application crashes with a `SQLiteConstraintException` when attempting to insert multiple transactions. This is because the `Transaction` entity uses `0` as a default value for its auto-generating primary key `id`, which Room interprets as a literal value rather than a request for auto-generation when the type is nullable (`Int?`).
+Implement the Login and Registration screens based on the provided design image for the Peppino Pizza application.
+
+## User Review Required
+
+> [!IMPORTANT]
+> - I will use `Color(0xFFE96131)` for the primary orange color.
+> - I will use placeholder icons for the logo and social login buttons (Google, Apple, Facebook) since the specific assets are not yet in the project.
+> - I will add `Login` and `SignUp` routes to the navigation graph.
 
 ## Proposed Changes
 
-### Domain Model
+### Navigation
 
-#### [MODIFY] [Transaction.kt](file:///Users/adityabhardwaj426gmail.com/AndroidStudioProjects/ExpenseTracker/app/src/main/java/com/aditya/expensetracker/domain/model/Transaction.kt)
-- Change the default value of `id` from `0` to `null`. This ensures Room correctly triggers auto-generation for new records.
+#### [MODIFY] [Routes.kt](file:///Users/adityabhardwaj426gmail.com/AndroidStudioProjects/ExpenseTracker/app/src/main/java/com/aditya/expensetracker/presentation/navigation/Routes.kt)
+- Add `Login` and `SignUp` objects to the `Routes` sealed class.
 
-### UI Screens
+#### [MODIFY] [App.kt](file:///Users/adityabhardwaj426gmail.com/AndroidStudioProjects/ExpenseTracker/app/src/main/java/com/aditya/expensetracker/presentation/navigation/App.kt)
+- Add the `Login` and `SignUp` screens to the `NavHost`.
+- Set the start destination to `SubNavigation.LoginSignUpScreen`.
 
-#### [MODIFY] [AddIncome.kt](file:///Users/adityabhardwaj426gmail.com/AndroidStudioProjects/ExpenseTracker/app/src/main/java/com/aditya/expensetracker/presentation/Screens/utils/AddIncome.kt)
-#### [MODIFY] [AddSaving.kt](file:///Users/adityabhardwaj426gmail.com/AndroidStudioProjects/ExpenseTracker/app/src/main/java/com/aditya/expensetracker/presentation/Screens/utils/AddSaving.kt)
-#### [MODIFY] [AddScreen.kt](file:///Users/adityabhardwaj426gmail.com/AndroidStudioProjects/ExpenseTracker/app/src/main/java/com/aditya/expensetracker/presentation/Screens/utils/AddScreen.kt)
-- Fix a bug where the user-selected date was being ignored and `LocalDate.now()` was always used.
+### Screens
 
-#### [MODIFY] [StatisticsScreen.kt](file:///Users/adityabhardwaj426gmail.com/AndroidStudioProjects/ExpenseTracker/app/src/main/java/com/aditya/expensetracker/presentation/Screens/StatisticsScreen.kt)
-- Remove hardcoded `id = 123` in sample data generation to avoid confusion.
+#### [MODIFY] [LoginScreen.kt](file:///Users/adityabhardwaj426gmail.com/AndroidStudioProjects/ExpenseTracker/app/src/main/java/com/aditya/expensetracker/presentation/Screens/LoginScreen.kt)
+- Implement the UI: Logo, Title, Subtitle, Email Field, Password Field, Remember Me, Forgot Password, Login Button, Social Login, and Sign Up link.
+
+#### [MODIFY] [SignUpScreen.kt](file:///Users/adityabhardwaj426gmail.com/AndroidStudioProjects/ExpenseTracker/app/src/main/java/com/aditya/expensetracker/presentation/Screens/SignUpScreen.kt)
+- Implement the UI: Logo, Title, Subtitle, Name Field, Email Field, Password Field, Remember Me, Sign Up Button, Social Login, and Sign In link.
 
 ## Verification Plan
 
 ### Manual Verification
-- Deploy the app to a device/emulator.
-- Navigate to "Add Income", "Add Expense", and "Add Saving" screens.
-- Add multiple entries for each.
-- Verify that the app no longer crashes and entries are correctly saved in the database.
-- Verify that selected dates are correctly preserved.
+- Run the app and verify the Login screen is the first screen shown.
+- Navigate from Login to Sign Up and back.
+- Verify the UI matches the design (colors, layouts, buttons).
+- Verify the password visibility toggle works.

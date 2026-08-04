@@ -22,6 +22,6 @@ sealed class Routes{
     object Statistics : Routes()
 
     @Serializable
-    object Setting : Routes()
+    object History : Routes()
 
 }

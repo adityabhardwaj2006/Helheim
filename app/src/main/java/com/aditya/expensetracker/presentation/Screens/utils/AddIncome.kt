@@ -57,10 +57,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aditya.expensetracker.data.ViewModel.transactionViewModel
-import com.aditya.expensetracker.domain.model.Transaction
-import com.aditya.expensetracker.domain.model.TransactionType
+import com.aditya.expensetracker.data.model.Transaction
+import com.aditya.expensetracker.data.model.TransactionType
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
 

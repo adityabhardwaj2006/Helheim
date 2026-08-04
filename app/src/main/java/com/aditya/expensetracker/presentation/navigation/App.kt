@@ -16,14 +16,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.aditya.expensetracker.presentation.Screens.HistoryScreen
 import com.aditya.expensetracker.presentation.Screens.HomeScreen
 import com.aditya.expensetracker.presentation.Screens.ProfileScreen
-import com.aditya.expensetracker.presentation.Screens.SettingScreen
 import com.aditya.expensetracker.presentation.Screens.StatisticsScreen
 import com.aditya.expensetracker.presentation.Screens.utils.AddIncome
 import com.aditya.expensetracker.presentation.Screens.utils.AddSaving
@@ -73,17 +74,54 @@ fun App(modifier: Modifier = Modifier) {
                 currentRoute = currentRoute,
                 onProfileClick = {
                     if (currentRoute != Routes.Profile::class.qualifiedName) {
-                        navController.navigate(Routes.Profile) { launchSingleTop = true }
+                        navController.navigate(Routes.Profile) {
+                            popUpTo(navController.graph.findStartDestination().id){
+                                saveState = true
+                            }
+
+                            launchSingleTop = true
+                            restoreState = true
+
+                        }
                     }
                 },
                 onStatisticsClick = {
                     if (currentRoute != Routes.Statistics::class.qualifiedName) {
-                        navController.navigate(Routes.Statistics) { launchSingleTop = true }
+                        navController.navigate(Routes.Statistics) {
+                            popUpTo(navController.graph.findStartDestination().id){
+                                saveState = true
+                            }
+
+                            launchSingleTop = true
+                            restoreState = true
+
+                        }
                     }
                 },
                 onHomeClick = {
                     if (currentRoute != Routes.HomeUi::class.qualifiedName) {
-                        navController.navigate(Routes.HomeUi) { launchSingleTop = true }
+                        navController.navigate(Routes.HomeUi) {
+                            popUpTo(navController.graph.findStartDestination().id){
+                                saveState = true
+                            }
+
+                            launchSingleTop = true
+                            restoreState = true
+
+                        }
+                    }
+                },
+                onHistoryClick = {
+                    if (currentRoute != Routes.History::class.qualifiedName) {
+                        navController.navigate(Routes.History) {
+                            popUpTo(navController.graph.findStartDestination().id){
+                                saveState = true
+                            }
+
+                            launchSingleTop = true
+                            restoreState = true
+
+                        }
                     }
                 }
             )
@@ -108,8 +146,8 @@ fun App(modifier: Modifier = Modifier) {
                 composable<Routes.Statistics> {
                     StatisticsScreen(navController)
                 }
-                composable<Routes.Setting> {
-                    SettingScreen()
+                composable<Routes.History> {
+                    HistoryScreen()
                 }
             }
         }

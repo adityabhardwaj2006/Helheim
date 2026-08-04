@@ -1,4 +1,4 @@
-package com.aditya.expensetracker.domain.model
+package com.aditya.expensetracker.data.model
 
 data class ChartPoint(
     val month: String,

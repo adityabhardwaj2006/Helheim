@@ -127,7 +127,7 @@ fun CustomBottomNavigation(
     onProfileClick: () -> Unit,
     onStatisticsClick: () -> Unit,
     onHomeClick: () -> Unit,
-    onWalletClick: () -> Unit = {}
+    onHistoryClick : () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier
@@ -159,7 +159,7 @@ fun CustomBottomNavigation(
                     icon = Icons.Default.History,
                     label = "Wallet",
                     selected = false,
-                    onClick = onWalletClick
+                    onClick = onHistoryClick
                 )
             }
 
