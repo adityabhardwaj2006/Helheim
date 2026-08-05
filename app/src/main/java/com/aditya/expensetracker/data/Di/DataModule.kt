@@ -5,7 +5,9 @@ import androidx.room.Room
 import com.aditya.expensetracker.data.Api.AuthApi
 import com.aditya.expensetracker.data.DAO.TransactionDao
 import com.aditya.expensetracker.data.Database.TransactionDatabase
+import com.aditya.expensetracker.data.repoImpl.AuthRepoImpl
 import com.aditya.expensetracker.data.repoImpl.RepoImpl
+import com.aditya.expensetracker.domain.repo.AuthRepo
 import com.aditya.expensetracker.domain.repo.Repo
 import dagger.Binds
 import dagger.Module
@@ -60,15 +62,23 @@ object DataModule {
         return retrofit.create(AuthApi::class.java)
     }
 
+
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule{
     @Binds
     @Singleton
-    fun bindRepo(
+    abstract fun bindAuthRepo(
+        authRepoImpl: AuthRepoImpl
+    ): AuthRepo
+
+    @Binds
+    @Singleton
+    abstract fun bindRepo(
         repoImpl: RepoImpl
-    ): Repo {
-        return repoImpl
-    }
-
-
+    ): Repo
 }
 
 

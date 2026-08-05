@@ -1,5 +1,6 @@
 package com.aditya.expensetracker.domain.repo
 
+import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.model.LoginResponse
 
 interface AuthRepo {

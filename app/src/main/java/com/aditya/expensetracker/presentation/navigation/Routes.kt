@@ -24,4 +24,7 @@ sealed class Routes{
     @Serializable
     object History : Routes()
 
+    @Serializable
+    object LoginScreen : Routes()
+
 }

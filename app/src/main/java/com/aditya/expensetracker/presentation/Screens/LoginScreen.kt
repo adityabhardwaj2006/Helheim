@@ -27,6 +27,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.aditya.expensetracker.common.ResultState
+import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.presentation.navigation.Routes
+import kotlin.math.log
 
 private val Black = Color(0xFF111111)
 private val White = Color.White
@@ -35,179 +42,196 @@ private val FieldColor = Color(0xFFF5F5F5)
 
 @Composable
 fun LoginScreen(
-    onLoginClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit = {},
-    onSignUpClick: () -> Unit = {},
-    onGoogleLoginClick: () -> Unit = {}
+    authViewModel: AuthViewModel = hiltViewModel(),
+    navController: NavController
 ) {
 
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
+        var username by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = White
-    ) {
+        val loginState by authViewModel.loginState.collectAsState()
+        val snackbarHostState = remember { SnackbarHostState() }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
-                .padding(top = 40.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            Spacer(modifier = Modifier.height(170.dp))
-
-            Text(
-                text = "Welcome Back",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                color = Black
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Username",
-                modifier = Modifier.fillMaxWidth(),
-                color = Gray,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            LoginTextField(
-                value = username,
-                onValueChange = {
-                    username = it
-                },
-                placeholder = "Enter username",
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Person2,
-                        contentDescription = null
-                    )
+        LaunchedEffect(loginState) {
+            when(val state = loginState){
+                is ResultState.Success<*> -> {
+                    navController.navigate(Routes.HomeUi)
                 }
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "Password",
-                modifier = Modifier.fillMaxWidth(),
-                color = Gray,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            LoginTextField(
-                value = password,
-                onValueChange = {
-                    password = it
-                },
-                placeholder = "Enter password",
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Lock,
-                        contentDescription = null
-                    )
-                },
-                keyboardType = KeyboardType.Password,
-                isPassword = true
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = "Forgot Password?",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        onForgotPasswordClick()
-                    },
-                textAlign = TextAlign.End,
-                color = Black,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            LoginButton(
-                loading = isLoading,
-                onClick = {
-                    if(isLoading==false){
-                        isLoading = true
-                        onLoginClick()
-                    }
-
+                is ResultState.Error -> {
+                    snackbarHostState.showSnackbar(state.message)
                 }
-            )
 
-            Spacer(modifier = Modifier.height(28.dp))
+                else -> {}
+            }
+        }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        ) { padding ->
+            Surface(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                color = White
             ) {
 
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f)
-                )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Spacer(modifier = Modifier.height(170.dp))
 
                 Text(
-                    text = " OR ",
-                    color = Gray
+                    text = "Welcome Back",
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Black
                 )
 
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Username",
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Gray,
+                    fontWeight = FontWeight.Medium
                 )
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(6.dp))
 
-            SocialButton(
-                text = "Continue with Google",
-                icon = {
+                LoginTextField(
+                    value = username,
+                    onValueChange = {
+                        username = it
+                    },
+                    placeholder = "Enter username",
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Person2,
+                            contentDescription = null
+                        )
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Password",
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Gray,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                LoginTextField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                    },
+                    placeholder = "Enter password",
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Lock,
+                            contentDescription = null
+                        )
+                    },
+                    keyboardType = KeyboardType.Password,
+                    isPassword = true
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = "Forgot Password?",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+    //                        onForgotPasswordClick()
+                        },
+                    textAlign = TextAlign.End,
+                    color = Black,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                LoginButton(
+                    loading = loginState is ResultState.Loading,
+                    onClick = {
+                            authViewModel.login(
+                                username,
+                                password
+                            )
+
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    HorizontalDivider(
+                        modifier = Modifier.weight(1f)
+                    )
 
                     Text(
-                        text = "G",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        text = " OR ",
+                        color = Gray
                     )
 
-                },
-                onClick = onGoogleLoginClick
-            )
+                    HorizontalDivider(
+                        modifier = Modifier.weight(1f)
+                    )
+                }
 
+                Spacer(modifier = Modifier.height(24.dp))
 
+                SocialButton(
+                    text = "Continue with Google",
+                    icon = {
 
-            Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = "G",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Text(
-                    "Don't have an account?",
-                    color = Gray
+                    },
+                    onClick = {  }
                 )
 
-                Spacer(modifier = Modifier.width(6.dp))
 
-                Text(
-                    text = "Sign Up",
-                    color = Black,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable {
-                        onSignUpClick()
-                    }
-                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Text(
+                        "Don't have an account?",
+                        color = Gray
+                    )
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    Text(
+                        text = "Sign Up",
+                        color = Black,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable {
+    //                        onSignUpClick()
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -353,11 +377,6 @@ fun LoginButton(
 @Composable
 fun LoginScreenPreview() {
     MaterialTheme {
-        LoginScreen(
-            onLoginClick = {},
-            onForgotPasswordClick = {},
-            onSignUpClick = {},
-            onGoogleLoginClick = {}
-        )
+        LoginScreen(hiltViewModel(),rememberNavController())
     }
 }

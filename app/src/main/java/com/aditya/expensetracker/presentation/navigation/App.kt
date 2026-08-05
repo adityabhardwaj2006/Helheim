@@ -31,6 +31,7 @@ import com.aditya.expensetracker.presentation.Screens.utils.AddSaving
 import com.aditya.expensetracker.presentation.Screens.utils.AddScreen
 import com.aditya.expensetracker.presentation.Screens.utils.CustomBottomNavigation
 import com.aditya.expensetracker.presentation.Screens.utils.MorphingFab
+import com.example.expensemanager.ui.login.LoginScreen
 
 enum class SheetType { NONE, INCOME, EXPENSE, SAVING }
 
@@ -48,88 +49,93 @@ fun App(modifier: Modifier = Modifier) {
     
     val currentEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentEntry?.destination?.route
+    val showBottomBarAndFab = currentRoute != Routes.LoginScreen::class.qualifiedName
 
     Scaffold(
         floatingActionButton = {
-            Box(
-                modifier = Modifier.offset(y = 90.dp)
-            ) {
-                MorphingFab(
-                    onSavingClick = {
-                        currentSheet = SheetType.SAVING
-                    },
-                    onExpenseClick = {
-                        currentSheet = SheetType.EXPENSE
-                    },
-                    onPaymentClick = {
-                        currentSheet = SheetType.INCOME
-                    }
-                )
+            if (showBottomBarAndFab) {
+                Box(
+                    modifier = Modifier.offset(y = 90.dp)
+                ) {
+                    MorphingFab(
+                        onSavingClick = {
+                            currentSheet = SheetType.SAVING
+                        },
+                        onExpenseClick = {
+                            currentSheet = SheetType.EXPENSE
+                        },
+                        onPaymentClick = {
+                            currentSheet = SheetType.INCOME
+                        }
+                    )
+                }
             }
         },
         containerColor = Color.White,
         floatingActionButtonPosition = FabPosition.Center,
         bottomBar = {
-            CustomBottomNavigation(
-                currentRoute = currentRoute,
-                onProfileClick = {
-                    if (currentRoute != Routes.Profile::class.qualifiedName) {
-                        navController.navigate(Routes.Profile) {
-                            popUpTo(navController.graph.findStartDestination().id){
-                                saveState = true
+            if (showBottomBarAndFab) {
+                CustomBottomNavigation(
+                    currentRoute = currentRoute,
+                    onProfileClick = {
+                        if (currentRoute != Routes.Profile::class.qualifiedName) {
+                            navController.navigate(Routes.Profile) {
+                                popUpTo(navController.graph.findStartDestination().id){
+                                    saveState = true
+                                }
+
+                                launchSingleTop = true
+                                restoreState = true
+
                             }
+                        }
+                    },
+                    onStatisticsClick = {
+                        if (currentRoute != Routes.Statistics::class.qualifiedName) {
+                            navController.navigate(Routes.Statistics) {
+                                popUpTo(navController.graph.findStartDestination().id){
+                                    saveState = true
+                                }
 
-                            launchSingleTop = true
-                            restoreState = true
+                                launchSingleTop = true
+                                restoreState = true
 
+                            }
+                        }
+                    },
+                    onHomeClick = {
+                        if (currentRoute != Routes.HomeUi::class.qualifiedName) {
+                            navController.navigate(Routes.HomeUi) {
+                                popUpTo(navController.graph.findStartDestination().id){
+                                    saveState = true
+                                }
+
+                                launchSingleTop = true
+                                restoreState = true
+
+                            }
+                        }
+                    },
+                    onHistoryClick = {
+                        if (currentRoute != Routes.History::class.qualifiedName) {
+                            navController.navigate(Routes.History) {
+                                popUpTo(navController.graph.findStartDestination().id){
+                                    saveState = true
+                                }
+
+                                launchSingleTop = true
+                                restoreState = true
+
+                            }
                         }
                     }
-                },
-                onStatisticsClick = {
-                    if (currentRoute != Routes.Statistics::class.qualifiedName) {
-                        navController.navigate(Routes.Statistics) {
-                            popUpTo(navController.graph.findStartDestination().id){
-                                saveState = true
-                            }
-
-                            launchSingleTop = true
-                            restoreState = true
-
-                        }
-                    }
-                },
-                onHomeClick = {
-                    if (currentRoute != Routes.HomeUi::class.qualifiedName) {
-                        navController.navigate(Routes.HomeUi) {
-                            popUpTo(navController.graph.findStartDestination().id){
-                                saveState = true
-                            }
-
-                            launchSingleTop = true
-                            restoreState = true
-
-                        }
-                    }
-                },
-                onHistoryClick = {
-                    if (currentRoute != Routes.History::class.qualifiedName) {
-                        navController.navigate(Routes.History) {
-                            popUpTo(navController.graph.findStartDestination().id){
-                                saveState = true
-                            }
-
-                            launchSingleTop = true
-                            restoreState = true
-
-                        }
-                    }
-                }
-            )
+                )
+            }
         }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = SubNavigation.MainHomeScreen,
+            startDestination = SubNavigation.LoginSignUpScreen,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -148,6 +154,13 @@ fun App(modifier: Modifier = Modifier) {
                 }
                 composable<Routes.History> {
                     HistoryScreen()
+                }
+            }
+            navigation< SubNavigation.LoginSignUpScreen>(
+                startDestination = Routes.LoginScreen
+            ){
+                composable<Routes.LoginScreen> {
+                    LoginScreen(navController = navController)
                 }
             }
         }

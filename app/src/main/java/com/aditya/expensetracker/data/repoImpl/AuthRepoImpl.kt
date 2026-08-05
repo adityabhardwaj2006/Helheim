@@ -1,11 +1,12 @@
 package com.aditya.expensetracker.data.repoImpl
 
+import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.Api.AuthApi
 import com.aditya.expensetracker.data.TokenManager
 import com.aditya.expensetracker.data.model.LoginRequest
 import com.aditya.expensetracker.data.model.LoginResponse
 import com.aditya.expensetracker.domain.repo.AuthRepo
-import jakarta.inject.Inject
+import javax.inject.Inject
 
 class AuthRepoImpl @Inject constructor(
     private val authApi : AuthApi,
