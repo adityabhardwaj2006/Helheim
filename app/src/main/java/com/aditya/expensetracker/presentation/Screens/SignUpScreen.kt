@@ -27,8 +27,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.aditya.expensetracker.common.ResultState
+import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.presentation.navigation.Routes
+import com.aditya.expensetracker.presentation.navigation.SubNavigation
 
 private val Black = Color(0xFF111111)
 private val White = Color.White
@@ -39,9 +44,7 @@ private val AccentBlue = Color(0xFF4C6FFF)
 @Composable
 fun SignUpScreen(
     navController: NavController,
-    onSignUp: () -> Unit,
-    onLoginClick: () -> Unit = {},
-    onGoogleSignUpClick: () -> Unit = {}
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -50,7 +53,21 @@ fun SignUpScreen(
     var firstname by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var passwordVisible2 by remember { mutableStateOf(false) }
-    var loading by remember { mutableStateOf(false) }
+    val signUpState by authViewModel.signUpState.collectAsState()
+    val snackbarHostState = remember{ SnackbarHostState() }
+
+    LaunchedEffect(signUpState) {
+        when(val state = signUpState){
+            is ResultState.Success -> {
+                navController.navigate(SubNavigation.MainHomeScreen)
+            }
+            is ResultState.Error ->{
+                snackbarHostState.showSnackbar(state.message)
+            }
+            else -> {}
+
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -171,35 +188,18 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(28.dp))
 
             SignUpButton(
-                loading,
+                loading = signUpState is ResultState.Loading,
                 onClick = {
-                    if (loading == false) {
-                        loading = true
-                        onSignUp()
-                    }
+                    authViewModel.signup(
+                        firstname,
+                        lastName,
+                        username,
+                        password
+                    )
                 }
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                HorizontalDivider(modifier = Modifier.weight(1f))
-
-                Text(
-                    text = " OR ",
-                    color = Gray
-                )
-
-                HorizontalDivider(modifier = Modifier.weight(1f))
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            GoogleSignUpButton(
-                onClick = onGoogleSignUpClick
-            )
 
             Spacer(modifier = Modifier.height(28.dp))
 
@@ -218,7 +218,7 @@ fun SignUpScreen(
                     color = AccentBlue,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable {
-                        onLoginClick()
+                        navController.navigate(Routes.LoginScreen)
                     }
                 )
             }
@@ -404,5 +404,5 @@ fun SignUpTextField(placeholder: String, firstname: String,
 @Preview(showBackground = true)
 @Composable
 fun SignUpScreenPreview() {
-    SignUpScreen(navController = rememberNavController(), onSignUp = {})
+    SignUpScreen(navController = rememberNavController())
 }

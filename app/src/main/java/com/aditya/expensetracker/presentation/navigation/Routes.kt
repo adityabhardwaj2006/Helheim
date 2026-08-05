@@ -27,4 +27,7 @@ sealed class Routes{
     @Serializable
     object LoginScreen : Routes()
 
+    @Serializable
+    object SignUpScreen : Routes()
+
 }

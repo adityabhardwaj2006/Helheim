@@ -25,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.presentation.Screens.HistoryScreen
 import com.aditya.expensetracker.presentation.Screens.HomeScreen
 import com.aditya.expensetracker.presentation.Screens.ProfileScreen
+import com.aditya.expensetracker.presentation.Screens.SignUpScreen
 import com.aditya.expensetracker.presentation.Screens.StatisticsScreen
 import com.aditya.expensetracker.presentation.Screens.utils.AddIncome
 import com.aditya.expensetracker.presentation.Screens.utils.AddSaving
@@ -50,7 +51,7 @@ fun App(modifier: Modifier = Modifier) {
     val currentEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentEntry?.destination?.route
     val showBottomBarAndFab = currentRoute != Routes.LoginScreen::class.qualifiedName
-
+            && currentRoute != Routes.SignUpScreen::class.qualifiedName
     Scaffold(
         floatingActionButton = {
             if (showBottomBarAndFab) {
@@ -161,6 +162,9 @@ fun App(modifier: Modifier = Modifier) {
             ){
                 composable<Routes.LoginScreen> {
                     LoginScreen(navController = navController)
+                }
+                composable<Routes.SignUpScreen> {
+                    SignUpScreen(navController)
                 }
             }
         }

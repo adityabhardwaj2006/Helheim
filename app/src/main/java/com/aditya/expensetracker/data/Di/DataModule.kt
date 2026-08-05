@@ -79,6 +79,7 @@ abstract class RepositoryModule{
     abstract fun bindRepo(
         repoImpl: RepoImpl
     ): Repo
+
 }
 
 

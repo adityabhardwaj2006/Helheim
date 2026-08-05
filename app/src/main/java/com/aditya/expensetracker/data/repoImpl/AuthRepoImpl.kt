@@ -5,6 +5,8 @@ import com.aditya.expensetracker.data.Api.AuthApi
 import com.aditya.expensetracker.data.TokenManager
 import com.aditya.expensetracker.data.model.LoginRequest
 import com.aditya.expensetracker.data.model.LoginResponse
+import com.aditya.expensetracker.data.model.SignUpRequest
+import com.aditya.expensetracker.data.model.SignUpResponse
 import com.aditya.expensetracker.domain.repo.AuthRepo
 import javax.inject.Inject
 
@@ -25,6 +27,20 @@ class AuthRepoImpl @Inject constructor(
         tokenManager.saveToken(response.token)
 
         return response
+    }
+
+    override suspend fun signup(
+        firstName: String,
+        lastName: String,
+        username: String,
+        password: String
+    ): SignUpResponse {
+        val response = authApi.signup(SignUpRequest(
+            firstName,lastName,username,password
+        ))
+
+        return response
+
     }
 
 }

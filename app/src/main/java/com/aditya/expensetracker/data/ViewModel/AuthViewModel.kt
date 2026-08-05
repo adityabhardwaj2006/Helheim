@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.model.LoginResponse
+import com.aditya.expensetracker.data.model.SignUpResponse
 import com.aditya.expensetracker.domain.repo.AuthRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -18,6 +19,9 @@ class AuthViewModel @Inject constructor(
 
     private val _loginState = MutableStateFlow<ResultState<LoginResponse>>(ResultState.Idle)
     val loginState = _loginState.asStateFlow()
+
+    private val _signUpState = MutableStateFlow<ResultState<SignUpResponse>>(ResultState.Idle)
+    val signUpState = _signUpState.asStateFlow()
 
     fun login(
         username : String,
@@ -35,6 +39,32 @@ class AuthViewModel @Inject constructor(
             }
             }
         }
+
+    fun signup(
+        firstName : String,
+        lastName : String,
+        username : String,
+        password : String
+    ){
+        viewModelScope.launch{
+            _signUpState.value = ResultState.Loading
+            try{
+                val response =  authRepo.signup(
+                    firstName,
+                    lastName,
+                    username,
+                    password
+                )
+                _signUpState.value = ResultState.Success(response)
+            }catch(err : Exception){
+
+                _signUpState.value = ResultState.Error(err.message ?: "Something went wrong")
+
+            }
+
+        }
+    }
+
     }
 
 
