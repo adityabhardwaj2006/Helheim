@@ -17,7 +17,8 @@ data class Transaction(
     val category: String?,
     val savedFor : String,
     val receivedFrom : String,
-    val paymentMethod: String
+    val paymentMethod: String,
+    val userId: String = ""
 )
 
 enum class TransactionType {

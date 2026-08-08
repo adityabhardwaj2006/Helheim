@@ -61,14 +61,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 
 @Composable
 fun ProfileScreen(navController: NavController) {
     val scrollState = rememberScrollState()
     val progress = (scrollState.value/300f).coerceIn(0f,1f)
-    
+
+    val authViewModel : AuthViewModel = hiltViewModel()
+
+
     val iconSize by animateDpAsState(
         targetValue = lerp(96.dp,30.dp,progress)
     )
@@ -221,8 +226,11 @@ fun ProfileScreen(navController: NavController) {
                     text = "Log Out",
                     textColor = Color(0xFFE53935),
                     iconTint = Color(0xFFE53935),
-                    showDivider = false
-                ) { }
+                    showDivider = false,
+                    onClick = {
+                        authViewModel.logout()
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))

@@ -25,6 +25,8 @@ class AuthRepoImpl @Inject constructor(
             )
         )
         tokenManager.saveToken(response.token)
+        tokenManager.saveUserId(response.user.id)
+        android.util.Log.d("AuthRepo", "Login success. Received userId: ${response.user.id}")
 
         return response
     }
@@ -42,5 +44,10 @@ class AuthRepoImpl @Inject constructor(
         return response
 
     }
+
+    override suspend fun logout() {
+            tokenManager.clearToken()
+    }
+
 
 }

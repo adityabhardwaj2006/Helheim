@@ -9,8 +9,8 @@ import javax.inject.Inject
 class RepoImpl @Inject constructor(
     private val dao : TransactionDao
 ) : Repo {
-    override fun getAllTransaction(): Flow<List<Transaction>> {
-        return dao.getAllTransaction()
+    override fun getAllTransaction(userId: String): Flow<List<Transaction>> {
+        return dao.getAllTransaction(userId)
     }
 
     override suspend fun insertTransaction(transaction: Transaction) {

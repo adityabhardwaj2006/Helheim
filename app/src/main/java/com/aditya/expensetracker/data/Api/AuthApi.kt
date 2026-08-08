@@ -26,4 +26,5 @@ interface AuthApi{
         @Body request : SignUpRequest
     ) : SignUpResponse
 
+
 }

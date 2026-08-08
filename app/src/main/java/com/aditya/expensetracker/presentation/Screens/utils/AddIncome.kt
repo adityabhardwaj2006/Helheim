@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
@@ -37,10 +39,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,7 +59,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.aditya.expensetracker.common.ResultState
+import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.data.ViewModel.transactionViewModel
 import com.aditya.expensetracker.data.model.Transaction
 import com.aditya.expensetracker.data.model.TransactionType
@@ -63,7 +71,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// Colors picked to match the design
+
 private val GreenDark = Color(0xFF184D3F)
 private val RowGray = Color(0xFFF5F5F5)
 
@@ -72,12 +80,15 @@ private val RowGray = Color(0xFFF5F5F5)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddIncome(
-    onDismiss : ()->Unit
+    onDismiss : ()->Unit,
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
 
     //Calling repo
     val viewModel : transactionViewModel = hiltViewModel()
-
+    val userId by authViewModel.userId.collectAsState()
+    val transactionVm : TransactionVm = hiltViewModel()
+    val addIncomeState by transactionVm.transactionState.collectAsState()
 
     var amount by remember { mutableStateOf("") }
     var dateMillis by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
@@ -86,6 +97,33 @@ fun AddIncome(
     var paymentMethod by remember { mutableStateOf("Cash") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember{ SnackbarHostState() }
+    LaunchedEffect(addIncomeState) {
+        when(val state = addIncomeState){
+            is ResultState.Success -> {
+                viewModel.addTransaction(Transaction(
+                    amount = amount.toDoubleOrNull() ?: 0.0,
+                    date = dateMillis,
+                    type = TransactionType.INCOME,
+                    paidTo = "",
+                    receivedFrom = receivedFrom,
+                    category = category,
+                    paymentMethod = paymentMethod,
+                    savedFor = "",
+                    userId = userId ?: ""
+                ))
+                scope.launch{
+                    sheetState.hide()
+                    onDismiss()
+                }
+            }
+            is ResultState.Error -> {
+                snackbarHostState.showSnackbar(state.message)
+            }
+            else -> {}
+        }
+    }
+
     ModalBottomSheet(
         tonalElevation = 0.dp,
         onDismissRequest = {
@@ -106,28 +144,44 @@ fun AddIncome(
                         .fillMaxWidth()
                         .padding(16.dp)) {
                     Button(
+                        enabled = addIncomeState !is ResultState.Loading,
                         onClick = {
+                            val currAmount = amount.toDoubleOrNull()
+                            if(currAmount!=null){
+                                transactionVm.saveTransaction(
+                                    amount = amount.toDouble(),
+                                    date = dateMillis,
+                                    type = "INCOME",
+                                    paidTo = "",
+                                    category = category,
+                                    savedFor = "",
+                                    receivedFrom = receivedFrom,
+                                    paymentMethod = paymentMethod
+                                )
+                            }else{
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("Invalid amount")
+                                }
 
-                            viewModel.addTransaction(Transaction(
-                                amount = amount.toDouble(),
-                                date = dateMillis,
-                                type = TransactionType.INCOME,
-                                paidTo = "",
-                                receivedFrom = receivedFrom,
-                                category = category,
-                                paymentMethod = paymentMethod,
-                                savedFor = ""
-                            ))
-                            scope.launch{
-                                sheetState.hide()
-                                onDismiss()
                             }
+
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
                         modifier = Modifier
                             .weight(1f)
                             .height(50.dp)
-                    ) { Text("Add Income") }
+                    ) {
+                        if(addIncomeState is ResultState.Loading){
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = Color.Black,
+                                strokeWidth = 2.dp
+                            )
+                        }else{
+                            Text("Add Income") }
+                        }
+
+
                 }
             }
         ) {innerPadding->

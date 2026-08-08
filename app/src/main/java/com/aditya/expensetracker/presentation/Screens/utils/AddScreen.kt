@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
@@ -37,10 +39,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuItemColors
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +62,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
+import com.aditya.expensetracker.common.ResultState
+import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.data.ViewModel.transactionViewModel
 import com.aditya.expensetracker.data.model.Transaction
 import com.aditya.expensetracker.data.model.TransactionType
@@ -72,11 +82,17 @@ private val RowGray = Color(0xFFF5F5F5)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddScreen(
-    onDismiss : ()->Unit
+    onDismiss : ()->Unit,
+    transactionVm: TransactionVm = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
 
     //Calling repo
     val viewModel : transactionViewModel = hiltViewModel()
+    val addScreenState by transactionVm.transactionState.collectAsState()
+    val userId by authViewModel.userId.collectAsState()
+    val snackbarHostState = remember{ SnackbarHostState() }
+
 
 
     var amount by remember { mutableStateOf("") }
@@ -86,6 +102,33 @@ fun AddScreen(
     var paymentMethod by remember { mutableStateOf("Cash") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+
+
+    LaunchedEffect(addScreenState) {
+        when(val state = addScreenState){
+            is ResultState.Success -> {
+                viewModel.addTransaction(Transaction(
+                    amount = amount.toDoubleOrNull() ?: 0.0,
+                    date = dateMillis,
+                    type = TransactionType.EXPENSE,
+                    paidTo = paidTo,
+                    category = category,
+                    paymentMethod = paymentMethod,
+                    savedFor = "",
+                    receivedFrom = "",
+                    userId = userId ?: ""
+                ))
+                sheetState.hide()
+                onDismiss()
+            }
+            is ResultState.Error -> {
+                snackbarHostState.showSnackbar("${state.message}")
+            }
+            else -> {}
+        }
+    }
+
+
         ModalBottomSheet(
             tonalElevation = 0.dp,
             onDismissRequest = {
@@ -100,6 +143,7 @@ fun AddScreen(
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         ){
             Scaffold(
+                snackbarHost = {SnackbarHost(snackbarHostState)},
                 bottomBar = {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier
@@ -107,27 +151,40 @@ fun AddScreen(
                             .padding(16.dp)) {
                         Button(
                             onClick = {
-
-                                viewModel.addTransaction(Transaction(
-                                    amount = amount.toDouble(),
-                                    date = dateMillis,
-                                    type = TransactionType.EXPENSE,
-                                    paidTo = paidTo,
-                                    category = category,
-                                    paymentMethod = paymentMethod,
-                                    savedFor = "",
-                                    receivedFrom = ""
-                                ))
-                                scope.launch{
-                                    sheetState.hide()
-                                    onDismiss()
+                                val amountVal = amount.toDoubleOrNull()
+                                if(amountVal != null){
+                                    transactionVm.saveTransaction(
+                                        amount = amountVal,
+                                        date = dateMillis,
+                                        type = "EXPENSE",
+                                        paidTo = paidTo,
+                                        category = category,
+                                        savedFor = "",
+                                        receivedFrom = "",
+                                        paymentMethod = paymentMethod
+                                    )
+                                }else{
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Invalid amount")
+                                    }
                                 }
                             },
+                            enabled = addScreenState !is ResultState.Loading,
                             colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
                             modifier = Modifier
                                 .weight(1f)
                                 .height(50.dp)
-                        ) { Text("Add Expense") }
+                        ) {
+                            if(addScreenState is ResultState.Loading){
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    color = Color.Black,
+                                    strokeWidth = 2.dp
+                                )
+                            }else{
+                                Text("Add Expense") }
+                            }
+
                     }
                 }
             ) {innerPadding->

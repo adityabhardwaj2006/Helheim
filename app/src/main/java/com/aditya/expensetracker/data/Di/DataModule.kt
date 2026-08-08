@@ -3,12 +3,15 @@ package com.aditya.expensetracker.data.Di
 import android.content.Context
 import androidx.room.Room
 import com.aditya.expensetracker.data.Api.AuthApi
+import com.aditya.expensetracker.data.Api.TransactionApi
 import com.aditya.expensetracker.data.DAO.TransactionDao
 import com.aditya.expensetracker.data.Database.TransactionDatabase
 import com.aditya.expensetracker.data.repoImpl.AuthRepoImpl
 import com.aditya.expensetracker.data.repoImpl.RepoImpl
+import com.aditya.expensetracker.data.repoImpl.TransactionRepoImpl
 import com.aditya.expensetracker.domain.repo.AuthRepo
 import com.aditya.expensetracker.domain.repo.Repo
+import com.aditya.expensetracker.domain.repo.TransactionRepo
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -33,7 +36,7 @@ object DataModule {
             context,
             TransactionDatabase::class.java,
             "transactionDao"
-        ).build()
+        ).fallbackToDestructiveMigration().build()
 
     }
 
@@ -62,6 +65,14 @@ object DataModule {
         return retrofit.create(AuthApi::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideTransactionApi(
+        retrofit: Retrofit
+    ) : TransactionApi {
+        return retrofit.create(TransactionApi::class.java)
+    }
+
 
 }
 
@@ -79,6 +90,12 @@ abstract class RepositoryModule{
     abstract fun bindRepo(
         repoImpl: RepoImpl
     ): Repo
+
+    @Binds
+    @Singleton
+    abstract fun bindsTransactionRepo(
+        transactionRepoImpl : TransactionRepoImpl
+    ) : TransactionRepo
 
 }
 

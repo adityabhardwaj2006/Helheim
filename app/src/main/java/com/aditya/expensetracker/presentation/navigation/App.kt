@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,6 +23,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.presentation.Screens.HistoryScreen
 import com.aditya.expensetracker.presentation.Screens.HomeScreen
 import com.aditya.expensetracker.presentation.Screens.ProfileScreen
@@ -33,13 +36,34 @@ import com.aditya.expensetracker.presentation.Screens.utils.AddScreen
 import com.aditya.expensetracker.presentation.Screens.utils.CustomBottomNavigation
 import com.aditya.expensetracker.presentation.Screens.utils.MorphingFab
 import com.example.expensemanager.ui.login.LoginScreen
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Alignment
 
 enum class SheetType { NONE, INCOME, EXPENSE, SAVING }
 
 @Composable
-fun App(modifier: Modifier = Modifier) {
+fun App(
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel = hiltViewModel()
+) {
     val navController = rememberNavController()
     var currentSheet by remember { mutableStateOf(SheetType.NONE) }
+    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
+
+    if (isLoggedIn == null) {
+        // Loading state
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    val startDestination = if (isLoggedIn == true) {
+        SubNavigation.MainHomeScreen
+    } else {
+        SubNavigation.LoginSignUpScreen
+    }
     
     when (currentSheet) {
         SheetType.INCOME -> AddIncome(onDismiss = { currentSheet = SheetType.NONE })
@@ -136,7 +160,7 @@ fun App(modifier: Modifier = Modifier) {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = SubNavigation.LoginSignUpScreen,
+            startDestination = startDestination,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)

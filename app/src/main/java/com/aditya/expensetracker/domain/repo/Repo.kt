@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface Repo  {
 
-    fun getAllTransaction () : Flow<List<Transaction>>
+    fun getAllTransaction (userId: String) : Flow<List<Transaction>>
 
     suspend fun insertTransaction(transaction: Transaction)
 
