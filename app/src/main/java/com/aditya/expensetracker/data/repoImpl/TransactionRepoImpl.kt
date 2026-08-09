@@ -3,6 +3,7 @@ package com.aditya.expensetracker.data.repoImpl
 import com.aditya.expensetracker.data.Api.TransactionApi
 import com.aditya.expensetracker.data.model.TransactionRequest
 import com.aditya.expensetracker.data.model.TransactionResponse
+import com.aditya.expensetracker.data.model.getTransactionResponse
 import com.aditya.expensetracker.domain.repo.TransactionRepo
 import javax.inject.Inject
 
@@ -34,6 +35,10 @@ class TransactionRepoImpl @Inject constructor(
             ),
             token = token
         )
+    }
+
+    override suspend fun getTransactions(token: String): getTransactionResponse {
+        return api.getTransactions(token)
     }
 
 }

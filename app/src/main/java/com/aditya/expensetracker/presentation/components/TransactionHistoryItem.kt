@@ -21,13 +21,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aditya.expensetracker.data.model.Transaction
+import com.aditya.expensetracker.data.model.TransactionItem
 import com.aditya.expensetracker.data.model.TransactionType
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun TransactionHistoryItem(transaction: Transaction) {
+fun TransactionHistoryItem(transaction: TransactionItem) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -63,9 +63,10 @@ fun TransactionHistoryItem(transaction: Transaction) {
             
             Column(modifier = Modifier.weight(1f)) {
                 val title = when (transaction.type) {
-                    TransactionType.INCOME -> "Income from ${transaction.receivedFrom}"
-                    TransactionType.EXPENSE -> "Paid to ${transaction.paidTo}"
-                    TransactionType.SAVINGS -> "Saved for ${transaction.savedFor}"
+                    "INCOME" -> "Income from ${transaction.receivedFrom}"
+                    "EXPENSE" -> "Paid to ${transaction.paidTo}"
+                    "SAVINGS" -> "Saved for ${transaction.savedFor}"
+                    else -> {"Income from ${transaction.receivedFrom}"}
                 }
                 
                 Text(
@@ -87,25 +88,29 @@ fun TransactionHistoryItem(transaction: Transaction) {
             }
             
             val prefix = when (transaction.type) {
-                TransactionType.INCOME -> "+"
-                TransactionType.EXPENSE -> "-"
-                TransactionType.SAVINGS -> "•"
+                "INCOME" -> "+"
+                "EXPENSE" -> "-"
+                "SAVINGS" -> "•"
+                else -> {}
             }
             
             Text(
                 text = "$prefix ₹${String.format(Locale.getDefault(), "%.2f", transaction.amount)}",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = if (transaction.type == TransactionType.INCOME) Color(0xFF4CAF50) else Color.Black
+                color = if (transaction.type == "INCOME") Color(0xFF4CAF50) else Color.Black
             )
         }
     }
 }
 
-private fun getTransactionInfo(type: TransactionType): Pair<ImageVector, Color> {
+private fun getTransactionInfo(type: String): Pair<ImageVector, Color> {
     return when (type) {
-        TransactionType.INCOME -> Icons.AutoMirrored.Filled.TrendingUp to Color(0xFF4CAF50)
-        TransactionType.EXPENSE -> Icons.Default.ShoppingCart to Color(0xFFF44336)
-        TransactionType.SAVINGS -> Icons.Default.Savings to Color(0xFF2196F3)
+        "INCOME" -> Icons.AutoMirrored.Filled.TrendingUp to Color(0xFF4CAF50)
+        "EXPENSE" -> Icons.Default.ShoppingCart to Color(0xFFF44336)
+        "SAVINGS" -> Icons.Default.Savings to Color(0xFF2196F3)
+        else -> {
+            Icons.Default.ShoppingCart to Color(0xFFF44336)
+        }
     }
 }

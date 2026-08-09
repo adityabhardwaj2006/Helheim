@@ -2,6 +2,7 @@ package com.aditya.expensetracker.domain.repo
 
 import com.aditya.expensetracker.data.model.TransactionResponse
 import com.aditya.expensetracker.data.model.TransactionType
+import com.aditya.expensetracker.data.model.getTransactionResponse
 
 interface TransactionRepo {
     suspend fun saveTransaction(
@@ -15,4 +16,9 @@ interface TransactionRepo {
         paymentMethod: String,
         token: String,
     ) : TransactionResponse
+
+    suspend fun getTransactions(
+        token : String
+    ) : getTransactionResponse
+
 }
