@@ -1,9 +1,15 @@
 package com.aditya.expensetracker.presentation.Screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -19,6 +25,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.getTransactionVm
 import com.aditya.expensetracker.data.ViewModel.transactionViewModel
@@ -31,6 +39,7 @@ import com.aditya.expensetracker.presentation.components.TransactionHistoryItem
 @Composable
 fun HistoryScreen(
     viewModel: transactionViewModel = hiltViewModel(),
+    navController : NavController,
     getTransactionVm : getTransactionVm = hiltViewModel()
 ) {
     val state by getTransactionVm.transactionState.collectAsState()
@@ -38,73 +47,109 @@ fun HistoryScreen(
     LaunchedEffect(Unit) {
         getTransactionVm.getTransaction()
     }
-    when(val state = state){
 
-        is ResultState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 2.dp
-                )
-            }
-        }
-        is ResultState.Success -> {
-            transactions = state.data.transactions
-        }
-        else -> {}
-    }
 
     Scaffold(
         topBar = {
+
+            // Top Bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                    .height(90.dp)
+                    .background(Color.White)
+                    .padding(all = 24.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Transaction History",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-            }
-        },
-        containerColor = Color(0xFFF7F7F7)
-    ) { innerPadding ->
-        if (transactions == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "No transactions found", color = Color.Gray)
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
-            ) {
-                items(transactions.reversed()) { transaction ->
-                    TransactionHistoryItem(transaction = transaction)
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .fillMaxHeight(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start)
+                {
+
+                    IconButton(
+                        onClick = {
+                            navController.popBackStack()
+                        },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(Color.White, CircleShape)
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black)
+                    }
+
                 }
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    , verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center)
+                {
+
+                    Text(
+                        text = "Transaction History",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+
+                }
+
+
+
             }
         }
+    ) { innerPadding ->
+
+        when(val state = state){
+
+            is ResultState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 2.dp
+                    )
+                }
+            }
+            is ResultState.Success -> {
+                transactions = state.data.transactions
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(bottom = 24.dp)
+                ) {
+                    items(transactions.reversed()) { transaction ->
+                        TransactionHistoryItem(transaction = transaction)
+                    }
+                }
+            }
+            is ResultState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = state.message,
+                        fontSize = 18.sp)
+                }
+            }
+            else -> {}
+        }
+
+
     }
 }
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun historyPreview(){
-    HistoryScreen(hiltViewModel())
+    HistoryScreen( hiltViewModel(),rememberNavController())
 }

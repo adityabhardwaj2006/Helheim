@@ -178,7 +178,7 @@ fun App(
                     StatisticsScreen(navController)
                 }
                 composable<Routes.History> {
-                    HistoryScreen()
+                    HistoryScreen(navController = navController)
                 }
             }
             navigation< SubNavigation.LoginSignUpScreen>(

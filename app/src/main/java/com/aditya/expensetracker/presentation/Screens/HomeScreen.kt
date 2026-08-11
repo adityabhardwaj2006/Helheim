@@ -9,6 +9,9 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,17 +19,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.aditya.expensetracker.common.ResultState
+import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.data.model.Expense
 import com.aditya.expensetracker.data.model.ExpenseType
+import com.aditya.expensetracker.data.model.UserDTO
+import com.aditya.expensetracker.data.model.profileResponse
 import com.aditya.expensetracker.presentation.components.BalanceCard
 import com.aditya.expensetracker.presentation.components.IncomeExpenseSummary
 import com.aditya.expensetracker.presentation.components.TransactionItem
 import java.util.*
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    navController: NavController,
+    authViewModel : AuthViewModel = hiltViewModel()) {
+    LaunchedEffect(Unit) {
+        authViewModel.getProfile()
+    }
+    val userState : ResultState<profileResponse>? by authViewModel.userState.collectAsState()
+    val name = when(val state = userState){
+        is ResultState.Loading -> {
+            ""
+        }
+        is ResultState.Success ->{
+            state.data.data.firstName
+        }
+        else -> {
+            "Unknown"
+        }
+    }
+
     Scaffold(
         containerColor = Color.White
     ) { innerPadding ->
@@ -51,7 +77,7 @@ fun HomeScreen(navController: NavController) {
                         style = MaterialTheme.typography.headlineSmall
                     )
                     Text(
-                        text = "Aditya Bhardwaj",
+                        text = name,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black

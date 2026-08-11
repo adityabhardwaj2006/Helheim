@@ -7,6 +7,8 @@ import com.aditya.expensetracker.data.model.LoginResponse
 import com.aditya.expensetracker.data.model.SignUpResponse
 import com.aditya.expensetracker.domain.repo.AuthRepo
 import com.aditya.expensetracker.data.TokenManager
+import com.aditya.expensetracker.data.model.UserDTO
+import com.aditya.expensetracker.data.model.profileResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +25,8 @@ class AuthViewModel @Inject constructor(
     private val tokenManager: TokenManager
 ) : ViewModel(){
 
+    private val _userState = MutableStateFlow<ResultState<profileResponse>?>(ResultState.Idle)
+    val userState = _userState.asStateFlow()
     val isLoggedIn: StateFlow<Boolean?> = tokenManager.getToken()
         .map { it != null }
         .stateIn(
@@ -90,6 +94,18 @@ class AuthViewModel @Inject constructor(
             }
 
         }
+    }
+    fun getProfile(){
+        viewModelScope.launch {
+            _userState.value = ResultState.Loading
+            try{
+                val response = authRepo.getProfile()
+                _userState.value = ResultState.Success(response)
+            }catch (err : Exception){
+                _userState.value = ResultState.Error(err.message?: "Cannot get profile, please try again")
+            }
+        }
+
     }
 
     }

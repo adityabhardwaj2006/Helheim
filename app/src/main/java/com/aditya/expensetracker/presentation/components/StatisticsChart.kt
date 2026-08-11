@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aditya.expensetracker.data.model.ChartType
-import com.aditya.expensetracker.data.model.Transaction
-import com.aditya.expensetracker.data.model.TransactionType
+import com.aditya.expensetracker.data.model.TimeFilter
+import com.aditya.expensetracker.data.model.TransactionItem
 import com.aditya.expensetracker.presentation.Screens.utils.chart.ChartCalculator
 import com.aditya.expensetracker.presentation.Screens.utils.chart.ChartUtils
 import java.time.LocalDate
@@ -40,8 +40,9 @@ import java.util.Locale
 
 @Composable
 fun StatisticsChart(
-    transactions: List<Transaction>,
+    transactions: List<TransactionItem>,
     chartType: ChartType,
+    timeFilter: TimeFilter,
     modifier: Modifier = Modifier,
     lineColor: Color = Color.Black,
     gradientColor: Color = Color.LightGray,
@@ -50,11 +51,12 @@ fun StatisticsChart(
     labelColor: Color = Color.Gray,
     backgroundColor: Color = Color.Transparent,
     strokeWidth: Dp = 4.dp,
-    pointRadius: Dp = 4.dp
+    pointRadius: Dp = 4.dp,
+    sharedMaxValue: Float? = null
 ) {
     val isPreview = LocalInspectionMode.current
-    val chartPoints = remember(transactions, chartType) {
-        ChartCalculator.calculateMonthlyTotals(transactions, chartType)
+    val chartPoints = remember(transactions, chartType, timeFilter) {
+        ChartCalculator.calculateChartPoints(transactions, chartType, timeFilter, cumulative = false)
     }
 
     if (chartPoints.isEmpty()) {
@@ -68,15 +70,19 @@ fun StatisticsChart(
     val animationProgress = remember { Animatable(if (isPreview) 1f else 0f) }
     val density = LocalDensity.current
 
+    LaunchedEffect(transactions, chartType, timeFilter) {
+        selectedIndex = -1
+    }
+
     LaunchedEffect(chartPoints) {
         if (!isPreview) {
             animationProgress.animateTo(1f, animationSpec = tween(1000))
         }
     }
 
-    val maxValue = remember(chartPoints) {
-        val max = chartPoints.maxOf { it.value }
-        if (max == 0f) 100f else max * 1.2f
+    val maxValue = remember(chartPoints, sharedMaxValue) {
+        val max = sharedMaxValue ?: chartPoints.maxOf { it.value }
+        if (max == 0f) 100f else max * 1.1f
     }
 
     BoxWithConstraints(
@@ -84,10 +90,14 @@ fun StatisticsChart(
             .background(backgroundColor)
             .pointerInput(chartPoints) {
                 detectTapGestures { offset ->
-                    val width = size.width.toFloat()
-                    val stepX = width / (chartPoints.size - 1)
-                    val index = (offset.x / stepX).toInt().coerceIn(0, chartPoints.size - 1)
-                    selectedIndex = index
+                    if (chartPoints.size > 1) {
+                        val width = size.width.toFloat()
+                        val stepX = width / (chartPoints.size - 1)
+                        val index = (offset.x / stepX).toInt().coerceIn(0, chartPoints.size - 1)
+                        selectedIndex = index
+                    } else if (chartPoints.size == 1) {
+                        selectedIndex = 0
+                    }
                 }
             }
     ) {
@@ -95,12 +105,12 @@ fun StatisticsChart(
         val height = constraints.maxHeight.toFloat()
         val labelAreaHeight = with(density) { 40.dp.toPx() }
         val chartHeight = height - labelAreaHeight
-        val stepX = width / (chartPoints.size - 1)
+        val stepX = if (chartPoints.size > 1) width / (chartPoints.size - 1) else width
 
         val points = chartPoints.mapIndexed { index, point ->
             Offset(
                 x = index * stepX,
-                y = chartHeight - (point.value / maxValue) * chartHeight
+                y = chartHeight - (if (maxValue > 0) (point.value / maxValue) * chartHeight else 0f)
             )
         }
 
@@ -186,7 +196,7 @@ fun StatisticsChart(
             }
         }
 
-        // Month Labels
+        // Labels
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -195,20 +205,29 @@ fun StatisticsChart(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             val itemWidth = with(density) { (width / chartPoints.size).toDp() }
+            
+            // For Month view, don't show all labels to avoid crowding
+            val skipLabels = timeFilter == TimeFilter.MONTH
+            
             chartPoints.forEachIndexed { index, point ->
-                Text(
-                    text = point.month,
-                    fontSize = 10.sp,
-                    color = if (index == selectedIndex) selectedColor else labelColor,
-                    fontWeight = if (index == selectedIndex) FontWeight.Bold else FontWeight.Normal,
-                    modifier = Modifier.width(itemWidth),
-                    textAlign = TextAlign.Center
-                )
+                val shouldShowLabel = !skipLabels || index == 0 || index == chartPoints.size - 1 || (index + 1) % 5 == 0
+                
+                Box(modifier = Modifier.width(itemWidth), contentAlignment = Alignment.Center) {
+                    if (shouldShowLabel) {
+                        Text(
+                            text = point.label,
+                            fontSize = 10.sp,
+                            color = if (index == selectedIndex) selectedColor else labelColor,
+                            fontWeight = if (index == selectedIndex) FontWeight.Bold else FontWeight.Normal,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
         }
 
         // Tooltip
-        if (selectedIndex != -1) {
+        if (selectedIndex != -1 && selectedIndex < points.size && selectedIndex < chartPoints.size) {
             val selectedPoint = points[selectedIndex]
             val dataPoint = chartPoints[selectedIndex]
             
@@ -231,7 +250,7 @@ fun StatisticsChart(
                             .padding(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = dataPoint.month, fontSize = 10.sp, color = Color.Gray)
+                        Text(text = dataPoint.label, fontSize = 10.sp, color = Color.Gray)
                         Text(
                             text = "₹${String.format(Locale.getDefault(), "%,.2f", dataPoint.value)}",
                             fontSize = 12.sp,
@@ -243,112 +262,4 @@ fun StatisticsChart(
             }
         }
     }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun StatisticsChartPreview() {
-    val sampleTransactions = listOf(
-        Transaction(
-            amount = 5000.0,
-            date = LocalDate.of(2026, 1, (1..28).random())
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli(),
-            type = TransactionType.INCOME,
-            paidTo = "",
-            category = "",
-            savedFor = "",
-            receivedFrom = "",
-            paymentMethod = ""
-        ),
-        Transaction(
-            amount = 3000.0,
-            date = LocalDate.of(2026, 2, (1..28).random())
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli(),
-            paidTo = "",
-            category = "",
-            savedFor = "",
-            receivedFrom = "",
-            paymentMethod = "",
-            type = TransactionType.INCOME
-        ),
-        Transaction(
-            amount = 7000.0,
-            date = LocalDate.of(2026, 3, (1..28).random())
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli(),
-            paidTo = "",
-            category = "",
-            savedFor = "",
-            receivedFrom = "",
-            paymentMethod = "",
-            type = TransactionType.EXPENSE
-        ),
-        Transaction(
-            amount = 4000.0,
-            date = LocalDate.of(2026, 5, (1..28).random())
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli(),
-            paidTo = "",
-            category = "",
-            savedFor = "",
-            receivedFrom = "",
-            paymentMethod = "",
-            type = TransactionType.EXPENSE
-        ),
-        Transaction(
-            amount = 4700.0,
-            date = LocalDate.of(2026, 8, (1..28).random())
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli(),
-            paidTo = "",
-            category = "",
-            savedFor = "",
-            receivedFrom = "",
-            paymentMethod = "",
-            type = TransactionType.EXPENSE
-        ),
-        Transaction(
-            amount = 9000.0,
-            date = LocalDate.of(2026, 9, (1..28).random())
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli(),
-            paidTo = "",
-            category = "",
-            savedFor = "",
-            receivedFrom = "",
-            paymentMethod = "",
-            type = TransactionType.INCOME
-        ),
-        Transaction(
-            amount = 10000.0,
-            date = LocalDate.of(2026, 11, (1..28).random())
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli(),
-            paidTo = "",
-            category = "",
-            savedFor = "",
-            receivedFrom = "",
-            paymentMethod = "",
-            type = TransactionType.SAVINGS
-        )
-    )
-    
-    StatisticsChart(
-        transactions = sampleTransactions,
-        chartType = ChartType.INCOME,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp)
-            .padding(16.dp)
-    )
 }

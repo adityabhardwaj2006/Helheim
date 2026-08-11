@@ -5,6 +5,7 @@ import com.aditya.expensetracker.data.model.LoginResponse
 import com.aditya.expensetracker.data.model.SignUpRequest
 import com.aditya.expensetracker.data.model.SignUpResponse
 import com.aditya.expensetracker.data.model.UserDTO
+import com.aditya.expensetracker.data.model.profileResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -16,15 +17,16 @@ interface AuthApi{
         @Body request : LoginRequest
     ) : LoginResponse
 
-    @GET("/profile")
-    suspend fun getProfile(
-        @Header("Authorization") token : String
-    ) : UserDTO
 
     @POST("/signup")
     suspend fun signup(
         @Body request : SignUpRequest
     ) : SignUpResponse
+
+    @GET("/profile")
+    suspend fun getProfile(
+        @Header("Authorization") token : String
+    ) : profileResponse
 
 
 }

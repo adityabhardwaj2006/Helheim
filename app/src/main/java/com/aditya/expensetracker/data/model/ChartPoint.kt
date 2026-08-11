@@ -1,6 +1,6 @@
 package com.aditya.expensetracker.data.model
 
 data class ChartPoint(
-    val month: String,
+    val label: String,
     val value: Float
 )

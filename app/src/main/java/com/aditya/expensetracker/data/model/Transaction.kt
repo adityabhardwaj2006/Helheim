@@ -32,3 +32,9 @@ enum class ChartType {
     EXPENSE,
     SAVINGS
 }
+
+enum class TimeFilter {
+    WEEK,
+    MONTH,
+    YEAR
+}
