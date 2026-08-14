@@ -13,8 +13,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+//Rooms viewmodel
 @HiltViewModel
-class transactionViewModel @Inject constructor(
+class TransactionViewModel @Inject constructor(
     private val repo : Repo,
     private val tokenManager: TokenManager
 ) : ViewModel() {

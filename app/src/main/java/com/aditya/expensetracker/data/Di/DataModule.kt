@@ -5,7 +5,8 @@ import androidx.room.Room
 import com.aditya.expensetracker.data.Api.AuthApi
 import com.aditya.expensetracker.data.Api.TransactionApi
 import com.aditya.expensetracker.data.DAO.TransactionDao
-import com.aditya.expensetracker.data.Database.TransactionDatabase
+import com.aditya.expensetracker.data.DAO.UserDao
+import com.aditya.expensetracker.data.Database.RoomsDatabase
 import com.aditya.expensetracker.data.repoImpl.AuthRepoImpl
 import com.aditya.expensetracker.data.repoImpl.RepoImpl
 import com.aditya.expensetracker.data.repoImpl.TransactionRepoImpl
@@ -20,7 +21,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 import javax.inject.Singleton
 
 @Module
@@ -31,11 +31,11 @@ object DataModule {
     @Singleton
     fun provideDatabase(
          @ApplicationContext context : Context
-    ): TransactionDatabase{
+    ): RoomsDatabase{
 
         return Room.databaseBuilder(
             context,
-            TransactionDatabase::class.java,
+            RoomsDatabase::class.java,
             "transactionDao"
         ).fallbackToDestructiveMigration().build()
 
@@ -44,9 +44,17 @@ object DataModule {
     @Provides
     @Singleton
     fun provideDao(
-        transactionDatabase : TransactionDatabase
+        roomsDatabase : RoomsDatabase
     ) : TransactionDao{
-        return transactionDatabase.transactionDao()
+        return roomsDatabase.transactionDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserDao(
+        roomsDatabase: RoomsDatabase
+    ) : UserDao{
+        return roomsDatabase.userDao()
     }
 
     @Provides

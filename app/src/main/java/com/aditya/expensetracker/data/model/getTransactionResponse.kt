@@ -5,12 +5,12 @@ data class getTransactionResponse(
     val transactions : List<TransactionItem>,
 )
 data class TransactionItem(
-    val id : Int,
+    val id : Int?,
     val amount : Double,
-    val date : Long,
+    val date : Long?,
     val type : String,
     val paidTo : String,
-    val category : String,
+    val category : String?,
     val savedFor : String,
     val receivedFrom : String,
     val paymentMethod : String

@@ -66,7 +66,7 @@ import androidx.lifecycle.viewModelScope
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
-import com.aditya.expensetracker.data.ViewModel.transactionViewModel
+import com.aditya.expensetracker.data.ViewModel.TransactionViewModel
 import com.aditya.expensetracker.data.model.Transaction
 import com.aditya.expensetracker.data.model.TransactionType
 import java.text.SimpleDateFormat
@@ -88,7 +88,7 @@ fun AddScreen(
 ) {
 
     //Calling repo
-    val viewModel : transactionViewModel = hiltViewModel()
+    val viewModel : TransactionViewModel = hiltViewModel()
     val addScreenState by transactionVm.transactionState.collectAsState()
     val userId by authViewModel.userId.collectAsState()
     val snackbarHostState = remember{ SnackbarHostState() }
@@ -110,7 +110,7 @@ fun AddScreen(
                 viewModel.addTransaction(Transaction(
                     amount = amount.toDoubleOrNull() ?: 0.0,
                     date = dateMillis,
-                    type = TransactionType.EXPENSE,
+                    type = TransactionType.EXPENSE.toString(),
                     paidTo = paidTo,
                     category = category,
                     paymentMethod = paymentMethod,

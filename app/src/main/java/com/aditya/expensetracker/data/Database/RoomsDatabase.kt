@@ -5,16 +5,19 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.aditya.expensetracker.Converters
 import com.aditya.expensetracker.data.DAO.TransactionDao
+import com.aditya.expensetracker.data.DAO.UserDao
 import com.aditya.expensetracker.data.model.Transaction
+import com.aditya.expensetracker.data.model.UserEntity
 
 
 @Database(
-    entities = [Transaction::class],
-    version = 2,
+    entities = [UserEntity::class,Transaction::class],
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
-abstract class TransactionDatabase : RoomDatabase() {
+abstract class RoomsDatabase : RoomDatabase() {
 
     abstract fun transactionDao(): TransactionDao
+    abstract fun userDao() : UserDao
 }

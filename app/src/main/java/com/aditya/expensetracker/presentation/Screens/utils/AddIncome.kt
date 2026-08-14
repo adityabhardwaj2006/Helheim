@@ -64,7 +64,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
-import com.aditya.expensetracker.data.ViewModel.transactionViewModel
+import com.aditya.expensetracker.data.ViewModel.TransactionViewModel
 import com.aditya.expensetracker.data.model.Transaction
 import com.aditya.expensetracker.data.model.TransactionType
 import java.text.SimpleDateFormat
@@ -85,7 +85,7 @@ fun AddIncome(
 ) {
 
     //Calling repo
-    val viewModel : transactionViewModel = hiltViewModel()
+    val viewModel : TransactionViewModel = hiltViewModel()
     val userId by authViewModel.userId.collectAsState()
     val transactionVm : TransactionVm = hiltViewModel()
     val addIncomeState by transactionVm.transactionState.collectAsState()
@@ -104,7 +104,7 @@ fun AddIncome(
                 viewModel.addTransaction(Transaction(
                     amount = amount.toDoubleOrNull() ?: 0.0,
                     date = dateMillis,
-                    type = TransactionType.INCOME,
+                    type = TransactionType.INCOME.toString(),
                     paidTo = "",
                     receivedFrom = receivedFrom,
                     category = category,

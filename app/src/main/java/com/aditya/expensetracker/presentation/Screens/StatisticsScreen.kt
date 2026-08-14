@@ -31,6 +31,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.common.ResultState
+import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.data.ViewModel.getTransactionVm
 import com.aditya.expensetracker.data.model.ChartType
 import com.aditya.expensetracker.data.model.TimeFilter
@@ -49,14 +50,14 @@ import java.util.Locale
 @Composable
 fun StatisticsScreen(
     navController: NavController,
-    getTransactionVm : getTransactionVm = hiltViewModel()
+    transactionVm : TransactionVm = hiltViewModel()
 ) {
     var selectedChartType by remember { mutableStateOf(ChartType.EXPENSE) }
     var selectedTimeFilter by remember { mutableStateOf(TimeFilter.YEAR) }
-    val state by getTransactionVm.transactionState.collectAsState()
+    val state by transactionVm.getTransactionState.collectAsState()
 
     LaunchedEffect(Unit) {
-        getTransactionVm.getTransaction()
+        transactionVm.getTransaction()
     }
 
     Scaffold(
@@ -314,7 +315,7 @@ fun StatisticsScreen(
                                         ChartType.EXPENSE -> transaction.paidTo ?: "Unknown"
                                         ChartType.SAVINGS -> transaction.savedFor ?: "Unknown"
                                     },
-                                    date = SimpleDateFormat("dd MMM, yyyy", Locale.getDefault()).format(Date(transaction.date)),
+                                    date = SimpleDateFormat("dd MMM, yyyy", Locale.getDefault()).format(Date(transaction.date?:0L)),
                                     amount = "$amountPrefix₹${String.format(Locale.getDefault(), "%,.2f", transaction.amount)}",
                                     icon = when(selectedChartType) {
                                         ChartType.INCOME -> Icons.AutoMirrored.Filled.TrendingUp

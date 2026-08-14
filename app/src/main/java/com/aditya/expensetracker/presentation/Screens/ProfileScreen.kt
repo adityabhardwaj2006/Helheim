@@ -47,6 +47,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,15 +66,36 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 
 @Composable
-fun ProfileScreen(navController: NavController) {
+fun ProfileScreen(navController: NavController,
+                  authViewModel: AuthViewModel = hiltViewModel()) {
     val scrollState = rememberScrollState()
     val progress = (scrollState.value/300f).coerceIn(0f,1f)
 
-    val authViewModel : AuthViewModel = hiltViewModel()
-
+    LaunchedEffect(Unit) {
+        authViewModel.getProfile()
+    }
+    var username = ""
+    var name = ""
+    val profileState by authViewModel.userState.collectAsState()
+    when(val state = profileState){
+        is ResultState.Loading -> {
+           username = "....."
+            name = "....."
+        }
+        is ResultState.Error -> {
+            username = "....."
+            name = "Unknown"
+        }
+        is ResultState.Success ->{
+            username = state.data.data?.username?:""
+            name = state.data.data?.firstName + " "+ state.data.data?.lastName
+        }
+        else -> {}
+    }
 
     val iconSize by animateDpAsState(
         targetValue = lerp(96.dp,30.dp,progress)
@@ -180,7 +203,7 @@ fun ProfileScreen(navController: NavController) {
             }
 
             Text(
-                text = "Aditya Bhardwaj",
+                text = name,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = nameSize.sp,
                 modifier = Modifier.fillMaxWidth(),
@@ -188,7 +211,7 @@ fun ProfileScreen(navController: NavController) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "adityabhardwaj@gmail.com",
+                text = username,
                 color = Color.Gray,
                 fontSize = 15.sp,
                 modifier = Modifier

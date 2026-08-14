@@ -28,7 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
-import com.aditya.expensetracker.data.ViewModel.transactionViewModel
+import com.aditya.expensetracker.data.ViewModel.TransactionViewModel
 import com.aditya.expensetracker.data.model.Transaction
 import com.aditya.expensetracker.data.model.TransactionType
 import kotlinx.coroutines.launch
@@ -45,7 +45,7 @@ fun AddSaving(
     onDismiss : ()->Unit,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
-    val viewModel : transactionViewModel = hiltViewModel()
+    val viewModel : TransactionViewModel = hiltViewModel()
     val transactionVm : TransactionVm = hiltViewModel()
     val userId by authViewModel.userId.collectAsState()
     val addSavingState by transactionVm.transactionState.collectAsState()
@@ -65,7 +65,7 @@ fun AddSaving(
                 viewModel.addTransaction(Transaction(
                     amount = amount.toDoubleOrNull() ?: 0.0,
                     date = dateMillis,
-                    type = TransactionType.SAVINGS,
+                    type = TransactionType.SAVINGS.toString(),
                     paidTo = "",
                     savedFor = savedFor,
                     category = category,

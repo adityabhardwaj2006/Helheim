@@ -21,21 +21,7 @@ class getTransactionVm @Inject constructor(
     private val _transactionState = MutableStateFlow<ResultState<getTransactionResponse>>(ResultState.Idle)
     val transactionState = _transactionState.asStateFlow()
 
-    fun getTransaction() {
-        _transactionState.value = ResultState.Loading
 
-        viewModelScope.launch {
-            try {
-                val token = tokenManager.getToken().first() ?: ""
-                val response = repo.getTransactions("Bearer $token")
-                _transactionState.value = ResultState.Success(response)
-            } catch (error: Exception) {
-                _transactionState.value =
-                    ResultState.Error(error.message ?: "Cannot get the transactions")
-            }
-        }
-
-    }
 
 
 }

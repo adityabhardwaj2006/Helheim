@@ -12,7 +12,7 @@ data class Transaction(
 
     val amount: Double,
     val date: Long?,
-    val type: TransactionType,
+    val type: String,
     val paidTo: String,
     val category: String?,
     val savedFor : String,

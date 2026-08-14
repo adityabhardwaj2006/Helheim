@@ -42,11 +42,11 @@ fun HomeScreen(
     }
     val userState : ResultState<profileResponse>? by authViewModel.userState.collectAsState()
     val name = when(val state = userState){
-        is ResultState.Loading -> {
-            ""
+        is ResultState.Loading, ResultState.Idle -> {
+            "..."
         }
         is ResultState.Success ->{
-            state.data.data.firstName
+            state.data.data?.firstName + " " + state.data.data?.lastName
         }
         else -> {
             "Unknown"

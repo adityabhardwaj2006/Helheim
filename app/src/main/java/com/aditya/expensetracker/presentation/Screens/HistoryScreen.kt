@@ -28,8 +28,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.common.ResultState
-import com.aditya.expensetracker.data.ViewModel.getTransactionVm
-import com.aditya.expensetracker.data.ViewModel.transactionViewModel
+import com.aditya.expensetracker.data.ViewModel.TransactionVm
+import com.aditya.expensetracker.data.ViewModel.TransactionViewModel
 import com.aditya.expensetracker.data.model.Transaction
 import com.aditya.expensetracker.data.model.TransactionItem
 import com.aditya.expensetracker.data.model.TransactionRequest
@@ -38,16 +38,15 @@ import com.aditya.expensetracker.presentation.components.TransactionHistoryItem
 
 @Composable
 fun HistoryScreen(
-    viewModel: transactionViewModel = hiltViewModel(),
+    viewModel: TransactionViewModel = hiltViewModel(),
     navController : NavController,
-    getTransactionVm : getTransactionVm = hiltViewModel()
+    transactionVm : TransactionVm = hiltViewModel()
 ) {
-    val state by getTransactionVm.transactionState.collectAsState()
+    val state by transactionVm.getTransactionState.collectAsState()
     var transactions: List<TransactionItem>? = null
     LaunchedEffect(Unit) {
-        getTransactionVm.getTransaction()
+        transactionVm.getTransaction()
     }
-
 
     Scaffold(
         topBar = {

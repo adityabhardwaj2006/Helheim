@@ -53,9 +53,9 @@ object ChartCalculator {
         val endOfWeek = startOfWeek.plusDays(6)
 
         val grouped = transactions.filter {
-            val date = toLocalDate(it.date)
+            val date = toLocalDate(it.date?:0L)
             !date.isBefore(startOfWeek) && !date.isAfter(endOfWeek)
-        }.groupBy { toLocalDate(it.date).dayOfWeek }
+        }.groupBy { toLocalDate(it.date?:0L).dayOfWeek }
 
         return DayOfWeek.entries.map { day ->
             val label = day.getDisplayName(TextStyle.SHORT, Locale.getDefault())
@@ -70,9 +70,9 @@ object ChartCalculator {
         val lastDay = now.with(TemporalAdjusters.lastDayOfMonth())
 
         val grouped = transactions.filter {
-            val date = toLocalDate(it.date)
+            val date = toLocalDate(it.date?:0L)
             !date.isBefore(firstDay) && !date.isAfter(lastDay)
-        }.groupBy { toLocalDate(it.date).dayOfMonth }
+        }.groupBy { toLocalDate(it.date?:0L).dayOfMonth }
 
         return (1..lastDay.dayOfMonth).map { day ->
             val total = grouped[day]?.sumOf { it.amount }?.toFloat() ?: 0f
@@ -85,8 +85,8 @@ object ChartCalculator {
         val currentYear = now.year
 
         val grouped = transactions.filter {
-            toLocalDate(it.date).year == currentYear
-        }.groupBy { toLocalDate(it.date).month }
+            toLocalDate(it.date?:0L).year == currentYear
+        }.groupBy { toLocalDate(it.date?:0L).month }
 
         return Month.entries.map { month ->
             val label = month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
