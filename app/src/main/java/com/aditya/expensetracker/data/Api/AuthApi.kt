@@ -28,5 +28,10 @@ interface AuthApi{
         @Header("Authorization") token : String
     ) : profileResponse
 
+    @POST("/updateProfile")
+    suspend fun updateProfile(
+        @Header("Authorization") token : String,
+        @Body request : UserDTO
+    ) : SignUpResponse
 
 }

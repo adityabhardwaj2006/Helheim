@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.aditya.expensetracker.common.ResultState
+import com.aditya.expensetracker.data.model.getTransactionResponse
 
 /**
  * A component that displays two summary cards for Income and Expense.
@@ -29,26 +31,42 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun IncomeExpenseSummary(
     modifier: Modifier = Modifier,
-    incomePercentage: String = "+24%",
-    expensePercentage: String = "-42%"
+    incomeChange: String = "0%",
+    expenseChange: String = "0%",
+    savingsChange: String = "0%"
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // Income Summary
+        val incomeIsPositive = !incomeChange.startsWith("-")
         SummaryCard(
             modifier = Modifier.weight(1f),
-            icon = Icons.Default.ArrowUpward,
-            iconColor = Color(0xFF4CAF50), // Green for income
-            value = incomePercentage,
+            icon = if (incomeIsPositive) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+            iconColor = if (incomeIsPositive) Color(0xFF4CAF50) else Color(0xFFF44336),
+            value = incomeChange,
             label = "Income"
         )
+
+        // Expense Summary
+        val expenseIsIncreased = expenseChange.startsWith("+")
         SummaryCard(
             modifier = Modifier.weight(1f),
-            icon = Icons.Default.ArrowDownward,
-            iconColor = Color(0xFFFFA000), // Orange/Amber for expense
-            value = expensePercentage,
+            icon = if (expenseIsIncreased) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+            iconColor = if (expenseIsIncreased) Color(0xFFF44336) else Color(0xFF4CAF50), // Red if expenses go up
+            value = expenseChange,
             label = "Expense"
+        )
+
+        // Savings Summary
+        val savingsIsPositive = !savingsChange.startsWith("-")
+        SummaryCard(
+            modifier = Modifier.weight(1f),
+            icon = if (savingsIsPositive) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
+            iconColor = if (savingsIsPositive) Color(0xFF2196F3) else Color(0xFFF44336), // Blue for savings
+            value = savingsChange,
+            label = "Savings"
         )
     }
 }
@@ -69,7 +87,7 @@ private fun SummaryCard(
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(8.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
@@ -113,6 +131,6 @@ private fun SummaryCard(
 @Composable
 fun IncomeExpenseSummaryPreview() {
     Box(modifier = Modifier.padding(16.dp)) {
-        IncomeExpenseSummary()
+        IncomeExpenseSummary(incomeChange = "+15%", savingsChange = "+5%", expenseChange = "-2%")
     }
 }

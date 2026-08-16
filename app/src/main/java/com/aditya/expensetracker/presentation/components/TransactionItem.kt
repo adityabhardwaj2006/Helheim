@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Card
@@ -21,8 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aditya.expensetracker.data.model.Expense
-import com.aditya.expensetracker.data.model.ExpenseType
+import com.aditya.expensetracker.data.model.TransactionItem
+import com.aditya.expensetracker.data.model.TransactionType
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,7 +33,7 @@ import java.util.*
  * Matches the white card style in the new design.
  */
 @Composable
-fun TransactionItem(expense: Expense) {
+fun TransactionItem(expense: TransactionItem) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -47,7 +49,7 @@ fun TransactionItem(expense: Expense) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Transaction icon with circular background
-            val iconColor = getCategoryColor(expense.category)
+            val iconColor = getCategoryColor(expense.category?:"EXPENSE")
             Box(
                 modifier = Modifier
                     .size(50.dp)
@@ -56,7 +58,7 @@ fun TransactionItem(expense: Expense) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = getCategoryIcon(expense.category),
+                    imageVector = getCategoryIcon(expense.type),
                     contentDescription = null,
                     tint = iconColor,
                     modifier = Modifier.size(24.dp)
@@ -68,7 +70,7 @@ fun TransactionItem(expense: Expense) {
             // Transaction details
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = expense.title,
+                    text = expense.category?:"",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
@@ -82,7 +84,9 @@ fun TransactionItem(expense: Expense) {
             }
             
             // Transaction amount
-            val prefix = if (expense.type == ExpenseType.INCOME) "+" else "-"
+            val prefix = if (expense.type == TransactionType.INCOME.name) "+"
+            else if (expense.type == TransactionType.EXPENSE.name)"-" else
+                "•"
             Text(
                 text = "$prefix$${String.format("%.2f", expense.amount)}",
                 fontSize = 16.sp,
@@ -93,12 +97,14 @@ fun TransactionItem(expense: Expense) {
     }
 }
 
-// Helper to determine icon based on category
-private fun getCategoryIcon(category: String): ImageVector {
-    return when (category.lowercase()) {
-        "work" -> Icons.Default.Work
-        "food", "groceries" -> Icons.Default.ShoppingCart
-        else -> Icons.Default.ShoppingCart
+private fun getCategoryIcon(type: String): ImageVector{
+    return when (type.lowercase()) {
+        "income" -> Icons.AutoMirrored.Filled.TrendingUp
+        "expense" -> Icons.Default.ShoppingCart
+        "savings" -> Icons.Default.Savings
+        else -> {
+            Icons.Default.ShoppingCart
+        }
     }
 }
 
@@ -111,16 +117,3 @@ private fun getCategoryColor(category: String): Color {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFFF5F5F5)
-@Composable
-fun TransactionItemPreview() {
-    TransactionItem(
-        expense = Expense(
-            title = "Dribbble Pro",
-            amount = 145.0,
-            date = Date(),
-            category = "Work",
-            type = ExpenseType.EXPENSE
-        )
-    )
-}

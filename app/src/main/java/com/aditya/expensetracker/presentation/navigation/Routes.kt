@@ -19,6 +19,9 @@ sealed class Routes{
     object Profile : Routes()
 
     @Serializable
+    object EditProfile : Routes()
+
+    @Serializable
     object Statistics : Routes()
 
     @Serializable

@@ -11,4 +11,5 @@ interface AuthRepo {
     suspend fun signup(firstName:String,lastName:String,username: String,password: String) : SignUpResponse
     suspend fun logout()
     suspend fun getProfile() : profileResponse
+    suspend fun updateProfile(firstName: String, lastName: String, username: String)
 }

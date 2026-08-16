@@ -24,4 +24,8 @@ class RepoImpl @Inject constructor(
     override suspend fun deleteTransaction(transaction: Transaction) {
         return dao.deleteTransaction(transaction)
     }
+
+    override suspend fun deleteAllTransaction() {
+        return dao.deleteAllTransaction()
+    }
 }

@@ -68,6 +68,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.presentation.navigation.Routes
 
 @Composable
 fun ProfileScreen(navController: NavController,
@@ -225,7 +226,9 @@ fun ProfileScreen(navController: NavController,
 
             SectionTitle("Account & Utilities")
             SectionCard {
-                CardItem(icon = Icons.Default.Person, text = "Edit Profile") { }
+                CardItem(icon = Icons.Default.Person, text = "Edit Profile") {
+                    navController.navigate(Routes.EditProfile)
+                }
                 CardItem(icon = Icons.Default.Lock, text = "Change Password") { }
                 CardItem(icon = Icons.Default.Notifications, text = "Notifications") { }
                 CardItem(icon = Icons.Default.Payment, text = "Payment Methods") { }

@@ -24,21 +24,25 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
-import com.aditya.expensetracker.data.model.Expense
-import com.aditya.expensetracker.data.model.ExpenseType
-import com.aditya.expensetracker.data.model.UserDTO
+import com.aditya.expensetracker.data.ViewModel.TransactionVm
+import com.aditya.expensetracker.data.model.getTransactionResponse
 import com.aditya.expensetracker.data.model.profileResponse
 import com.aditya.expensetracker.presentation.components.BalanceCard
 import com.aditya.expensetracker.presentation.components.IncomeExpenseSummary
 import com.aditya.expensetracker.presentation.components.TransactionItem
-import java.util.*
+import java.time.Instant
+import java.time.YearMonth
+import java.time.ZoneId
+import kotlin.collections.emptyList
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-    authViewModel : AuthViewModel = hiltViewModel()) {
+    authViewModel : AuthViewModel = hiltViewModel(),
+    transactionVm : TransactionVm = hiltViewModel()) {
     LaunchedEffect(Unit) {
         authViewModel.getProfile()
+        transactionVm.getTransaction()
     }
     val userState : ResultState<profileResponse>? by authViewModel.userState.collectAsState()
     val name = when(val state = userState){
@@ -53,6 +57,77 @@ fun HomeScreen(
         }
     }
 
+    val transactionState by transactionVm.getTransactionState.collectAsState()
+    
+    var totalIncome = 0.0
+    var totalSavings = 0.0
+    var totalExpense = 0.0
+    
+    var currentIncome = 0.0
+    var currentSavings = 0.0
+    var currentExpense = 0.0
+    
+    var prevIncome = 0.0
+    var prevSavings = 0.0
+    var prevExpense = 0.0
+
+    val currentMonth = YearMonth.now()
+    val prevMonth = currentMonth.minusMonths(1)
+
+    var listState = getTransactionResponse(
+        success = false,
+        transactions = emptyList()
+    )
+    
+    when(val state = transactionState){
+        is ResultState.Success -> {
+            listState = state.data
+            listState.transactions.forEach { trans ->
+                val amount = trans.amount
+                val type = trans.type.lowercase()
+                
+                // Total calculation for balance
+                when(type){
+                    "income" -> totalIncome += amount
+                    "expense" -> totalExpense += amount
+                    "savings" -> totalSavings += amount
+                }
+                
+                // Month based calculation for growth
+                val transDate = Instant.ofEpochMilli(trans.date ?: 0L)
+                    .atZone(ZoneId.systemDefault()).toLocalDate()
+                val transYearMonth = YearMonth.from(transDate)
+                
+                if (transYearMonth == currentMonth) {
+                    when(type){
+                        "income" -> currentIncome += amount
+                        "expense" -> currentExpense += amount
+                        "savings" -> currentSavings += amount
+                    }
+                } else if (transYearMonth == prevMonth) {
+                    when(type){
+                        "income" -> prevIncome += amount
+                        "expense" -> prevExpense += amount
+                        "savings" -> prevSavings += amount
+                    }
+                }
+            }
+        }
+        else -> {}
+    }
+
+    fun calculateGrowth(current: Double, previous: Double): String {
+        if (previous == 0.0) return if (current > 0) "+100%" else "0%"
+        val growth = ((current - previous) / previous) * 100
+        val sign = if (growth >= 0) "+" else ""
+        return "$sign${growth.toInt()}%"
+    }
+
+    val incomeChange = calculateGrowth(currentIncome, prevIncome)
+    val expenseChange = calculateGrowth(currentExpense, prevExpense)
+    val savingsChange = calculateGrowth(currentSavings, prevSavings)
+
+
     Scaffold(
         containerColor = Color.White
     ) { innerPadding ->
@@ -61,7 +136,6 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp)
-                .padding(top = innerPadding.calculateTopPadding()/2)
         ) {
 
             // 1. Personalized Header Section
@@ -118,7 +192,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // 2. Premium Balance Card
-            BalanceCard(balance = 5480.00)
+            BalanceCard(balance = (totalIncome - totalExpense ))
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -133,24 +207,20 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // 4. Income & Expense Summary Cards
-            IncomeExpenseSummary()
+            IncomeExpenseSummary(
+                incomeChange = incomeChange,
+                expenseChange = expenseChange,
+                savingsChange = savingsChange
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            // 5. Transaction List Section
-            val dummyExpenses = listOf(
-                Expense(1, "Dribbble Pro", 145.0, Date(), "Work", ExpenseType.EXPENSE),
-                Expense(2, "Figma", 46.0, Date(), "Work", ExpenseType.EXPENSE),
-                Expense(3, "Salary", 5000.0, Date(), "Work", ExpenseType.INCOME),
-                Expense(4, "Groceries", 150.0, Date(), "Food", ExpenseType.EXPENSE)
-            )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(bottom = 100.dp) // Extra padding for bottom navigation
             ) {
-                items(dummyExpenses) { expense ->
+                items(listState.transactions.reversed()) { expense ->
                     TransactionItem(expense = expense)
                 }
             }

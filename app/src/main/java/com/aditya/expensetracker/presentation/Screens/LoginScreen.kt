@@ -67,9 +67,10 @@ fun LoginScreen(
 
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-        ) { padding ->
+        ) { innerPadding ->
             Surface(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier.fillMaxSize()
+                    .padding(innerPadding),
                 color = White
             ) {
 

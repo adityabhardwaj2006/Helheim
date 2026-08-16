@@ -27,6 +27,10 @@ class AuthViewModel @Inject constructor(
 
     private val _userState = MutableStateFlow<ResultState<profileResponse>?>(ResultState.Idle)
     val userState = _userState.asStateFlow()
+
+    private val _updateProfileState = MutableStateFlow<ResultState<Unit>>(ResultState.Idle)
+    val updateProfileState = _updateProfileState.asStateFlow()
+
     val isLoggedIn: StateFlow<Boolean?> = tokenManager.getToken()
         .map { it != null }
         .stateIn(
@@ -67,7 +71,7 @@ class AuthViewModel @Inject constructor(
 
     fun logout(){
         viewModelScope.launch {
-            tokenManager.clearToken()
+            authRepo.logout()
         }
     }
 
@@ -106,6 +110,24 @@ class AuthViewModel @Inject constructor(
             }
         }
 
+    }
+
+    fun updateProfile(
+        firstName: String,
+        lastName: String,
+        username: String
+    ) {
+        viewModelScope.launch {
+            _updateProfileState.value = ResultState.Loading
+            try {
+                authRepo.updateProfile(firstName, lastName, username)
+                _updateProfileState.value = ResultState.Success(Unit)
+                // Refresh profile data in state
+                getProfile()
+            } catch (err: Exception) {
+                _updateProfileState.value = ResultState.Error(err.message ?: "Cannot update profile, please try again")
+            }
+        }
     }
 
     }

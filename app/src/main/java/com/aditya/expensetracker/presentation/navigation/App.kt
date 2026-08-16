@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -25,6 +26,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.presentation.Screens.EditProfileScreen
 import com.aditya.expensetracker.presentation.Screens.HistoryScreen
 import com.aditya.expensetracker.presentation.Screens.HomeScreen
 import com.aditya.expensetracker.presentation.Screens.ProfileScreen
@@ -163,7 +165,8 @@ fun App(
             startDestination = startDestination,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .statusBarsPadding()
+                .padding(bottom = innerPadding.calculateBottomPadding())
         ) {
             navigation<SubNavigation.MainHomeScreen>(
                 startDestination = Routes.HomeUi
@@ -173,6 +176,9 @@ fun App(
                 }
                 composable<Routes.Profile> {
                     ProfileScreen(navController)
+                }
+                composable<Routes.EditProfile> {
+                    EditProfileScreen(navController)
                 }
                 composable<Routes.Statistics> {
                     StatisticsScreen(navController)

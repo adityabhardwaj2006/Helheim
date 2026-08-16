@@ -1,12 +1,15 @@
 package com.aditya.expensetracker.data.repoImpl
 
+import android.util.Log
 import com.aditya.expensetracker.data.Api.AuthApi
+import com.aditya.expensetracker.data.DAO.TransactionDao
 import com.aditya.expensetracker.data.DAO.UserDao
 import com.aditya.expensetracker.data.TokenManager
 import com.aditya.expensetracker.data.model.LoginRequest
 import com.aditya.expensetracker.data.model.LoginResponse
 import com.aditya.expensetracker.data.model.SignUpRequest
 import com.aditya.expensetracker.data.model.SignUpResponse
+import com.aditya.expensetracker.data.model.UserDTO
 import com.aditya.expensetracker.data.model.UserEntity
 import com.aditya.expensetracker.data.model.profileData
 import com.aditya.expensetracker.data.model.profileResponse
@@ -17,7 +20,8 @@ import javax.inject.Inject
 class AuthRepoImpl @Inject constructor(
     private val authApi : AuthApi,
     private val tokenManager : TokenManager,
-    private val userDao : UserDao
+    private val userDao : UserDao,
+    private val transactionDao: TransactionDao
 ) : AuthRepo{
 
     override suspend fun login(
@@ -51,8 +55,11 @@ class AuthRepoImpl @Inject constructor(
     }
 
     override suspend fun logout() {
+
         tokenManager.clearToken()
+        transactionDao.deleteAllTransaction()
         userDao.deleteUser()
+
     }
 
     override suspend fun getProfile(): profileResponse {
@@ -101,5 +108,35 @@ class AuthRepoImpl @Inject constructor(
                 throw e
             }
         }
+    }
+
+    override suspend fun updateProfile(
+        firstName: String,
+        lastName: String,
+        username: String
+    ) {
+        try{
+            val token = tokenManager.getToken().first() ?: throw Exception("Token not found")
+            authApi.updateProfile(
+                token = "Bearer $token",
+                request = UserDTO(
+                    id = "0",
+                    firstName = firstName,
+                    lastName = lastName,
+                    username = username
+                )
+            )
+
+            val storedUserId = tokenManager.getUserId().first() ?: ""
+            userDao.insertUser(UserEntity(
+                userId = storedUserId,
+                firstName = firstName,
+                lastName = lastName,
+                username = username
+            ))
+        }catch(err: Exception){
+            throw err
+        }
+
     }
 }

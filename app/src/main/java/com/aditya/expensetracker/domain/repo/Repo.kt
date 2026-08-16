@@ -12,4 +12,6 @@ interface Repo  {
     suspend fun updateTransaction(transaction: Transaction)
 
     suspend fun deleteTransaction(transaction: Transaction)
+
+    suspend fun deleteAllTransaction()
 }
