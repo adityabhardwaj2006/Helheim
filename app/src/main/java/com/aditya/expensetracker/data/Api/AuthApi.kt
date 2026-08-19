@@ -1,5 +1,6 @@
 package com.aditya.expensetracker.data.Api
 
+import com.aditya.expensetracker.data.model.ChangePasswordRequest
 import com.aditya.expensetracker.data.model.LoginRequest
 import com.aditya.expensetracker.data.model.LoginResponse
 import com.aditya.expensetracker.data.model.SignUpRequest
@@ -32,6 +33,12 @@ interface AuthApi{
     suspend fun updateProfile(
         @Header("Authorization") token : String,
         @Body request : UserDTO
+    ) : SignUpResponse
+
+    @POST("/updatePassword")
+    suspend fun updatePassword(
+        @Header("Authorization") token : String,
+        @Body request : ChangePasswordRequest
     ) : SignUpResponse
 
 }

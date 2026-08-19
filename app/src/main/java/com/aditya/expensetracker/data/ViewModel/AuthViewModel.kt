@@ -7,6 +7,7 @@ import com.aditya.expensetracker.data.model.LoginResponse
 import com.aditya.expensetracker.data.model.SignUpResponse
 import com.aditya.expensetracker.domain.repo.AuthRepo
 import com.aditya.expensetracker.data.TokenManager
+import com.aditya.expensetracker.data.model.TransactionResponse
 import com.aditya.expensetracker.data.model.UserDTO
 import com.aditya.expensetracker.data.model.profileResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +28,9 @@ class AuthViewModel @Inject constructor(
 
     private val _userState = MutableStateFlow<ResultState<profileResponse>?>(ResultState.Idle)
     val userState = _userState.asStateFlow()
+
+    private val _updatePasswordState = MutableStateFlow<ResultState<SignUpResponse>>(ResultState.Idle)
+    val updatePasswordState = _updatePasswordState.asStateFlow()
 
     private val _updateProfileState = MutableStateFlow<ResultState<Unit>>(ResultState.Idle)
     val updateProfileState = _updateProfileState.asStateFlow()
@@ -130,6 +134,21 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun updatePassword(
+        newPassword : String
+    ){
+        viewModelScope.launch {
+            _updatePasswordState.value = ResultState.Loading
+            try{
+                val response = authRepo.updatePassword(newPassword)
+                _updatePasswordState.value = ResultState.Success(response)
+            }catch(err: Exception){
+                _updatePasswordState.value = ResultState.Error(err.message?:"Something went wrong")
+            }
+        }
+
     }
+
+}
 
 

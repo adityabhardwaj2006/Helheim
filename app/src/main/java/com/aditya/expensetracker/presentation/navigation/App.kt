@@ -2,6 +2,11 @@ package com.aditya.expensetracker.presentation.navigation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -29,6 +34,7 @@ import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.presentation.Screens.EditProfileScreen
 import com.aditya.expensetracker.presentation.Screens.HistoryScreen
 import com.aditya.expensetracker.presentation.Screens.HomeScreen
+import com.aditya.expensetracker.presentation.Screens.PrivacyPolicyScreen
 import com.aditya.expensetracker.presentation.Screens.ProfileScreen
 import com.aditya.expensetracker.presentation.Screens.SignUpScreen
 import com.aditya.expensetracker.presentation.Screens.StatisticsScreen
@@ -41,6 +47,7 @@ import com.example.expensemanager.ui.login.LoginScreen
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
+import com.aditya.expensetracker.presentation.Screens.UpdatePassword
 
 enum class SheetType { NONE, INCOME, EXPENSE, SAVING }
 
@@ -78,11 +85,22 @@ fun App(
     val currentRoute = currentEntry?.destination?.route
     val showBottomBarAndFab = currentRoute != Routes.LoginScreen::class.qualifiedName
             && currentRoute != Routes.SignUpScreen::class.qualifiedName
+            && currentRoute != Routes.UpdatePassword::class.qualifiedName
+            && currentRoute != Routes.EditProfile::class.qualifiedName
+            && currentRoute != Routes.PrivacyPolicy::class.qualifiedName
     Scaffold(
         floatingActionButton = {
-            if (showBottomBarAndFab) {
+            AnimatedVisibility(
+                visible = showBottomBarAndFab,
+                enter = slideInVertically(
+                    initialOffsetY = { it }
+                ) + fadeIn(),
+                exit = slideOutVertically(
+                    targetOffsetY = { it }
+                ) + fadeOut()
+            ) {
                 Box(
-                    modifier = Modifier.offset(y = 90.dp)
+                    modifier = Modifier.offset(y = 85.dp)
                 ) {
                     MorphingFab(
                         onSavingClick = {
@@ -101,64 +119,74 @@ fun App(
         containerColor = Color.White,
         floatingActionButtonPosition = FabPosition.Center,
         bottomBar = {
-            if (showBottomBarAndFab) {
-                CustomBottomNavigation(
-                    currentRoute = currentRoute,
-                    onProfileClick = {
-                        if (currentRoute != Routes.Profile::class.qualifiedName) {
-                            navController.navigate(Routes.Profile) {
-                                popUpTo(navController.graph.findStartDestination().id){
-                                    saveState = true
+                AnimatedVisibility(
+                    visible = showBottomBarAndFab,
+                    enter = slideInVertically(
+                        initialOffsetY = {it}
+                    )+ fadeIn(),
+                    exit = slideOutVertically(
+                        targetOffsetY = {it}
+                    )+ fadeOut()
+                ) {
+                    CustomBottomNavigation(
+                        currentRoute = currentRoute,
+                        onProfileClick = {
+                            if (currentRoute != Routes.Profile::class.qualifiedName) {
+                                navController.navigate(Routes.Profile) {
+                                    popUpTo(navController.graph.findStartDestination().id){
+                                        saveState = true
+                                    }
+
+                                    launchSingleTop = true
+                                    restoreState = true
+
                                 }
+                            }
+                        },
+                        onStatisticsClick = {
+                            if (currentRoute != Routes.Statistics::class.qualifiedName) {
+                                navController.navigate(Routes.Statistics) {
+                                    popUpTo(navController.graph.findStartDestination().id){
+                                        saveState = true
+                                    }
 
-                                launchSingleTop = true
-                                restoreState = true
+                                    launchSingleTop = true
+                                    restoreState = true
 
+                                }
+                            }
+                        },
+                        onHomeClick = {
+                            if (currentRoute != Routes.HomeUi::class.qualifiedName) {
+                                navController.navigate(Routes.HomeUi) {
+                                    popUpTo(navController.graph.findStartDestination().id){
+                                        saveState = true
+                                    }
+
+                                    launchSingleTop = true
+                                    restoreState = true
+
+                                }
+                            }
+                        },
+                        onHistoryClick = {
+                            if (currentRoute != Routes.History::class.qualifiedName) {
+                                navController.navigate(Routes.History) {
+                                    popUpTo(navController.graph.findStartDestination().id){
+                                        saveState = true
+                                    }
+
+                                    launchSingleTop = true
+                                    restoreState = true
+
+                                }
                             }
                         }
-                    },
-                    onStatisticsClick = {
-                        if (currentRoute != Routes.Statistics::class.qualifiedName) {
-                            navController.navigate(Routes.Statistics) {
-                                popUpTo(navController.graph.findStartDestination().id){
-                                    saveState = true
-                                }
+                    )
+                }
 
-                                launchSingleTop = true
-                                restoreState = true
 
-                            }
-                        }
-                    },
-                    onHomeClick = {
-                        if (currentRoute != Routes.HomeUi::class.qualifiedName) {
-                            navController.navigate(Routes.HomeUi) {
-                                popUpTo(navController.graph.findStartDestination().id){
-                                    saveState = true
-                                }
-
-                                launchSingleTop = true
-                                restoreState = true
-
-                            }
-                        }
-                    },
-                    onHistoryClick = {
-                        if (currentRoute != Routes.History::class.qualifiedName) {
-                            navController.navigate(Routes.History) {
-                                popUpTo(navController.graph.findStartDestination().id){
-                                    saveState = true
-                                }
-
-                                launchSingleTop = true
-                                restoreState = true
-
-                            }
-                        }
-                    }
-                )
             }
-        }
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -185,6 +213,14 @@ fun App(
                 }
                 composable<Routes.History> {
                     HistoryScreen(navController = navController)
+                }
+                composable<Routes.UpdatePassword> {
+                    UpdatePassword(
+                        navController = navController
+                    )
+                }
+                composable<Routes.PrivacyPolicy> {
+                    PrivacyPolicyScreen(navController)
                 }
             }
             navigation< SubNavigation.LoginSignUpScreen>(

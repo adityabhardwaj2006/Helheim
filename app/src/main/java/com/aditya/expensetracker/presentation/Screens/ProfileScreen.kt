@@ -147,7 +147,7 @@ fun ProfileScreen(navController: NavController,
                 }
                 Row(modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .weight(2f)
                     .fillMaxHeight()
                     , verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center)
@@ -229,10 +229,16 @@ fun ProfileScreen(navController: NavController,
                 CardItem(icon = Icons.Default.Person, text = "Edit Profile") {
                     navController.navigate(Routes.EditProfile)
                 }
-                CardItem(icon = Icons.Default.Lock, text = "Change Password") { }
+                CardItem(icon = Icons.Default.Lock, text = "Change Password",
+                    onClick = {
+                        navController.navigate(Routes.UpdatePassword)
+                    }
+                )
                 CardItem(icon = Icons.Default.Notifications, text = "Notifications") { }
                 CardItem(icon = Icons.Default.Payment, text = "Payment Methods") { }
-                CardItem(icon = Icons.Default.PrivacyTip, text = "Privacy Policy", showDivider = false) { }
+                CardItem(icon = Icons.Default.PrivacyTip, text = "Privacy Policy", showDivider = false) {
+                    navController.navigate(Routes.PrivacyPolicy)
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))

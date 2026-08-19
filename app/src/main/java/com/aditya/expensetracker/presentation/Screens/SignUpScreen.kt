@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person2
 import androidx.compose.material.icons.filled.Visibility
@@ -17,13 +17,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,11 +46,9 @@ fun SignUpScreen(
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var firstname by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
-    var passwordVisible2 by remember { mutableStateOf(false) }
     val signUpState by authViewModel.signUpState.collectAsState()
     val snackbarHostState = remember{ SnackbarHostState() }
 
@@ -74,153 +70,177 @@ fun SignUpScreen(
         color = White
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 40.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize()
         ) {
-
-            Spacer(Modifier.height(128.dp))
-
-
-
-
-            Text(
-                text = "Create a new account",
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
-                color = Black
-            )
-
-
-            Spacer(Modifier.height(28.dp))
-
-            Text(
-                text = "First Name",
-                fontSize = 16.sp,
-                modifier = Modifier.fillMaxWidth(),
-                fontWeight = FontWeight.Medium,
-                color = Gray
-            )
-
-            Spacer(Modifier.height(6.dp))
-
-            NameTextField(
-                placeholder = "Enter your first name",
-                firstname = firstname,
-                onValueChange = {
-                    firstname = it
-                },
-                keyboardType = KeyboardType.Text
-            )
-
-            Spacer(Modifier.height(18.dp))
-
-            Text(
-                text = "Last Name",
-                fontSize = 16.sp,
-                modifier = Modifier.fillMaxWidth(),
-                fontWeight = FontWeight.Medium,
-                color = Gray
-            )
-
-            Spacer(Modifier.height(6.dp))
-
-            NameTextField(
-                placeholder = "Enter your last name",
-                firstname = lastName,
-                onValueChange = {
-                    lastName = it
-                },
-                keyboardType = KeyboardType.Text
-            )
-
-            Spacer(Modifier.height(18.dp))
-
-            Text(
-                text = "Username",
-                fontSize = 16.sp,
-                modifier = Modifier.fillMaxWidth(),
-                fontWeight = FontWeight.Medium,
-                color = Gray
-            )
-
-            Spacer(Modifier.height(6.dp))
-
-            SignUpTextField(
-                placeholder = "Enter username",
-                firstname = username,
-                onValueChange = {
-                    username = it
-                },
-                keyboardType = KeyboardType.Text,
-                passwordVisible = passwordVisible,
-                onEyeClick = {
-                    passwordVisible = !passwordVisible
-                }
-            )
-
-            Spacer(Modifier.height(18.dp))
-
-            Text(
-                text = "Password",
-                fontSize = 16.sp,
-                modifier = Modifier.fillMaxWidth(),
-                fontWeight = FontWeight.Medium,
-                color = Gray
-            )
-
-            Spacer(Modifier.height(6.dp))
-
-            SignUpTextField(
-                placeholder = "Enter password",
-                firstname = password,
-                onValueChange = {
-                    password = it
-                },
-                keyboardType = KeyboardType.Password,
-                passwordVisible = passwordVisible,
-                onEyeClick = {
-                    passwordVisible = !it
-                }
-            )
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            SignUpButton(
-                loading = signUpState is ResultState.Loading,
-                onClick = {
-                    authViewModel.signup(
-                        firstname,
-                        lastName,
-                        username,
-                        password
-                    )
-                }
-            )
-
-
-
-            Spacer(modifier = Modifier.height(28.dp))
-
+            // Top Bar with Back Button
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(90.dp)
+                    .background(Color.White)
+                    .padding(horizontal = 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                IconButton(
+                    onClick = {
+                        navController.popBackStack()
+                    },
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(Color.White, CircleShape)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Spacer(Modifier.height(40.dp))
+
                 Text(
-                    "Already have an account?",
+                    text = "Create a new account",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Black
+                )
+
+                Spacer(Modifier.height(28.dp))
+
+                Text(
+                    text = "First Name",
+                    fontSize = 16.sp,
+                    modifier = Modifier.fillMaxWidth(),
+                    fontWeight = FontWeight.Medium,
                     color = Gray
                 )
 
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(Modifier.height(6.dp))
+
+                NameTextField(
+                    placeholder = "Enter your first name",
+                    firstname = firstname,
+                    onValueChange = {
+                        firstname = it
+                    },
+                    keyboardType = KeyboardType.Text
+                )
+
+                Spacer(Modifier.height(18.dp))
 
                 Text(
-                    text = "Login",
-                    color = AccentBlue,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable {
-                        navController.navigate(Routes.LoginScreen)
+                    text = "Last Name",
+                    fontSize = 16.sp,
+                    modifier = Modifier.fillMaxWidth(),
+                    fontWeight = FontWeight.Medium,
+                    color = Gray
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                NameTextField(
+                    placeholder = "Enter your last name",
+                    firstname = lastName,
+                    onValueChange = {
+                        lastName = it
+                    },
+                    keyboardType = KeyboardType.Text
+                )
+
+                Spacer(Modifier.height(18.dp))
+
+                Text(
+                    text = "Username",
+                    fontSize = 16.sp,
+                    modifier = Modifier.fillMaxWidth(),
+                    fontWeight = FontWeight.Medium,
+                    color = Gray
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                SignUpTextField(
+                    placeholder = "Enter username",
+                    firstname = username,
+                    onValueChange = {
+                        username = it
+                    },
+                    keyboardType = KeyboardType.Text,
+                    passwordVisible = passwordVisible,
+                    onEyeClick = {
+                        passwordVisible = !passwordVisible
                     }
                 )
+
+                Spacer(Modifier.height(18.dp))
+
+                Text(
+                    text = "Password",
+                    fontSize = 16.sp,
+                    modifier = Modifier.fillMaxWidth(),
+                    fontWeight = FontWeight.Medium,
+                    color = Gray
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                SignUpTextField(
+                    placeholder = "Enter password",
+                    firstname = password,
+                    onValueChange = {
+                        password = it
+                    },
+                    keyboardType = KeyboardType.Password,
+                    passwordVisible = passwordVisible,
+                    onEyeClick = {
+                        passwordVisible = !passwordVisible
+                    }
+                )
+
+                Spacer(Modifier.height(28.dp))
+
+                SignUpButton(
+                    loading = signUpState is ResultState.Loading,
+                    onClick = {
+                        authViewModel.signup(
+                            firstname,
+                            lastName,
+                            username,
+                            password
+                        )
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Already have an account?",
+                        color = Gray
+                    )
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    Text(
+                        text = "Login",
+                        color = AccentBlue,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable {
+                            navController.navigate(Routes.LoginScreen)
+                        }
+                    )
+                }
             }
         }
     }
@@ -231,7 +251,6 @@ fun SignUpButton(
     loading: Boolean,
     onClick: () -> Unit
 ) {
-
     Button(
         onClick = onClick,
         modifier = Modifier
@@ -247,57 +266,20 @@ fun SignUpButton(
             containerColor = Black
         )
     ) {
-
         if (loading) {
-
             CircularProgressIndicator(
                 modifier = Modifier.size(22.dp),
                 strokeWidth = 2.dp,
                 color = White
             )
-
         } else {
-
             Text(
                 "Sign Up",
                 color = White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
-
         }
-    }
-}
-
-@Composable
-fun GoogleSignUpButton(
-    onClick: () -> Unit
-) {
-    OutlinedButton(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, Black.copy(alpha = 0.15f)),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = White,
-            contentColor = Black
-        )
-    ) {
-        Text(
-            text = "G",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            color = AccentBlue
-        )
-
-        Spacer(modifier = Modifier.width(10.dp))
-
-        Text(
-            text = "Continue with Google",
-            fontWeight = FontWeight.Medium
-        )
     }
 }
 
@@ -326,7 +308,6 @@ fun NameTextField(placeholder: String, firstname: String,
             unfocusedIndicatorColor = Color.Transparent,
             cursorColor = Black
         )
-
     )
 }
 
@@ -366,7 +347,7 @@ fun SignUpTextField(placeholder: String, firstname: String,
             }
         },
         visualTransformation =
-            if(placeholder == "Enter password" && passwordVisible==false){
+            if(placeholder == "Enter password" && !passwordVisible){
                 PasswordVisualTransformation()
             }else{
                 VisualTransformation.None
@@ -375,7 +356,7 @@ fun SignUpTextField(placeholder: String, firstname: String,
             if(placeholder == "Enter password"){
                 Icon(
                     imageVector =
-                        if(passwordVisible==false){
+                        if(!passwordVisible){
                             Icons.Default.VisibilityOff
                         }else{
                             Icons.Default.Visibility
@@ -395,11 +376,8 @@ fun SignUpTextField(placeholder: String, firstname: String,
             unfocusedIndicatorColor = Color.Transparent,
             cursorColor = Black
         )
-
     )
 }
-
-
 
 @Preview(showBackground = true)
 @Composable

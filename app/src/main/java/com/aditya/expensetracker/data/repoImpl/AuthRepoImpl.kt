@@ -5,6 +5,7 @@ import com.aditya.expensetracker.data.Api.AuthApi
 import com.aditya.expensetracker.data.DAO.TransactionDao
 import com.aditya.expensetracker.data.DAO.UserDao
 import com.aditya.expensetracker.data.TokenManager
+import com.aditya.expensetracker.data.model.ChangePasswordRequest
 import com.aditya.expensetracker.data.model.LoginRequest
 import com.aditya.expensetracker.data.model.LoginResponse
 import com.aditya.expensetracker.data.model.SignUpRequest
@@ -14,7 +15,9 @@ import com.aditya.expensetracker.data.model.UserEntity
 import com.aditya.expensetracker.data.model.profileData
 import com.aditya.expensetracker.data.model.profileResponse
 import com.aditya.expensetracker.domain.repo.AuthRepo
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.first
+import retrofit2.HttpException
 import javax.inject.Inject
 
 class AuthRepoImpl @Inject constructor(
@@ -128,15 +131,52 @@ class AuthRepoImpl @Inject constructor(
             )
 
             val storedUserId = tokenManager.getUserId().first() ?: ""
+            val currFirstName = userDao.getUser()!!.firstName
+            val currLastName = userDao.getUser()!!.lastName
+            val currUsername = userDao.getUser()!!.username
+
             userDao.insertUser(UserEntity(
                 userId = storedUserId,
-                firstName = firstName,
-                lastName = lastName,
-                username = username
+                firstName =
+                    if(firstName=="")currFirstName
+                else firstName,
+                lastName =
+                    if(lastName=="")currLastName
+                    else lastName,
+                username =
+                    if(username=="")currUsername
+                    else username,
             ))
         }catch(err: Exception){
             throw err
         }
 
     }
+
+    override suspend fun updatePassword(newPassword: String): SignUpResponse {
+        try {
+            val token = tokenManager.getToken().first()
+            val response = authApi.updatePassword(
+                token = "Bearer $token",
+                request = ChangePasswordRequest(
+                    password = newPassword
+                )
+            )
+            return response
+
+        } catch (err: HttpException) {
+            val errorBody = err.response()?.errorBody()?.string()
+            val message = try {
+                val errorResponse = Gson().fromJson(errorBody, SignUpResponse::class.java)
+                errorResponse.message
+            } catch (_: Exception) {
+                err.message() ?: "Conflict occurred"
+            }
+            throw Exception(message)
+        } catch (err: Exception) {
+            throw err
+        }
+    }
+
+
 }

@@ -33,4 +33,11 @@ sealed class Routes{
     @Serializable
     object SignUpScreen : Routes()
 
+    @Serializable
+    object UpdatePassword : Routes()
+
+    @Serializable
+    object PrivacyPolicy : Routes()
+
+
 }

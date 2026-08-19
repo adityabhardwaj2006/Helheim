@@ -94,7 +94,7 @@ fun StatisticsScreen(
                 }
                 Row(modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .weight(2f)
                     .fillMaxHeight()
                     , verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center)

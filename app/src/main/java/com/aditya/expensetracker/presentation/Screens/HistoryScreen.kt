@@ -82,6 +82,7 @@ fun HistoryScreen(
                 }
                 Row(modifier = Modifier
                     .fillMaxWidth()
+                    .weight(2f)
                     .fillMaxHeight()
                     , verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center)
@@ -89,11 +90,16 @@ fun HistoryScreen(
 
                     Text(
                         text = "Transaction History",
-                        fontSize = 22.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
 
+                }
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .fillMaxHeight()){
                 }
 
 
