@@ -65,6 +65,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.data.ViewModel.TransactionViewModel
 import com.aditya.expensetracker.data.model.Transaction
@@ -84,13 +85,15 @@ private val RowGray = Color(0xFFF5F5F5)
 fun AddScreen(
     onDismiss : ()->Unit,
     transactionVm: TransactionVm = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    paymentViewModel: PaymentViewModel = hiltViewModel()
 ) {
 
     //Calling repo
     val viewModel : TransactionViewModel = hiltViewModel()
     val addScreenState by transactionVm.transactionState.collectAsState()
     val userId by authViewModel.userId.collectAsState()
+    val preferredPaymentMethod by paymentViewModel.preferredPaymentMethod.collectAsState()
     val snackbarHostState = remember{ SnackbarHostState() }
 
 
@@ -103,26 +106,36 @@ fun AddScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
+    LaunchedEffect(preferredPaymentMethod) {
+        if (preferredPaymentMethod != null) {
+            paymentMethod = preferredPaymentMethod!!
+        }
+    }
+
 
     LaunchedEffect(addScreenState) {
         when(val state = addScreenState){
             is ResultState.Success -> {
-                viewModel.addTransaction(Transaction(
-                    amount = amount.toDoubleOrNull() ?: 0.0,
-                    date = dateMillis,
-                    type = TransactionType.EXPENSE.toString(),
-                    paidTo = paidTo,
-                    category = category,
-                    paymentMethod = paymentMethod,
-                    savedFor = "",
-                    receivedFrom = "",
-                    userId = userId ?: ""
-                ))
-                sheetState.hide()
-                onDismiss()
+                if (amount.isNotEmpty()) {
+                    viewModel.addTransaction(Transaction(
+                        amount = amount.toDoubleOrNull() ?: 0.0,
+                        date = dateMillis,
+                        type = TransactionType.EXPENSE.toString(),
+                        paidTo = paidTo,
+                        category = category,
+                        paymentMethod = paymentMethod,
+                        savedFor = "",
+                        receivedFrom = "",
+                        userId = userId ?: ""
+                    ))
+                    transactionVm.resetTransactionState()
+                    sheetState.hide()
+                    onDismiss()
+                }
             }
             is ResultState.Error -> {
                 snackbarHostState.showSnackbar("${state.message}")
+                transactionVm.resetTransactionState()
             }
             else -> {}
         }
@@ -133,6 +146,7 @@ fun AddScreen(
             tonalElevation = 0.dp,
             onDismissRequest = {
                 scope.launch{
+                    transactionVm.resetTransactionState()
                     sheetState.hide()
                     onDismiss()
                 }
@@ -343,7 +357,7 @@ fun AddScreen(
                     Spacer(modifier = Modifier.height(5.dp))
 
                     var paymentMenuOpen by remember { mutableStateOf(false) }
-                    val paymentOptions = listOf("Cash", "Card", "UPI", "Bank Transfer")
+                    val paymentOptions = listOf("Cash", "Credit Card","Debit Card", "UPI", "Bank Transfer","Phone Pay","Wallet")
                     Box {
                         SimpleRow(
                             leftText = "Payment"

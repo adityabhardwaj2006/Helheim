@@ -39,5 +39,20 @@ sealed class Routes{
     @Serializable
     object PrivacyPolicy : Routes()
 
+    @Serializable
+    object HelpSupport : Routes()
+
+    @Serializable
+    object AboutApp : Routes()
+
+    @Serializable
+    object RateUs : Routes()
+
+    @Serializable
+    object PaymentMethods : Routes()
+
+    @Serializable
+    object Notification : Routes()
+
 
 }

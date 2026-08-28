@@ -88,7 +88,7 @@ fun TransactionItem(expense: TransactionItem) {
             else if (expense.type == TransactionType.EXPENSE.name)"-" else
                 "•"
             Text(
-                text = "$prefix$${String.format("%.2f", expense.amount)}",
+                text = "$prefix₹${String.format("%.2f", expense.amount)}",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.Black

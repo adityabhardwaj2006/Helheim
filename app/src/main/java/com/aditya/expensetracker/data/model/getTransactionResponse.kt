@@ -5,7 +5,7 @@ data class getTransactionResponse(
     val transactions : List<TransactionItem>,
 )
 data class TransactionItem(
-    val id : Int?,
+    val _id : String?,
     val amount : Double,
     val date : Long?,
     val type : String,

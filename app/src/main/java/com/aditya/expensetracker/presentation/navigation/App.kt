@@ -31,11 +31,16 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.presentation.Screens.AboutAppScreen
 import com.aditya.expensetracker.presentation.Screens.EditProfileScreen
+import com.aditya.expensetracker.presentation.Screens.HelpSupportScreen
 import com.aditya.expensetracker.presentation.Screens.HistoryScreen
 import com.aditya.expensetracker.presentation.Screens.HomeScreen
+import com.aditya.expensetracker.presentation.Screens.NotificationScreen
+import com.aditya.expensetracker.presentation.Screens.PaymentMethodsScreen
 import com.aditya.expensetracker.presentation.Screens.PrivacyPolicyScreen
 import com.aditya.expensetracker.presentation.Screens.ProfileScreen
+import com.aditya.expensetracker.presentation.Screens.RateUsScreen
 import com.aditya.expensetracker.presentation.Screens.SignUpScreen
 import com.aditya.expensetracker.presentation.Screens.StatisticsScreen
 import com.aditya.expensetracker.presentation.Screens.utils.AddIncome
@@ -88,6 +93,11 @@ fun App(
             && currentRoute != Routes.UpdatePassword::class.qualifiedName
             && currentRoute != Routes.EditProfile::class.qualifiedName
             && currentRoute != Routes.PrivacyPolicy::class.qualifiedName
+            && currentRoute != Routes.HelpSupport::class.qualifiedName
+            && currentRoute != Routes.AboutApp::class.qualifiedName
+            && currentRoute != Routes.RateUs::class.qualifiedName
+            && currentRoute != Routes.Notification::class.qualifiedName
+            && currentRoute != Routes.PaymentMethods::class.qualifiedName
     Scaffold(
         floatingActionButton = {
             AnimatedVisibility(
@@ -157,16 +167,12 @@ fun App(
                             }
                         },
                         onHomeClick = {
-                            if (currentRoute != Routes.HomeUi::class.qualifiedName) {
-                                navController.navigate(Routes.HomeUi) {
-                                    popUpTo(navController.graph.findStartDestination().id){
-                                        saveState = true
-                                    }
-
-                                    launchSingleTop = true
-                                    restoreState = true
-
+                            navController.navigate(Routes.HomeUi) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
                                 }
+                                launchSingleTop = true
+                                restoreState = true
                             }
                         },
                         onHistoryClick = {
@@ -221,6 +227,21 @@ fun App(
                 }
                 composable<Routes.PrivacyPolicy> {
                     PrivacyPolicyScreen(navController)
+                }
+                composable<Routes.HelpSupport> {
+                    HelpSupportScreen(navController)
+                }
+                composable<Routes.AboutApp> {
+                    AboutAppScreen(navController)
+                }
+                composable<Routes.RateUs> {
+                    RateUsScreen(navController)
+                }
+                composable<Routes.PaymentMethods> {
+                    PaymentMethodsScreen(navController)
+                }
+                composable<Routes.Notification> {
+                    NotificationScreen(navController)
                 }
             }
             navigation< SubNavigation.LoginSignUpScreen>(

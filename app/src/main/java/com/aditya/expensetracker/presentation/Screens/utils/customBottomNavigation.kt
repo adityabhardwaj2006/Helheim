@@ -158,7 +158,7 @@ fun CustomBottomNavigation(
                 NavigationItem(
                     icon = Icons.Default.History,
                     label = "Wallet",
-                    selected = false,
+                    selected = currentRoute == Routes.History::class.qualifiedName,
                     onClick = onHistoryClick
                 )
             }

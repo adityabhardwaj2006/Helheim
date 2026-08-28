@@ -1,6 +1,7 @@
 package com.aditya.expensetracker.presentation.Screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,12 +25,14 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.data.ViewModel.NotificationViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.data.model.getTransactionResponse
 import com.aditya.expensetracker.data.model.profileResponse
 import com.aditya.expensetracker.presentation.components.BalanceCard
 import com.aditya.expensetracker.presentation.components.IncomeExpenseSummary
 import com.aditya.expensetracker.presentation.components.TransactionItem
+import com.aditya.expensetracker.presentation.navigation.Routes
 import java.time.Instant
 import java.time.YearMonth
 import java.time.ZoneId
@@ -39,10 +42,13 @@ import kotlin.collections.emptyList
 fun HomeScreen(
     navController: NavController,
     authViewModel : AuthViewModel = hiltViewModel(),
-    transactionVm : TransactionVm = hiltViewModel()) {
+    transactionVm : TransactionVm = hiltViewModel(),
+    notificationViewModel: NotificationViewModel = hiltViewModel()
+) {
     LaunchedEffect(Unit) {
         authViewModel.getProfile()
         transactionVm.getTransaction()
+        notificationViewModel.getNotifications()
     }
     val userState : ResultState<profileResponse>? by authViewModel.userState.collectAsState()
     val name = when(val state = userState){
@@ -58,6 +64,12 @@ fun HomeScreen(
     }
 
     val transactionState by transactionVm.getTransactionState.collectAsState()
+    val notificationState by notificationViewModel.notificationState.collectAsState()
+
+    val hasUnreadNotifications = when (val state = notificationState) {
+        is ResultState.Success -> state.data.notifications.any { !it.isRead }
+        else -> false
+    }
     
     var totalIncome = 0.0
     var totalSavings = 0.0
@@ -131,7 +143,6 @@ fun HomeScreen(
     Scaffold(
         containerColor = Color.White
     ) { innerPadding ->
-        val isNotification = true
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -163,10 +174,13 @@ fun HomeScreen(
                     modifier = Modifier
                         .size(45.dp)
                         .background(Color.White)
-                        .padding(8.dp),
+                        .padding(8.dp)
+                        .clickable {
+                            navController.navigate(Routes.Notification)
+                        },
                     contentAlignment = Alignment.Center
                 ) {
-                    if(isNotification){
+                    if(hasUnreadNotifications){
                         BadgedBox(
                             badge = {
                                 Badge()
@@ -220,7 +234,11 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(bottom = 100.dp) // Extra padding for bottom navigation
             ) {
-                items(listState.transactions.reversed()) { expense ->
+                val transactions = listState.transactions.distinctBy { it._id ?: it.hashCode() }
+                items(
+                    items = transactions.reversed(),
+                    key = { it._id ?: it.hashCode() }
+                ) { expense ->
                     TransactionItem(expense = expense)
                 }
             }

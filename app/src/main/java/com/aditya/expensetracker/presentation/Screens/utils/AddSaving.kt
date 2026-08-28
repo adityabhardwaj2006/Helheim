@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.data.ViewModel.TransactionViewModel
 import com.aditya.expensetracker.data.model.Transaction
@@ -43,11 +44,13 @@ private val RowGray = Color(0xFFF5F5F5)
 @Composable
 fun AddSaving(
     onDismiss : ()->Unit,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    paymentViewModel: PaymentViewModel = hiltViewModel()
 ) {
     val viewModel : TransactionViewModel = hiltViewModel()
     val transactionVm : TransactionVm = hiltViewModel()
     val userId by authViewModel.userId.collectAsState()
+    val preferredPaymentMethod by paymentViewModel.preferredPaymentMethod.collectAsState()
     val addSavingState by transactionVm.transactionState.collectAsState()
 
     var amount by remember { mutableStateOf("") }
@@ -59,27 +62,37 @@ fun AddSaving(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(preferredPaymentMethod) {
+        if (preferredPaymentMethod != null) {
+            paymentMethod = preferredPaymentMethod!!
+        }
+    }
+
     LaunchedEffect(addSavingState) {
         when(val state = addSavingState){
             is ResultState.Success -> {
-                viewModel.addTransaction(Transaction(
-                    amount = amount.toDoubleOrNull() ?: 0.0,
-                    date = dateMillis,
-                    type = TransactionType.SAVINGS.toString(),
-                    paidTo = "",
-                    savedFor = savedFor,
-                    category = category,
-                    paymentMethod = paymentMethod,
-                    receivedFrom = "",
-                    userId = userId ?: ""
-                ))
-                scope.launch {
-                    sheetState.hide()
-                    onDismiss()
+                if (amount.isNotEmpty()) {
+                    viewModel.addTransaction(Transaction(
+                        amount = amount.toDoubleOrNull() ?: 0.0,
+                        date = dateMillis,
+                        type = TransactionType.SAVINGS.toString(),
+                        paidTo = "",
+                        savedFor = savedFor,
+                        category = category,
+                        paymentMethod = paymentMethod,
+                        receivedFrom = "",
+                        userId = userId ?: ""
+                    ))
+                    transactionVm.resetTransactionState()
+                    scope.launch {
+                        sheetState.hide()
+                        onDismiss()
+                    }
                 }
             }
             is ResultState.Error -> {
                 snackbarHostState.showSnackbar(state.message)
+                transactionVm.resetTransactionState()
             }
             else -> {}
         }
@@ -88,6 +101,7 @@ fun AddSaving(
     ModalBottomSheet(
         onDismissRequest = {
             scope.launch {
+                transactionVm.resetTransactionState()
                 sheetState.hide()
                 onDismiss()
             }
@@ -201,17 +215,51 @@ fun AddSaving(
                 val categories = listOf("Emergency Fund", "Retirement", "Vacation", "Car", "Other")
                 Box {
                     SimpleRow(leftText = category ?: "Category") {
-                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.clickable { categoryMenuOpen = true })
-                        DropdownMenu(expanded = categoryMenuOpen, onDismissRequest = { categoryMenuOpen = false }) {
-                            categories.forEach { cat ->
-                                DropdownMenuItem(text = { Text(cat) }, onClick = { category = cat; categoryMenuOpen = false })
+                        Box {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = "Choose category",
+                                modifier = Modifier.clickable {
+                                    categoryMenuOpen = true
+                                }
+                            )
+                            DropdownMenu(
+                                expanded = categoryMenuOpen,
+                                onDismissRequest = { categoryMenuOpen = false },
+                                border = BorderStroke(1.dp, Color.LightGray),
+                                shape = RoundedCornerShape(12.dp),
+                                shadowElevation = 8.dp
+                            ) {
+                                categories.forEach { cat ->
+                                    DropdownMenuItem(
+                                        modifier = Modifier.background(Color.Transparent),
+                                        text = {
+                                            Text(
+                                                text = cat,
+                                                color = Color.Black
+                                            )
+                                        },
+                                        onClick = {
+                                            category = cat
+                                            categoryMenuOpen = false
+                                        },
+                                        colors = MenuItemColors(
+                                            textColor = Color.Black,
+                                            leadingIconColor = Color.Black,
+                                            trailingIconColor = Color.Black,
+                                            disabledTextColor = Color.Black,
+                                            disabledLeadingIconColor = Color.Black,
+                                            disabledTrailingIconColor = Color.Black
+                                        )
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
                 var paymentMenuOpen by remember { mutableStateOf(false) }
-                val paymentOptions = listOf("Cash", "Card", "UPI", "Bank Transfer")
+                val paymentOptions = listOf("Cash", "Credit Card","Debit Card", "UPI", "Bank Transfer","Phone Pay","Wallet")
                 Box {
                     SimpleRow(leftText = "Payment") {
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { paymentMenuOpen = true }) {

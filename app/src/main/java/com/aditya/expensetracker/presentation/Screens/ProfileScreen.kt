@@ -234,8 +234,12 @@ fun ProfileScreen(navController: NavController,
                         navController.navigate(Routes.UpdatePassword)
                     }
                 )
-                CardItem(icon = Icons.Default.Notifications, text = "Notifications") { }
-                CardItem(icon = Icons.Default.Payment, text = "Payment Methods") { }
+                CardItem(icon = Icons.Default.Notifications, text = "Notifications") {
+                    navController.navigate(Routes.Notification)
+                }
+                CardItem(icon = Icons.Default.Payment, text = "Payment Methods") {
+                    navController.navigate(Routes.PaymentMethods)
+                }
                 CardItem(icon = Icons.Default.PrivacyTip, text = "Privacy Policy", showDivider = false) {
                     navController.navigate(Routes.PrivacyPolicy)
                 }
@@ -245,9 +249,15 @@ fun ProfileScreen(navController: NavController,
 
             SectionTitle("Support")
             SectionCard {
-                CardItem(icon = Icons.AutoMirrored.Filled.HelpOutline, text = "Help & Support") { }
-                CardItem(icon = Icons.Default.Info, text = "About App") { }
-                CardItem(icon = Icons.Default.Star, text = "Rate Us", showDivider = false) { }
+                CardItem(icon = Icons.AutoMirrored.Filled.HelpOutline, text = "Help & Support") {
+                    navController.navigate(Routes.HelpSupport)
+                }
+                CardItem(icon = Icons.Default.Info, text = "About App") {
+                    navController.navigate(Routes.AboutApp)
+                }
+                CardItem(icon = Icons.Default.Star, text = "Rate Us", showDivider = false) {
+                    navController.navigate(Routes.RateUs)
+                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))

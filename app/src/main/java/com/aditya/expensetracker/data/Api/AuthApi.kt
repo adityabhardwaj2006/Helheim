@@ -3,6 +3,7 @@ package com.aditya.expensetracker.data.Api
 import com.aditya.expensetracker.data.model.ChangePasswordRequest
 import com.aditya.expensetracker.data.model.LoginRequest
 import com.aditya.expensetracker.data.model.LoginResponse
+import com.aditya.expensetracker.data.model.RatingRequest
 import com.aditya.expensetracker.data.model.SignUpRequest
 import com.aditya.expensetracker.data.model.SignUpResponse
 import com.aditya.expensetracker.data.model.UserDTO
@@ -40,5 +41,12 @@ interface AuthApi{
         @Header("Authorization") token : String,
         @Body request : ChangePasswordRequest
     ) : SignUpResponse
+
+    @POST("/giveRating")
+    suspend fun giveRating(
+        @Header("Authorization") token : String,
+        @Body request : RatingRequest
+        ) : SignUpResponse
+
 
 }

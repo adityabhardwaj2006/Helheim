@@ -75,7 +75,7 @@ fun BalanceCard(
                 ) {
                     Column {
                         Text(
-                            text = "$${String.format("%,.2f", balance)}",
+                            text = "₹ ${String.format("%,.2f", balance)}",
                             color = Color.White,
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold

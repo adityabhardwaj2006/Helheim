@@ -41,4 +41,7 @@ class TransactionRepoImpl @Inject constructor(
         return api.getTransactions(token)
     }
 
+    override suspend fun deleteTransaction(token: String, id: String): TransactionResponse {
+        return api.deleteTransaction(token, id)
+    }
 }

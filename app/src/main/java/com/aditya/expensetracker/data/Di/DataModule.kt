@@ -3,14 +3,19 @@ package com.aditya.expensetracker.data.Di
 import android.content.Context
 import androidx.room.Room
 import com.aditya.expensetracker.data.Api.AuthApi
+import com.aditya.expensetracker.data.Api.NotificationApi
 import com.aditya.expensetracker.data.Api.TransactionApi
 import com.aditya.expensetracker.data.DAO.TransactionDao
 import com.aditya.expensetracker.data.DAO.UserDao
 import com.aditya.expensetracker.data.Database.RoomsDatabase
 import com.aditya.expensetracker.data.repoImpl.AuthRepoImpl
+import com.aditya.expensetracker.data.repoImpl.NotificationRepoImpl
+import com.aditya.expensetracker.data.repoImpl.RatingRepoImpl
 import com.aditya.expensetracker.data.repoImpl.RepoImpl
 import com.aditya.expensetracker.data.repoImpl.TransactionRepoImpl
 import com.aditya.expensetracker.domain.repo.AuthRepo
+import com.aditya.expensetracker.domain.repo.NotificationRepo
+import com.aditya.expensetracker.domain.repo.RatingRepo
 import com.aditya.expensetracker.domain.repo.Repo
 import com.aditya.expensetracker.domain.repo.TransactionRepo
 import dagger.Binds
@@ -82,6 +87,14 @@ object DataModule {
         return retrofit.create(TransactionApi::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideNotificationApi(
+        retrofit: Retrofit
+    ): NotificationApi {
+        return retrofit.create(NotificationApi::class.java)
+    }
+
 
 }
 
@@ -106,7 +119,16 @@ abstract class RepositoryModule{
         transactionRepoImpl : TransactionRepoImpl
     ) : TransactionRepo
 
+    @Binds
+    @Singleton
+    abstract fun bindRatingRepo(
+        ratingRepoImpl: RatingRepoImpl
+    ) : RatingRepo
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationRepo(
+        notificationRepoImpl: NotificationRepoImpl
+    ): NotificationRepo
+
 }
-
-
-

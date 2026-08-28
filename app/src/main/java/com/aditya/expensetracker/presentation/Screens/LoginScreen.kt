@@ -7,18 +7,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Person2
-import androidx.compose.material.icons.filled.Person3
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.outlined.GMobiledata
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -33,11 +30,15 @@ import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.presentation.navigation.Routes
-import kotlin.math.log
-
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.aditya.expensetracker.R
 private val Black = Color(0xFF111111)
 private val White = Color.White
 private val Gray = Color(0xFF757575)
+private val AccentBlue = Color(0xFF4C6FFF)
 private val FieldColor = Color(0xFFF5F5F5)
 
 @Composable
@@ -81,8 +82,17 @@ fun LoginScreen(
                     .padding(top = 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                Spacer(modifier = Modifier.height(170.dp))
+                //Here the lottie animation space
+                LottieAnimation(
+                    composition = rememberLottieComposition(
+                        LottieCompositionSpec.RawRes(R.raw.lottie_animation)
+                    ).value,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(170.dp),
+                    iterations = LottieConstants.IterateForever,
+                    contentScale = ContentScale.Fit
+                )
 
                 Text(
                     text = "Welcome Back",
@@ -172,39 +182,39 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(28.dp))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    Text(
-                        text = " OR ",
-                        color = Gray
-                    )
-
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//
+//                    HorizontalDivider(
+//                        modifier = Modifier.weight(1f)
+//                    )
+//
+//                    Text(
+//                        text = " OR ",
+//                        color = Gray
+//                    )
+//
+//                    HorizontalDivider(
+//                        modifier = Modifier.weight(1f)
+//                    )
+//                }
+//
                 Spacer(modifier = Modifier.height(24.dp))
-
-                SocialButton(
-                    text = "Continue with Google",
-                    icon = {
-
-                        Text(
-                            text = "G",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-
-                    },
-                    onClick = {  }
-                )
+//
+//                SocialButton(
+//                    text = "Continue with Google",
+//                    icon = {
+//
+//                        Text(
+//                            text = "G",
+//                            fontWeight = FontWeight.Bold,
+//                            fontSize = 18.sp
+//                        )
+//
+//                    },
+//                    onClick = {  }
+//                )
 
 
 
@@ -223,7 +233,7 @@ fun LoginScreen(
 
                     Text(
                         text = "Sign Up",
-                        color = Black,
+                        color = AccentBlue,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable {
                             navController.navigate(Routes.SignUpScreen)

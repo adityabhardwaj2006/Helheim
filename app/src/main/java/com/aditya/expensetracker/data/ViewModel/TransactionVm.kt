@@ -8,6 +8,7 @@ import com.aditya.expensetracker.data.model.Transaction
 import com.aditya.expensetracker.data.model.TransactionItem
 import com.aditya.expensetracker.data.model.TransactionResponse
 import com.aditya.expensetracker.data.model.getTransactionResponse
+import com.aditya.expensetracker.domain.repo.NotificationRepo
 import com.aditya.expensetracker.domain.repo.Repo
 import com.aditya.expensetracker.domain.repo.TransactionRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,7 +23,8 @@ import javax.inject.Inject
 class TransactionVm @Inject constructor(
     private val repo : TransactionRepo,
     private val tokenManager: TokenManager,
-    private val localRepo : Repo
+    private val localRepo : Repo,
+    private val notificationRepo: NotificationRepo
 ) : ViewModel(){
 
     private val _transactionState = MutableStateFlow<ResultState<TransactionResponse>>(ResultState.Idle)
@@ -41,7 +43,7 @@ class TransactionVm @Inject constructor(
                 if(list.isNotEmpty()){
                     val newList = list.map {
                         TransactionItem(
-                            id = it.id,
+                            _id = it.backendId,
                             amount = it.amount,
                             date = it.date,
                             type = it.type,
@@ -51,7 +53,7 @@ class TransactionVm @Inject constructor(
                             receivedFrom = it.receivedFrom,
                             paymentMethod = it.paymentMethod
                         )
-                    }
+                    }.distinctBy { it._id ?: it.hashCode() }
                     _getTransactionState.value = ResultState.Success(getTransactionResponse(
                         success = true,
                         transactions = newList
@@ -59,12 +61,13 @@ class TransactionVm @Inject constructor(
                 }else{
                     val token = tokenManager.getToken().first() ?: ""
                     val response = repo.getTransactions("Bearer $token")
-                    _getTransactionState.value = ResultState.Success(response)
+                    val distinctTransactions = response.transactions.distinctBy { it._id ?: it.hashCode() }
+                    _getTransactionState.value = ResultState.Success(response.copy(transactions = distinctTransactions))
 
-                    response.transactions.forEach {
+                    distinctTransactions.forEach {
                         localRepo.insertTransaction(
                             Transaction(
-                                id = it.id,
+                                backendId = it._id,
                                 amount = it.amount,
                                 date = it.date,
                                 type = it.type,
@@ -103,12 +106,66 @@ class TransactionVm @Inject constructor(
                     amount,date,type,paidTo,category,savedFor,receivedFrom,paymentMethod,
                     token = "Bearer $token"
                 )
+                
+                // Automatically trigger notification generation after a successful transaction
+                try {
+                    notificationRepo.generateNotifications("Bearer $token")
+                } catch (e: Exception) {
+                    // Fail silently or log - we don't want to break the transaction flow if notification generation fails
+                }
+
                 _transactionState.value = ResultState.Success(response)
             }catch (error : Exception){
                 _transactionState.value = ResultState.Error(error.message?:"Transaction couldn't be saved")
             }
         }
 
+    }
+
+    fun resetTransactionState() {
+        _transactionState.value = ResultState.Idle
+    }
+
+    fun deleteTransaction(transactionItem: TransactionItem) {
+        val currentState = _getTransactionState.value
+        if (currentState is ResultState.Success) {
+            // Update UI immediately (Optimistic)
+            val updatedList = currentState.data.transactions.filter { it._id != transactionItem._id }
+            _getTransactionState.value = ResultState.Success(
+                currentState.data.copy(transactions = updatedList)
+            )
+
+            viewModelScope.launch {
+                try {
+                    val token = tokenManager.getToken().first() ?: ""
+                    val userId = tokenManager.getUserId().first() ?: ""
+
+                    // Delete from Backend
+                    transactionItem._id?.let { id ->
+                        repo.deleteTransaction("Bearer $token", id)
+                    }
+
+                    // Delete from Room
+                    // Find the local transaction by backendId or fallback to other fields
+                    val localTransactions = localRepo.getAllTransaction(userId).first()
+                    val transactionToDelete = localTransactions.find { 
+                        if (it.backendId != null && transactionItem._id != null) {
+                            it.backendId == transactionItem._id
+                        } else {
+                            it.amount == transactionItem.amount && 
+                            it.date == transactionItem.date && 
+                            it.paidTo == transactionItem.paidTo
+                        }
+                    }
+
+                    transactionToDelete?.let {
+                        localRepo.deleteTransaction(it)
+                    }
+                } catch (e: Exception) {
+                    // Silently fail or log, UI is already updated optimistically
+                }
+            }
+        }
     }
 
 }

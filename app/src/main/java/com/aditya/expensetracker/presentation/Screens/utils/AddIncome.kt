@@ -63,6 +63,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.data.ViewModel.TransactionViewModel
 import com.aditya.expensetracker.data.model.Transaction
@@ -81,12 +82,14 @@ private val RowGray = Color(0xFFF5F5F5)
 @Composable
 fun AddIncome(
     onDismiss : ()->Unit,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    paymentViewModel: PaymentViewModel = hiltViewModel()
 ) {
 
     //Calling repo
     val viewModel : TransactionViewModel = hiltViewModel()
     val userId by authViewModel.userId.collectAsState()
+    val preferredPaymentMethod by paymentViewModel.preferredPaymentMethod.collectAsState()
     val transactionVm : TransactionVm = hiltViewModel()
     val addIncomeState by transactionVm.transactionState.collectAsState()
 
@@ -98,27 +101,37 @@ fun AddIncome(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember{ SnackbarHostState() }
+
+    LaunchedEffect(preferredPaymentMethod) {
+        if (preferredPaymentMethod != null) {
+            paymentMethod = preferredPaymentMethod!!
+        }
+    }
     LaunchedEffect(addIncomeState) {
         when(val state = addIncomeState){
             is ResultState.Success -> {
-                viewModel.addTransaction(Transaction(
-                    amount = amount.toDoubleOrNull() ?: 0.0,
-                    date = dateMillis,
-                    type = TransactionType.INCOME.toString(),
-                    paidTo = "",
-                    receivedFrom = receivedFrom,
-                    category = category,
-                    paymentMethod = paymentMethod,
-                    savedFor = "",
-                    userId = userId ?: ""
-                ))
-                scope.launch{
-                    sheetState.hide()
-                    onDismiss()
+                if (amount.isNotEmpty()) {
+                    viewModel.addTransaction(Transaction(
+                        amount = amount.toDoubleOrNull() ?: 0.0,
+                        date = dateMillis,
+                        type = TransactionType.INCOME.toString(),
+                        paidTo = "",
+                        receivedFrom = receivedFrom,
+                        category = category,
+                        paymentMethod = paymentMethod,
+                        savedFor = "",
+                        userId = userId ?: ""
+                    ))
+                    transactionVm.resetTransactionState()
+                    scope.launch {
+                        sheetState.hide()
+                        onDismiss()
+                    }
                 }
             }
             is ResultState.Error -> {
                 snackbarHostState.showSnackbar(state.message)
+                transactionVm.resetTransactionState()
             }
             else -> {}
         }
@@ -128,6 +141,7 @@ fun AddIncome(
         tonalElevation = 0.dp,
         onDismissRequest = {
             scope.launch{
+                transactionVm.resetTransactionState()
                 sheetState.hide()
                 onDismiss()
             }
@@ -331,7 +345,7 @@ fun AddIncome(
                 Spacer(modifier = Modifier.height(5.dp))
 
                 var paymentMenuOpen by remember { mutableStateOf(false) }
-                val paymentOptions = listOf("Cash", "Card", "UPI", "Bank Transfer")
+                val paymentOptions = listOf("Cash", "Credit Card","Debit Card", "UPI", "Bank Transfer","Phone Pay","Wallet")
                 Box {
                     SimpleRow(
                         leftText = "Payment"

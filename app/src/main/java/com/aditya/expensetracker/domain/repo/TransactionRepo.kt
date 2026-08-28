@@ -21,4 +21,8 @@ interface TransactionRepo {
         token : String
     ) : getTransactionResponse
 
+    suspend fun deleteTransaction(
+        token: String,
+        id: String
+    ): TransactionResponse
 }

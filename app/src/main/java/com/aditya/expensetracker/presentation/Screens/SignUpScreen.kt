@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -28,10 +29,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.aditya.expensetracker.R
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.presentation.navigation.Routes
 import com.aditya.expensetracker.presentation.navigation.SubNavigation
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 
 private val Black = Color(0xFF111111)
 private val White = Color.White
@@ -55,7 +61,7 @@ fun SignUpScreen(
     LaunchedEffect(signUpState) {
         when(val state = signUpState){
             is ResultState.Success -> {
-                navController.navigate(SubNavigation.MainHomeScreen)
+                authViewModel.login(username,password)
             }
             is ResultState.Error ->{
                 snackbarHostState.showSnackbar(state.message)
@@ -72,30 +78,7 @@ fun SignUpScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Top Bar with Back Button
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(90.dp)
-                    .background(Color.White)
-                    .padding(horizontal = 24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = {
-                        navController.popBackStack()
-                    },
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(Color.White, CircleShape)
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.Black
-                    )
-                }
-            }
+
 
             Column(
                 modifier = Modifier
@@ -105,7 +88,17 @@ fun SignUpScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Spacer(Modifier.height(40.dp))
+                LottieAnimation(
+                    composition = rememberLottieComposition(
+                        LottieCompositionSpec.RawRes(R.raw.lottie_animation)
+                    ).value,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(170.dp),
+                    iterations = LottieConstants.IterateForever,
+                    contentScale = ContentScale.Fit
+                )
+
 
                 Text(
                     text = "Create a new account",
