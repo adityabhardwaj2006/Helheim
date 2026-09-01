@@ -53,6 +53,7 @@ dependencies {
     implementation("com.airbnb.android:lottie-compose:6.6.7")
 
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.animation)
 
     implementation(libs.androidx.core.ktx)
 

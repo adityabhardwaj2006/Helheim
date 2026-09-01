@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -29,17 +30,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.presentation.components.shimmer
 import com.aditya.expensetracker.presentation.navigation.Routes
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.aditya.expensetracker.R
-private val Black = Color(0xFF111111)
-private val White = Color.White
-private val Gray = Color(0xFF757575)
-private val AccentBlue = Color(0xFF4C6FFF)
-private val FieldColor = Color(0xFFF5F5F5)
 
 @Composable
 fun LoginScreen(
@@ -67,12 +64,13 @@ fun LoginScreen(
         }
 
         Scaffold(
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            containerColor = MaterialTheme.colorScheme.background
         ) { innerPadding ->
             Surface(
                 modifier = Modifier.fillMaxSize()
                     .padding(innerPadding),
-                color = White
+                color = MaterialTheme.colorScheme.background
             ) {
 
             Column(
@@ -98,7 +96,7 @@ fun LoginScreen(
                     text = "Welcome Back",
                     fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Black
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -106,7 +104,7 @@ fun LoginScreen(
                 Text(
                     text = "Username",
                     modifier = Modifier.fillMaxWidth(),
-                    color = Gray,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                     fontWeight = FontWeight.Medium
                 )
 
@@ -131,7 +129,7 @@ fun LoginScreen(
                 Text(
                     text = "Password",
                     modifier = Modifier.fillMaxWidth(),
-                    color = Gray,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                     fontWeight = FontWeight.Medium
                 )
 
@@ -163,7 +161,7 @@ fun LoginScreen(
     //                        onForgotPasswordClick()
                         },
                     textAlign = TextAlign.End,
-                    color = Black,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
                 )
 
@@ -226,14 +224,14 @@ fun LoginScreen(
 
                     Text(
                         "Don't have an account?",
-                        color = Gray
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                     )
 
                     Spacer(modifier = Modifier.width(6.dp))
 
                     Text(
                         text = "Sign Up",
-                        color = AccentBlue,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable {
                             navController.navigate(Routes.SignUpScreen)
@@ -270,7 +268,7 @@ fun LoginTextField(
         placeholder = {
             Text(
                 placeholder,
-                color = Gray
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
             )
         },
         leadingIcon = leadingIcon,
@@ -294,6 +292,7 @@ fun LoginTextField(
                             Icons.Default.VisibilityOff,
 
                     contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.clickable {
                         passwordVisible = !passwordVisible
                     }
@@ -304,11 +303,13 @@ fun LoginTextField(
         shape = RoundedCornerShape(16.dp),
 
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = FieldColor,
-            unfocusedContainerColor = FieldColor,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
-            cursorColor = Black
+            cursorColor = MaterialTheme.colorScheme.primary,
+            focusedLeadingIconColor = MaterialTheme.colorScheme.primary,
+            unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
     )
 }
@@ -326,10 +327,10 @@ fun SocialButton(
             .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, Black),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = White,
-            contentColor = Black
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
 
@@ -355,26 +356,26 @@ fun LoginButton(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
-        enabled = true,
+        enabled = !loading,
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Black
+            containerColor = MaterialTheme.colorScheme.primary
         )
     ) {
 
         if (loading) {
 
             CircularProgressIndicator(
-                modifier = Modifier.size(22.dp),
-                strokeWidth = 2.dp,
-                color = White
+                modifier = Modifier.size(24.dp),
+                color = MaterialTheme.colorScheme.onPrimary,
+                strokeWidth = 2.dp
             )
 
         } else {
 
             Text(
                 "Login",
-                color = White,
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 16.sp
             )
 

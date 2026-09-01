@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,10 +20,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aditya.expensetracker.data.model.TransactionItem
 import com.aditya.expensetracker.data.model.TransactionType
+import com.aditya.expensetracker.ui.theme.responsiveSp
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,8 +36,8 @@ fun TransactionHistoryItem(transaction: TransactionItem) {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
     ) {
         Row(
             modifier = Modifier
@@ -71,9 +74,11 @@ fun TransactionHistoryItem(transaction: TransactionItem) {
                 
                 Text(
                     text = title,
-                    fontSize = 16.sp,
+                    fontSize = responsiveSp(16),
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 
                 val dateStr = transaction.date?.let {
@@ -82,8 +87,10 @@ fun TransactionHistoryItem(transaction: TransactionItem) {
                 
                 Text(
                     text = "${transaction.category ?: "No Category"} • $dateStr",
-                    fontSize = 12.sp,
-                    color = Color.Gray
+                    fontSize = responsiveSp(12),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             
@@ -91,14 +98,16 @@ fun TransactionHistoryItem(transaction: TransactionItem) {
                 "INCOME" -> "+"
                 "EXPENSE" -> "-"
                 "SAVINGS" -> "•"
-                else -> {}
+                else -> ""
             }
             
             Text(
                 text = "$prefix ₹${String.format(Locale.getDefault(), "%.2f", transaction.amount)}",
-                fontSize = 16.sp,
+                fontSize = responsiveSp(16),
                 fontWeight = FontWeight.ExtraBold,
-                color = if (transaction.type == "INCOME") Color(0xFF4CAF50) else Color.Black
+                color = if (transaction.type == "INCOME") Color(0xFF4CAF50) 
+                        else if (transaction.type == "EXPENSE") Color(0xFFF44336)
+                        else MaterialTheme.colorScheme.onSurface
             )
         }
     }

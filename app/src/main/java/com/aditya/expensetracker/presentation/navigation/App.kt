@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,6 +38,7 @@ import com.aditya.expensetracker.presentation.Screens.HelpSupportScreen
 import com.aditya.expensetracker.presentation.Screens.HistoryScreen
 import com.aditya.expensetracker.presentation.Screens.HomeScreen
 import com.aditya.expensetracker.presentation.Screens.NotificationScreen
+import com.aditya.expensetracker.presentation.Screens.ChatScreen
 import com.aditya.expensetracker.presentation.Screens.PaymentMethodsScreen
 import com.aditya.expensetracker.presentation.Screens.PrivacyPolicyScreen
 import com.aditya.expensetracker.presentation.Screens.ProfileScreen
@@ -48,10 +50,13 @@ import com.aditya.expensetracker.presentation.Screens.utils.AddSaving
 import com.aditya.expensetracker.presentation.Screens.utils.AddScreen
 import com.aditya.expensetracker.presentation.Screens.utils.CustomBottomNavigation
 import com.aditya.expensetracker.presentation.Screens.utils.MorphingFab
+import com.aditya.expensetracker.presentation.components.HomeSkeleton
 import com.example.expensemanager.ui.login.LoginScreen
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Alignment
+import com.aditya.expensetracker.presentation.components.shimmer
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
 import com.aditya.expensetracker.presentation.Screens.UpdatePassword
 
 enum class SheetType { NONE, INCOME, EXPENSE, SAVING }
@@ -66,10 +71,8 @@ fun App(
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
     if (isLoggedIn == null) {
-        // Loading state
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
+        // Full screen skeleton loader
+        HomeSkeleton()
         return
     }
 
@@ -98,6 +101,7 @@ fun App(
             && currentRoute != Routes.RateUs::class.qualifiedName
             && currentRoute != Routes.Notification::class.qualifiedName
             && currentRoute != Routes.PaymentMethods::class.qualifiedName
+            && currentRoute != Routes.Chat::class.qualifiedName
     Scaffold(
         floatingActionButton = {
             AnimatedVisibility(
@@ -126,7 +130,7 @@ fun App(
                 }
             }
         },
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.background,
         floatingActionButtonPosition = FabPosition.Center,
         bottomBar = {
                 AnimatedVisibility(
@@ -199,7 +203,6 @@ fun App(
             startDestination = startDestination,
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
                 .padding(bottom = innerPadding.calculateBottomPadding())
         ) {
             navigation<SubNavigation.MainHomeScreen>(
@@ -242,6 +245,9 @@ fun App(
                 }
                 composable<Routes.Notification> {
                     NotificationScreen(navController)
+                }
+                composable<Routes.Chat> {
+                    ChatScreen(navController)
                 }
             }
             navigation< SubNavigation.LoginSignUpScreen>(

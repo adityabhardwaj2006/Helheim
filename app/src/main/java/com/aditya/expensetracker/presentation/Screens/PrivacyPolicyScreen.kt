@@ -20,53 +20,40 @@ import androidx.navigation.NavController
 @Composable
 fun PrivacyPolicyScreen(navController: NavController) {
     Scaffold(
-        containerColor = Color(0xFFF7F7F9),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(90.dp)
-                    .background(Color.White)
-                    .padding(all = 24.dp),
+                    .background(MaterialTheme.colorScheme.surface)
+                    .statusBarsPadding()
+                    .height(64.dp)
+                    .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .fillMaxHeight(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start)
-                {
-                    IconButton(
-                        onClick = {
-                            navController.popBackStack()
-                        },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .background(Color.White, CircleShape)
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black)
-                    }
+                IconButton(
+                    onClick = {
+                        navController.popBackStack()
+                    },
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(MaterialTheme.colorScheme.background, CircleShape)
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(2f)
-                    .fillMaxHeight(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center)
-                {
-                    Text(
-                        text = "Privacy Policy",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                }
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .fillMaxHeight()){
-                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "Privacy Policy",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+
+                Box(modifier = Modifier.size(48.dp))
             }
         }
     ) { innerPadding ->
@@ -134,13 +121,13 @@ fun PolicySection(title: String, content: String) {
             text = title,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = content,
             fontSize = 15.sp,
-            color = Color.DarkGray,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
             lineHeight = 22.sp
         )
     }

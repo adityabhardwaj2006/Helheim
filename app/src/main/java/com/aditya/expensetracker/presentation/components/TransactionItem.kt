@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,21 +26,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aditya.expensetracker.data.model.TransactionItem
 import com.aditya.expensetracker.data.model.TransactionType
+import com.aditya.expensetracker.ui.theme.responsiveSp
 import java.text.SimpleDateFormat
 import java.util.*
 
 /**
  * A clean transaction item row with icon, title, date and amount.
- * Matches the white card style in the new design.
+ * Matches the theme colors and uses responsive typography.
  */
 @Composable
 fun TransactionItem(expense: TransactionItem) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(vertical = 4.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
     ) {
         Row(
@@ -49,10 +51,10 @@ fun TransactionItem(expense: TransactionItem) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Transaction icon with circular background
-            val iconColor = getCategoryColor(expense.category?:"EXPENSE")
+            val iconColor = MaterialTheme.colorScheme.onSurface
             Box(
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
                     .background(iconColor.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
@@ -71,15 +73,15 @@ fun TransactionItem(expense: TransactionItem) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = expense.category?:"",
-                    fontSize = 16.sp,
+                    fontSize = responsiveSp(16),
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 val formatter = SimpleDateFormat("dd MMM, yyyy", Locale.getDefault())
                 Text(
                     text = formatter.format(expense.date),
-                    fontSize = 12.sp,
-                    color = Color.Gray
+                    fontSize = responsiveSp(12),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
             
@@ -89,9 +91,11 @@ fun TransactionItem(expense: TransactionItem) {
                 "•"
             Text(
                 text = "$prefix₹${String.format("%.2f", expense.amount)}",
-                fontSize = 16.sp,
+                fontSize = responsiveSp(16),
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.Black
+                color = if (expense.type == TransactionType.INCOME.name) Color(0xFF4CAF50) 
+                        else if (expense.type == TransactionType.EXPENSE.name) Color(0xFFF44336)
+                        else MaterialTheme.colorScheme.onSurface
             )
         }
     }

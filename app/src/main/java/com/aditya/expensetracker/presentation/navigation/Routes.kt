@@ -54,5 +54,8 @@ sealed class Routes{
     @Serializable
     object Notification : Routes()
 
+    @Serializable
+    object Chat : Routes()
+
 
 }

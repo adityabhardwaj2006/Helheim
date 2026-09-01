@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -23,53 +24,40 @@ import androidx.navigation.NavController
 @Composable
 fun AboutAppScreen(navController: NavController) {
     Scaffold(
-        containerColor = Color(0xFFF7F7F9),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(90.dp)
-                    .background(Color.White)
-                    .padding(all = 24.dp),
+                    .background(MaterialTheme.colorScheme.surface)
+                    .statusBarsPadding()
+                    .height(64.dp)
+                    .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .fillMaxHeight(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start)
-                {
-                    IconButton(
-                        onClick = {
-                            navController.popBackStack()
-                        },
-                        modifier = Modifier
-                            .size(48.dp)
-                            .background(Color.White, CircleShape)
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.Black)
-                    }
+                IconButton(
+                    onClick = {
+                        navController.popBackStack()
+                    },
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(MaterialTheme.colorScheme.background, CircleShape)
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(2f)
-                    .fillMaxHeight(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center)
-                {
-                    Text(
-                        text = "About App",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                }
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .fillMaxHeight()){
-                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "About App",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+
+                Box(modifier = Modifier.size(48.dp))
             }
         }
     ) { innerPadding ->
@@ -87,13 +75,13 @@ fun AboutAppScreen(navController: NavController) {
             Box(
                 modifier = Modifier
                     .size(100.dp)
-                    .background(Color(0xFF184D3F), RoundedCornerShape(24.dp)),
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(24.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Info,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(60.dp)
                 )
             }
@@ -104,13 +92,13 @@ fun AboutAppScreen(navController: NavController) {
                 text = "Expense Tracker",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Text(
                 text = "Version 1.0.0",
                 fontSize = 14.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -118,14 +106,14 @@ fun AboutAppScreen(navController: NavController) {
             Text(
                 text = "Track your finances with ease. Our app helps you manage your income, expenses, and savings in one place, providing insightful statistics to help you reach your financial goals.",
                 fontSize = 16.sp,
-                color = Color.DarkGray,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center,
                 lineHeight = 24.sp
             )
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            Divider(color = Color.LightGray.copy(alpha = 0.5f))
+            Divider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -160,13 +148,13 @@ fun AboutSection(title: String, content: String) {
             text = title,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = content,
             fontSize = 15.sp,
-            color = Color.DarkGray,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
             lineHeight = 22.sp
         )
     }

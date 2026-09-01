@@ -3,17 +3,20 @@ package com.aditya.expensetracker.data.Di
 import android.content.Context
 import androidx.room.Room
 import com.aditya.expensetracker.data.Api.AuthApi
+import com.aditya.expensetracker.data.Api.ChatApi
 import com.aditya.expensetracker.data.Api.NotificationApi
 import com.aditya.expensetracker.data.Api.TransactionApi
 import com.aditya.expensetracker.data.DAO.TransactionDao
 import com.aditya.expensetracker.data.DAO.UserDao
 import com.aditya.expensetracker.data.Database.RoomsDatabase
 import com.aditya.expensetracker.data.repoImpl.AuthRepoImpl
+import com.aditya.expensetracker.data.repoImpl.ChatRepoImpl
 import com.aditya.expensetracker.data.repoImpl.NotificationRepoImpl
 import com.aditya.expensetracker.data.repoImpl.RatingRepoImpl
 import com.aditya.expensetracker.data.repoImpl.RepoImpl
 import com.aditya.expensetracker.data.repoImpl.TransactionRepoImpl
 import com.aditya.expensetracker.domain.repo.AuthRepo
+import com.aditya.expensetracker.domain.repo.ChatRepo
 import com.aditya.expensetracker.domain.repo.NotificationRepo
 import com.aditya.expensetracker.domain.repo.RatingRepo
 import com.aditya.expensetracker.domain.repo.Repo
@@ -26,6 +29,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
+import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -64,9 +70,20 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit() : Retrofit{
+    fun provideOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(okHttpClient: OkHttpClient) : Retrofit{
         return Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:3000/")
+            .baseUrl("https://expensetrackerbackend-2-rxtw.onrender.com")
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -96,11 +113,28 @@ object DataModule {
     }
 
 
+    @Provides
+    @Singleton
+    fun provideChatApi(
+        retrofit: Retrofit
+    ) : ChatApi {
+        return retrofit.create(
+            ChatApi::class.java
+        )
+    }
+
 }
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule{
+
+    @Binds
+    @Singleton
+    abstract fun bindChatRepo(
+        chatRepoImpl : ChatRepoImpl
+    ) : ChatRepo
+
     @Binds
     @Singleton
     abstract fun bindAuthRepo(
@@ -130,5 +164,6 @@ abstract class RepositoryModule{
     abstract fun bindNotificationRepo(
         notificationRepoImpl: NotificationRepoImpl
     ): NotificationRepo
+
 
 }

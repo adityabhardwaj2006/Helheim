@@ -44,6 +44,7 @@ class TransactionVm @Inject constructor(
                     val newList = list.map {
                         TransactionItem(
                             _id = it.backendId,
+                            localId = it.id,
                             amount = it.amount,
                             date = it.date,
                             type = it.type,
@@ -53,7 +54,7 @@ class TransactionVm @Inject constructor(
                             receivedFrom = it.receivedFrom,
                             paymentMethod = it.paymentMethod
                         )
-                    }.distinctBy { it._id ?: it.hashCode() }
+                    }.distinctBy { it._id ?: it.localId }
                     _getTransactionState.value = ResultState.Success(getTransactionResponse(
                         success = true,
                         transactions = newList
@@ -61,7 +62,7 @@ class TransactionVm @Inject constructor(
                 }else{
                     val token = tokenManager.getToken().first() ?: ""
                     val response = repo.getTransactions("Bearer $token")
-                    val distinctTransactions = response.transactions.distinctBy { it._id ?: it.hashCode() }
+                    val distinctTransactions = response.transactions.distinctBy { it._id ?: it.localId }
                     _getTransactionState.value = ResultState.Success(response.copy(transactions = distinctTransactions))
 
                     distinctTransactions.forEach {
@@ -107,6 +108,25 @@ class TransactionVm @Inject constructor(
                     token = "Bearer $token"
                 )
                 
+                // If backend save is successful, save to local database with the backend _id
+                if (response.success && response.transaction != null) {
+                    val userId = tokenManager.getUserId().first() ?: ""
+                    localRepo.insertTransaction(
+                        Transaction(
+                            backendId = response.transaction._id,
+                            amount = response.transaction.amount,
+                            date = response.transaction.date,
+                            type = response.transaction.type,
+                            paidTo = response.transaction.paidTo,
+                            category = response.transaction.category,
+                            savedFor = response.transaction.savedFor,
+                            receivedFrom = response.transaction.receivedFrom,
+                            paymentMethod = response.transaction.paymentMethod,
+                            userId = userId
+                        )
+                    )
+                }
+
                 // Automatically trigger notification generation after a successful transaction
                 try {
                     notificationRepo.generateNotifications("Bearer $token")
@@ -129,8 +149,9 @@ class TransactionVm @Inject constructor(
     fun deleteTransaction(transactionItem: TransactionItem) {
         val currentState = _getTransactionState.value
         if (currentState is ResultState.Success) {
-            // Update UI immediately (Optimistic)
-            val updatedList = currentState.data.transactions.filter { it._id != transactionItem._id }
+            val originalList = currentState.data.transactions
+            // Optimistic UI Update
+            val updatedList = originalList.filter { it._id != transactionItem._id }
             _getTransactionState.value = ResultState.Success(
                 currentState.data.copy(transactions = updatedList)
             )
@@ -140,29 +161,40 @@ class TransactionVm @Inject constructor(
                     val token = tokenManager.getToken().first() ?: ""
                     val userId = tokenManager.getUserId().first() ?: ""
 
-                    // Delete from Backend
-                    transactionItem._id?.let { id ->
+                    // 1. Delete from Backend
+                    val response = transactionItem._id?.let { id ->
                         repo.deleteTransaction("Bearer $token", id)
                     }
 
-                    // Delete from Room
-                    // Find the local transaction by backendId or fallback to other fields
-                    val localTransactions = localRepo.getAllTransaction(userId).first()
-                    val transactionToDelete = localTransactions.find { 
-                        if (it.backendId != null && transactionItem._id != null) {
-                            it.backendId == transactionItem._id
-                        } else {
-                            it.amount == transactionItem.amount && 
-                            it.date == transactionItem.date && 
-                            it.paidTo == transactionItem.paidTo
+                    if (response?.success == true) {
+                        // 2. Delete from Room only if backend deletion was successful
+                        val localTransactions = localRepo.getAllTransaction(userId).first()
+                        val transactionToDelete = localTransactions.find {
+                            if (it.backendId != null && transactionItem._id != null) {
+                                it.backendId == transactionItem._id
+                            } else {
+                                // Fallback for legacy items without backendId
+                                it.amount == transactionItem.amount &&
+                                it.date == transactionItem.date &&
+                                it.type == transactionItem.type &&
+                                it.paidTo == transactionItem.paidTo
+                            }
                         }
-                    }
 
-                    transactionToDelete?.let {
-                        localRepo.deleteTransaction(it)
+                        transactionToDelete?.let {
+                            localRepo.deleteTransaction(it)
+                        }
+                    } else {
+                        // Rollback UI if backend reported failure
+                        _getTransactionState.value = ResultState.Success(
+                            currentState.data.copy(transactions = originalList)
+                        )
                     }
                 } catch (e: Exception) {
-                    // Silently fail or log, UI is already updated optimistically
+                    // Rollback UI if network error occurred
+                    _getTransactionState.value = ResultState.Success(
+                        currentState.data.copy(transactions = originalList)
+                    )
                 }
             }
         }

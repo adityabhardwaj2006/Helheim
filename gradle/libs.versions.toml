@@ -59,6 +59,7 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt"
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+androidx-compose-animation = { group = "androidx.compose.animation", name = "animation" }
 
 [plugins]
 

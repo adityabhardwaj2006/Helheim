@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,11 +19,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aditya.expensetracker.common.ResultState
-import com.aditya.expensetracker.data.model.getTransactionResponse
+import com.aditya.expensetracker.ui.theme.responsiveSp
 
 /**
  * A component that displays two summary cards for Income and Expense.
@@ -37,7 +38,7 @@ fun IncomeExpenseSummary(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp) // Reduced spacing to fit better
     ) {
         // Income Summary
         val incomeIsPositive = !incomeChange.startsWith("-")
@@ -80,9 +81,9 @@ private fun SummaryCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier.heightIn(min = 60.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -90,12 +91,12 @@ private fun SummaryCard(
                 .padding(8.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+            horizontalArrangement = Arrangement.Center
         ) {
             // Circular icon background
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(32.dp) // Slightly smaller icon
                     .clip(CircleShape)
                     .background(iconColor.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
@@ -104,23 +105,27 @@ private fun SummaryCard(
                     imageVector = icon,
                     contentDescription = null,
                     tint = iconColor,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
             
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             
-            Column {
+            Column(horizontalAlignment = Alignment.Start) {
                 Text(
                     text = value,
                     color = iconColor,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = responsiveSp(14),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = label,
-                    color = Color.Gray,
-                    fontSize = 12.sp
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    fontSize = responsiveSp(10),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

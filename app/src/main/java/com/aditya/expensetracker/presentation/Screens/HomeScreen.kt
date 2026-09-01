@@ -1,25 +1,32 @@
 package com.aditya.expensetracker.presentation.Screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import com.aditya.expensetracker.ui.theme.responsiveSp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -30,8 +37,10 @@ import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.data.model.getTransactionResponse
 import com.aditya.expensetracker.data.model.profileResponse
 import com.aditya.expensetracker.presentation.components.BalanceCard
+import com.aditya.expensetracker.presentation.components.ChatBubble
 import com.aditya.expensetracker.presentation.components.IncomeExpenseSummary
 import com.aditya.expensetracker.presentation.components.TransactionItem
+import com.aditya.expensetracker.presentation.components.shimmer
 import com.aditya.expensetracker.presentation.navigation.Routes
 import java.time.Instant
 import java.time.YearMonth
@@ -51,17 +60,7 @@ fun HomeScreen(
         notificationViewModel.getNotifications()
     }
     val userState : ResultState<profileResponse>? by authViewModel.userState.collectAsState()
-    val name = when(val state = userState){
-        is ResultState.Loading, ResultState.Idle -> {
-            "..."
-        }
-        is ResultState.Success ->{
-            state.data.data?.firstName + " " + state.data.data?.lastName
-        }
-        else -> {
-            "Unknown"
-        }
-    }
+    val isLoadingUser = userState is ResultState.Loading || userState is ResultState.Idle
 
     val transactionState by transactionVm.getTransactionState.collectAsState()
     val notificationState by notificationViewModel.notificationState.collectAsState()
@@ -132,7 +131,7 @@ fun HomeScreen(
         if (previous == 0.0) return if (current > 0) "+100%" else "0%"
         val growth = ((current - previous) / previous) * 100
         val sign = if (growth >= 0) "+" else ""
-        return "$sign${growth.toInt()}%"
+        return "$sign${Math.round(growth)}%"
     }
 
     val incomeChange = calculateGrowth(currentIncome, prevIncome)
@@ -140,12 +139,34 @@ fun HomeScreen(
     val savingsChange = calculateGrowth(currentSavings, prevSavings)
 
 
+    val transactionListState = rememberLazyListState()
+    val isScrollingDown by remember {
+        derivedStateOf {
+            transactionListState.isScrollInProgress && transactionListState.firstVisibleItemIndex > 0
+        }
+    }
+
     Scaffold(
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.background,
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = !isScrollingDown,
+                enter = fadeIn() + scaleIn(),
+                exit = fadeOut() + scaleOut()
+            ) {
+                ChatBubble(
+                    onClick = {
+                        navController.navigate(Routes.Chat)
+                    },
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(innerPadding)
                 .padding(horizontal = 24.dp)
         ) {
 
@@ -158,23 +179,40 @@ fun HomeScreen(
                 Column {
                     Text(
                         text = "Welcome!",
-                        color = Color.Gray,
-                        style = MaterialTheme.typography.headlineSmall
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                        fontSize = responsiveSp(18),
+                        fontWeight = FontWeight.Medium
                     )
-                    Text(
-                        text = name,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
+                    if (isLoadingUser) {
+                        Box(
+                            modifier = Modifier
+                                .width(150.dp)
+                                .height(32.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .shimmer()
+                        )
+                    } else {
+                        val name = when(val state = userState){
+                            is ResultState.Success ->{
+                                state.data.data?.firstName + " " + state.data.data?.lastName
+                            }
+                            else -> "Unknown"
+                        }
+                        Text(
+                            text = name,
+                            fontSize = responsiveSp(24),
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
                 }
                 
                 // Notification icon with circular background
                 Box(
                     modifier = Modifier
                         .size(45.dp)
-                        .background(Color.White)
-                        .padding(8.dp)
+                        .background(MaterialTheme.colorScheme.surface, CircleShape)
+                        .clip(CircleShape)
                         .clickable {
                             navController.navigate(Routes.Notification)
                         },
@@ -188,14 +226,15 @@ fun HomeScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notifications"
+                                contentDescription = "Notifications",
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }else{
                         Icon(
                             imageVector = Icons.Default.NotificationsNone,
                             contentDescription = "Notifications",
-                            tint = Color.Black
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
 
@@ -206,16 +245,16 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // 2. Premium Balance Card
-            BalanceCard(balance = (totalIncome - totalExpense ))
+            BalanceCard(balance = (totalIncome - totalExpense - totalSavings))
 
             Spacer(modifier = Modifier.height(32.dp))
 
             // 3. Transactions Section Title
             Text(
                 text = "Transactions",
-                fontSize = 20.sp,
+                fontSize = responsiveSp(20),
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -230,14 +269,15 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             LazyColumn(
+                state = transactionListState,
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(bottom = 100.dp) // Extra padding for bottom navigation
             ) {
-                val transactions = listState.transactions.distinctBy { it._id ?: it.hashCode() }
+                val transactions = listState.transactions.distinctBy { it._id ?: it.localId }
                 items(
                     items = transactions.reversed(),
-                    key = { it._id ?: it.hashCode() }
+                    key = { it._id ?: it.localId ?: it.hashCode() }
                 ) { expense ->
                     TransactionItem(expense = expense)
                 }

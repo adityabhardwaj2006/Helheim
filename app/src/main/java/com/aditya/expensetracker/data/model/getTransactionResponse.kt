@@ -6,6 +6,7 @@ data class getTransactionResponse(
 )
 data class TransactionItem(
     val _id : String?,
+    val localId: Int? = null,
     val amount : Double,
     val date : Long?,
     val type : String,

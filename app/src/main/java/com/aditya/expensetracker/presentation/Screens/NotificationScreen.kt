@@ -33,6 +33,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.NotificationViewModel
 import com.aditya.expensetracker.data.model.NotificationItem
+import com.aditya.expensetracker.presentation.components.shimmer
 import com.aditya.expensetracker.presentation.navigation.Routes
 import com.aditya.expensetracker.presentation.navigation.SubNavigation
 import java.time.ZonedDateTime
@@ -58,10 +59,14 @@ fun NotificationScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         },
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
@@ -79,14 +84,8 @@ fun NotificationScreen(
                 when (val result = state) {
                     is ResultState.Loading -> {
                         if (!isRefreshing) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillParentMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
-                                }
+                            items(5) {
+                                ShimmerNotificationItem()
                             }
                         }
                     }
@@ -101,7 +100,7 @@ fun NotificationScreen(
                                 ) {
                                     Text(
                                         if (isRefreshing) "Scanning for insights..." else "Pull down to scan for insights",
-                                        color = Color.Gray,
+                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                         modifier = Modifier.padding(32.dp)
                                     )
@@ -140,11 +139,13 @@ fun NotificationScreen(
                                                 .padding(horizontal = 20.dp),
                                             contentAlignment = Alignment.CenterEnd
                                         ) {
-                                            Icon(
-                                                Icons.Default.Delete,
-                                                contentDescription = "Delete",
-                                                tint = Color.White
-                                            )
+                                            if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                                                Icon(
+                                                    Icons.Default.Delete,
+                                                    contentDescription = "Delete",
+                                                    tint = Color.White
+                                                )
+                                            }
                                         }
                                     },
                                     content = {
@@ -177,12 +178,56 @@ fun NotificationScreen(
 }
 
 @Composable
+fun ShimmerNotificationItem() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .shimmer()
+            )
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .height(20.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .shimmer()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(16.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .shimmer()
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun NotificationItemView(notification: NotificationItem) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (notification.isRead) Color.White else Color(0xFFF0F7F4)
+            containerColor = if (notification.isRead) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
     ) {
@@ -216,20 +261,20 @@ fun NotificationItemView(notification: NotificationItem) {
                     text = notification.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = notification.message,
                     fontSize = 14.sp,
-                    color = Color.DarkGray,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                     lineHeight = 20.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = formatNotificationDate(notification.createdAt),
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
             
@@ -238,7 +283,7 @@ fun NotificationItemView(notification: NotificationItem) {
                     modifier = Modifier
                         .size(8.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFF184D3F))
+                        .background(MaterialTheme.colorScheme.primary)
                 )
             }
         }

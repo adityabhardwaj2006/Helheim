@@ -133,7 +133,7 @@ fun CustomBottomNavigation(
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp),
-        color = Color.White,
+        color = MaterialTheme.colorScheme.surface,
         shadowElevation = 8.dp
     ) {
         Row(
@@ -201,7 +201,7 @@ fun NavigationItem(
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = if (selected) Color(0xFF0E0E0E) else Color(0xFFBDBDBD),
+            tint = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
             modifier = Modifier.size(26.dp)
         )
     }
@@ -300,7 +300,7 @@ fun AnimatedFab(
     FloatingActionButton(
         onClick = onClick,
         shape = CircleShape,
-        containerColor = Color.Black,
+        containerColor = MaterialTheme.colorScheme.onSurface,
         elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
         modifier = modifier.scale(1.25f)
     ) {
@@ -308,7 +308,7 @@ fun AnimatedFab(
             Icon(
                 imageVector = it,
                 contentDescription = null,
-                tint = Color.White.copy(alpha = opacity)
+                tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = opacity)
             )
         }
     }

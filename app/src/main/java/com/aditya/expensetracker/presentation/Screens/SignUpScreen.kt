@@ -32,18 +32,14 @@ import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.R
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
+import com.aditya.expensetracker.presentation.components.shimmer
 import com.aditya.expensetracker.presentation.navigation.Routes
 import com.aditya.expensetracker.presentation.navigation.SubNavigation
 import com.airbnb.lottie.compose.LottieAnimation
+import androidx.compose.ui.draw.clip
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
-
-private val Black = Color(0xFF111111)
-private val White = Color.White
-private val Gray = Color(0xFF757575)
-private val FieldColor = Color(0xFFF5F5F5)
-private val AccentBlue = Color(0xFF4C6FFF)
 
 @Composable
 fun SignUpScreen(
@@ -73,7 +69,7 @@ fun SignUpScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = White
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -104,7 +100,7 @@ fun SignUpScreen(
                     text = "Create a new account",
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Black
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(Modifier.height(28.dp))
@@ -114,7 +110,7 @@ fun SignUpScreen(
                     fontSize = 16.sp,
                     modifier = Modifier.fillMaxWidth(),
                     fontWeight = FontWeight.Medium,
-                    color = Gray
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                 )
 
                 Spacer(Modifier.height(6.dp))
@@ -135,7 +131,7 @@ fun SignUpScreen(
                     fontSize = 16.sp,
                     modifier = Modifier.fillMaxWidth(),
                     fontWeight = FontWeight.Medium,
-                    color = Gray
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                 )
 
                 Spacer(Modifier.height(6.dp))
@@ -156,7 +152,7 @@ fun SignUpScreen(
                     fontSize = 16.sp,
                     modifier = Modifier.fillMaxWidth(),
                     fontWeight = FontWeight.Medium,
-                    color = Gray
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                 )
 
                 Spacer(Modifier.height(6.dp))
@@ -181,7 +177,7 @@ fun SignUpScreen(
                     fontSize = 16.sp,
                     modifier = Modifier.fillMaxWidth(),
                     fontWeight = FontWeight.Medium,
-                    color = Gray
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                 )
 
                 Spacer(Modifier.height(6.dp))
@@ -220,14 +216,14 @@ fun SignUpScreen(
                 ) {
                     Text(
                         "Already have an account?",
-                        color = Gray
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                     )
 
                     Spacer(modifier = Modifier.width(6.dp))
 
                     Text(
                         text = "Login",
-                        color = AccentBlue,
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable {
                             navController.navigate(Routes.LoginScreen)
@@ -249,26 +245,26 @@ fun SignUpButton(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
-        enabled = true,
+        enabled = !loading,
         shape = RoundedCornerShape(16.dp),
         elevation = ButtonDefaults.buttonElevation(
             defaultElevation = 2.dp,
             pressedElevation = 0.dp
         ),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Black
+            containerColor = MaterialTheme.colorScheme.primary
         )
     ) {
         if (loading) {
             CircularProgressIndicator(
-                modifier = Modifier.size(22.dp),
-                strokeWidth = 2.dp,
-                color = White
+                modifier = Modifier.size(24.dp),
+                color = MaterialTheme.colorScheme.onPrimary,
+                strokeWidth = 2.dp
             )
         } else {
             Text(
                 "Sign Up",
-                color = White,
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -288,18 +284,18 @@ fun NameTextField(placeholder: String, firstname: String,
             .height(58.dp),
         placeholder = {
             Text(
-                text = placeholder, color = Gray
+                text = placeholder, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
             )
         },
         shape = RoundedCornerShape(16.dp),
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = FieldColor,
-            unfocusedContainerColor = FieldColor,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
-            cursorColor = Black
+            cursorColor = MaterialTheme.colorScheme.primary
         )
     )
 }
@@ -318,7 +314,7 @@ fun SignUpTextField(placeholder: String, firstname: String,
             .height(58.dp),
         placeholder = {
             Text(
-                text = placeholder, color = Gray
+                text = placeholder, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
             )
         },
         shape = RoundedCornerShape(16.dp),
@@ -329,13 +325,13 @@ fun SignUpTextField(placeholder: String, firstname: String,
                 Icon(
                     imageVector = Icons.Default.Person2,
                     contentDescription = "",
-                    tint = Black
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }else{
                 Icon(
                     imageVector = Icons.Default.Lock,
                     contentDescription = "",
-                    tint = Black
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
         },
@@ -355,7 +351,7 @@ fun SignUpTextField(placeholder: String, firstname: String,
                             Icons.Default.Visibility
                         },
                     contentDescription = "",
-                    tint = Black,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.clickable{
                         onEyeClick(passwordVisible)
                     }
@@ -363,11 +359,11 @@ fun SignUpTextField(placeholder: String, firstname: String,
             }
         },
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = FieldColor,
-            unfocusedContainerColor = FieldColor,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
-            cursorColor = Black
+            cursorColor = MaterialTheme.colorScheme.primary
         )
     )
 }

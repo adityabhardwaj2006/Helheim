@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.aditya.expensetracker.ui.theme.responsiveSp
 
 /**
  * A premium credit card-style component to display the total balance.
@@ -40,23 +41,18 @@ fun BalanceCard(
             .fillMaxWidth()
             .height(220.dp),
         shape = RoundedCornerShape(32.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF1A1C1E)) // Dark background for premium look
+                .background(Color(0xFF1A1C1E)) // Keep premium dark background
         ) {
-            // Subtle decorative circles to mimic the design's background
+            // Subtle decorative circles
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawCircle(
                     color = Color.White.copy(alpha = 0.03f),
                     radius = 150.dp.toPx(),
-                    center = center.copy(x = size.width * 0.9f, y = size.height * 0.2f)
-                )
-                drawCircle(
-                    color = Color.White.copy(alpha = 0.05f),
-                    radius = 80.dp.toPx(),
                     center = center.copy(x = size.width * 0.9f, y = size.height * 0.2f)
                 )
             }
@@ -77,19 +73,19 @@ fun BalanceCard(
                         Text(
                             text = "₹ ${String.format("%,.2f", balance)}",
                             color = Color.White,
-                            fontSize = 32.sp,
+                            fontSize = responsiveSp(32),
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = "Balance",
-                            color = Color.Gray,
-                            fontSize = 14.sp
+                            color = Color.White.copy(alpha = 0.6f),
+                            fontSize = responsiveSp(14)
                         )
                     }
 
                 }
 
-                // Progress Bar - indicating spending limit or similar
+                // Progress Bar
                 Column(modifier = Modifier.fillMaxWidth()) {
                     LinearProgressIndicator(
                         progress = { spendingProgress },
@@ -103,7 +99,7 @@ fun BalanceCard(
                     )
                 }
 
-                // Bottom section with card number and logo
+                // Bottom section
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -112,11 +108,10 @@ fun BalanceCard(
                     Text(
                         text = "****  ****  426",
                         color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 18.sp,
+                        fontSize = responsiveSp(18),
                         letterSpacing = 2.sp
                     )
                     
-                    // Mastercard logo placeholder or actual image
                     Icon(
                         painter = painterResource(id = R.drawable.mastercard),
                         contentDescription = "Mastercard",

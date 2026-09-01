@@ -1,0 +1,6 @@
+- [x] Add `localId` to `TransactionItem` in `getTransactionResponse.kt`.
+- [x] Update mapping and `distinctBy` in `TransactionVm.kt`.
+- [x] Correct balance formula in `HomeScreen.kt`.
+- [x] Update growth rounding to `roundToInt()` in `HomeScreen.kt`.
+- [x] Ensure unique keys in `HomeScreen.kt` transaction list.
+- [x] Update unique keys and `distinctBy` in `HistoryScreen.kt`.

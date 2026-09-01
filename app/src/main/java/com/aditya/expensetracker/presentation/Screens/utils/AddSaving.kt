@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,6 +17,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -29,16 +31,11 @@ import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
-import com.aditya.expensetracker.data.ViewModel.TransactionViewModel
-import com.aditya.expensetracker.data.model.Transaction
-import com.aditya.expensetracker.data.model.TransactionType
+import com.aditya.expensetracker.presentation.components.shimmer
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-private val GreenDark = Color(0xFF184D3F)
-private val RowGray = Color(0xFFF5F5F5)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,9 +44,7 @@ fun AddSaving(
     authViewModel: AuthViewModel = hiltViewModel(),
     paymentViewModel: PaymentViewModel = hiltViewModel()
 ) {
-    val viewModel : TransactionViewModel = hiltViewModel()
     val transactionVm : TransactionVm = hiltViewModel()
-    val userId by authViewModel.userId.collectAsState()
     val preferredPaymentMethod by paymentViewModel.preferredPaymentMethod.collectAsState()
     val addSavingState by transactionVm.transactionState.collectAsState()
 
@@ -72,17 +67,6 @@ fun AddSaving(
         when(val state = addSavingState){
             is ResultState.Success -> {
                 if (amount.isNotEmpty()) {
-                    viewModel.addTransaction(Transaction(
-                        amount = amount.toDoubleOrNull() ?: 0.0,
-                        date = dateMillis,
-                        type = TransactionType.SAVINGS.toString(),
-                        paidTo = "",
-                        savedFor = savedFor,
-                        category = category,
-                        paymentMethod = paymentMethod,
-                        receivedFrom = "",
-                        userId = userId ?: ""
-                    ))
                     transactionVm.resetTransactionState()
                     scope.launch {
                         sheetState.hide()
@@ -99,6 +83,7 @@ fun AddSaving(
     }
 
     ModalBottomSheet(
+        tonalElevation = 0.dp,
         onDismissRequest = {
             scope.launch {
                 transactionVm.resetTransactionState()
@@ -107,10 +92,11 @@ fun AddSaving(
             }
         },
         sheetState = sheetState,
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
     ){
         Scaffold(
+            containerColor = MaterialTheme.colorScheme.surface,
             snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
                 Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -133,11 +119,15 @@ fun AddSaving(
                                 scope.launch { snackbarHostState.showSnackbar("Invalid amount") }
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                         modifier = Modifier.weight(1f).height(50.dp)
                     ) {
                         if(addSavingState is ResultState.Loading){
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.dp
+                            )
                         } else {
                             Text("Add Saving")
                         }
@@ -154,7 +144,7 @@ fun AddSaving(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("Enter Saving Amount", color = Color.Gray)
+                    Text("Enter Saving Amount", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                     Spacer(modifier = Modifier.height(8.dp))
                     BasicTextField(
                         value = amount,
@@ -162,11 +152,11 @@ fun AddSaving(
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
-                        textStyle = TextStyle(fontSize = 40.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, color = Color.Black),
+                        textStyle = TextStyle(fontSize = 40.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurface),
                         decorationBox = { innerTextField ->
                             Row(modifier = Modifier.wrapContentWidth()){
                                 if (amount.isEmpty()) {
-                                    Text("₹ 0", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = Color.Gray, textAlign = TextAlign.Center)
+                                    Text("₹ 0", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), textAlign = TextAlign.Center)
                                 } else {
                                     innerTextField()
                                 }
@@ -178,9 +168,9 @@ fun AddSaving(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable { showDatePicker = true }
                     ) {
-                        Icon(Icons.Default.DateRange, contentDescription = null, modifier = Modifier.height(16.dp))
+                        Icon(Icons.Default.DateRange, contentDescription = null, modifier = Modifier.height(16.dp), tint = MaterialTheme.colorScheme.onSurface)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = dateMillis?.let { convertMillisToDate(it) } ?: "Today", color = Color.Gray, fontSize = 13.sp)
+                        Text(text = dateMillis?.let { convertMillisToDate(it) } ?: "Today", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 13.sp)
                     }
                 }
 
@@ -226,31 +216,18 @@ fun AddSaving(
                             DropdownMenu(
                                 expanded = categoryMenuOpen,
                                 onDismissRequest = { categoryMenuOpen = false },
-                                border = BorderStroke(1.dp, Color.LightGray),
+                                modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
                                 shape = RoundedCornerShape(12.dp),
                                 shadowElevation = 8.dp
                             ) {
                                 categories.forEach { cat ->
                                     DropdownMenuItem(
-                                        modifier = Modifier.background(Color.Transparent),
-                                        text = {
-                                            Text(
-                                                text = cat,
-                                                color = Color.Black
-                                            )
-                                        },
+                                        text = { Text(cat, color = MaterialTheme.colorScheme.onSurface) },
                                         onClick = {
                                             category = cat
                                             categoryMenuOpen = false
-                                        },
-                                        colors = MenuItemColors(
-                                            textColor = Color.Black,
-                                            leadingIconColor = Color.Black,
-                                            trailingIconColor = Color.Black,
-                                            disabledTextColor = Color.Black,
-                                            disabledLeadingIconColor = Color.Black,
-                                            disabledTrailingIconColor = Color.Black
-                                        )
+                                        }
                                     )
                                 }
                             }
@@ -262,13 +239,15 @@ fun AddSaving(
                 val paymentOptions = listOf("Cash", "Credit Card","Debit Card", "UPI", "Bank Transfer","Phone Pay","Wallet")
                 Box {
                     SimpleRow(leftText = "Payment") {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { paymentMenuOpen = true }) {
-                            Text(paymentMethod)
-                            Icon(Icons.Default.KeyboardArrowDown, contentDescription = null)
-                        }
-                        DropdownMenu(expanded = paymentMenuOpen, onDismissRequest = { paymentMenuOpen = false }) {
-                            paymentOptions.forEach { opt ->
-                                DropdownMenuItem(text = { Text(opt) }, onClick = { paymentMethod = opt; paymentMenuOpen = false })
+                        Box {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { paymentMenuOpen = true }) {
+                                Text(paymentMethod, color = MaterialTheme.colorScheme.onSurface)
+                                Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                            }
+                            DropdownMenu(expanded = paymentMenuOpen, onDismissRequest = { paymentMenuOpen = false }) {
+                                paymentOptions.forEach { opt ->
+                                    DropdownMenuItem(text = { Text(opt, color = MaterialTheme.colorScheme.onSurface) }, onClick = { paymentMethod = opt; paymentMenuOpen = false })
+                                }
                             }
                         }
                     }
@@ -281,11 +260,11 @@ fun AddSaving(
 @Composable
 private fun SimpleRow(leftText: String, trailing: @Composable () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().background(RowGray, RoundedCornerShape(12.dp)).padding(horizontal = 16.dp, vertical = 16.dp),
+        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(leftText, color = Color.Black)
+        Text(leftText, color = MaterialTheme.colorScheme.onSurface)
         trailing()
     }
 }
