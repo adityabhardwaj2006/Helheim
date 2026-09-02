@@ -17,23 +17,43 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80,
+    primary = WhitePure,
+    onPrimary = BlackPrimary,
+    primaryContainer = GrayDark,
+    onPrimaryContainer = WhitePure,
+    secondary = GrayLight,
+    onSecondary = BlackPrimary,
+    secondaryContainer = GrayDark,
+    onSecondaryContainer = WhitePure,
+    tertiary = GrayMedium,
     background = BackgroundDark,
     surface = SurfaceDark,
-    onBackground = Color.White,
-    onSurface = Color.White
+    surfaceVariant = GrayDark,
+    onSurfaceVariant = GrayLight,
+    outline = GrayMedium,
+    onBackground = WhitePure,
+    onSurface = WhitePure,
+    surfaceTint = Color.Transparent // Disable purple tint
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
+    primary = BlackPrimary,
+    onPrimary = WhitePure,
+    primaryContainer = GrayLight,
+    onPrimaryContainer = BlackPrimary,
+    secondary = GrayDark,
+    onSecondary = WhitePure,
+    secondaryContainer = GrayLight,
+    onSecondaryContainer = BlackPrimary,
+    tertiary = GrayMedium,
     background = BackgroundLight,
     surface = SurfaceLight,
-    onBackground = Color.Black,
-    onSurface = Color.Black
+    surfaceVariant = BackgroundLight,
+    onSurfaceVariant = GrayMedium,
+    outline = GrayLight,
+    onBackground = BlackPrimary,
+    onSurface = BlackPrimary,
+    surfaceTint = Color.Transparent
 )
 
 @Composable

@@ -70,6 +70,14 @@ object DataModule {
 
     @Provides
     @Singleton
+    fun provideNotificationDao(
+        roomsDatabase: RoomsDatabase
+    ): com.aditya.expensetracker.data.DAO.NotificationDao {
+        return roomsDatabase.notificationDao()
+    }
+
+    @Provides
+    @Singleton
     fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .connectTimeout(60, TimeUnit.SECONDS)

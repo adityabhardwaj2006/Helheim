@@ -172,11 +172,11 @@ fun ProfileScreen(navController: NavController,
                 Box(contentAlignment = Alignment.BottomEnd) {
                     Icon(
                         imageVector = Icons.Default.Person,
-                        tint = MaterialTheme.colorScheme.onPrimary,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         contentDescription = "Profile",
                         modifier = Modifier
                             .size(iconSize)
-                            .background(MaterialTheme.colorScheme.onSurface, CircleShape)
+                            .background(MaterialTheme.colorScheme.surface, CircleShape)
                             .padding(16.dp)
                     )
 

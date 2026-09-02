@@ -29,3 +29,21 @@ interface TransactionDao{
 
 }
 
+@Dao
+interface NotificationDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertNotification(notification: com.aditya.expensetracker.data.model.LocalNotification)
+
+    @Query("SELECT * FROM notifications WHERE userId = :userId ORDER BY date DESC")
+    fun getAllNotifications(userId: String): Flow<List<com.aditya.expensetracker.data.model.LocalNotification>>
+
+    @Query("DELETE FROM notifications WHERE id = :id")
+    suspend fun deleteNotification(id: Int)
+
+    @Query("SELECT * FROM notifications WHERE type = :type AND userId = :userId LIMIT 1")
+    suspend fun getNotificationByType(type: String, userId: String): com.aditya.expensetracker.data.model.LocalNotification?
+    
+    @Query("UPDATE notifications SET isRead = 1 WHERE id = :id")
+    suspend fun markAsRead(id: Int)
+}
+

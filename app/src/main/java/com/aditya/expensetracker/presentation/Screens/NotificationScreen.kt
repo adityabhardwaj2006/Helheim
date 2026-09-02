@@ -1,6 +1,5 @@
 package com.aditya.expensetracker.presentation.Screens
 
-import android.net.http.SslCertificate.restoreState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,6 +35,7 @@ import com.aditya.expensetracker.data.model.NotificationItem
 import com.aditya.expensetracker.presentation.components.shimmer
 import com.aditya.expensetracker.presentation.navigation.Routes
 import com.aditya.expensetracker.presentation.navigation.SubNavigation
+import com.aditya.expensetracker.ui.theme.responsiveSp
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -52,19 +52,37 @@ fun NotificationScreen(
     // Removed buggy LaunchedEffect that was incorrectly checking isRefreshing as ResultState
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("Notifications", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .statusBarsPadding()
+                    .height(64.dp)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "Notifications",
+                    fontSize = responsiveSp(20),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
-            )
+
+                // Spacer to balance the back button
+                Box(modifier = Modifier.size(48.dp))
+            }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
@@ -127,19 +145,16 @@ fun NotificationScreen(
                                     modifier = Modifier.animateItem(),
                                     enableDismissFromStartToEnd = false,
                                     backgroundContent = {
-                                        val color = when (dismissState.dismissDirection) {
-                                            SwipeToDismissBoxValue.EndToStart -> Color.Red
-                                            else -> Color.Transparent
-                                        }
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .clip(RoundedCornerShape(20.dp))
-                                                .background(color)
-                                                .padding(horizontal = 20.dp),
-                                            contentAlignment = Alignment.CenterEnd
-                                        ) {
-                                            if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                                        if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                                            val color = Color.Red
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .clip(RoundedCornerShape(20.dp))
+                                                    .background(color)
+                                                    .padding(horizontal = 20.dp),
+                                                contentAlignment = Alignment.CenterEnd
+                                            ) {
                                                 Icon(
                                                     Icons.Default.Delete,
                                                     contentDescription = "Delete",
@@ -164,7 +179,7 @@ fun NotificationScreen(
                             ) {
                                 Text(
                                     text = result.message,
-                                    color = Color.Red,
+                                    color = MaterialTheme.colorScheme.error,
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                 )
                             }
@@ -227,7 +242,7 @@ fun NotificationItemView(notification: NotificationItem) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (notification.isRead) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            containerColor = if (notification.isRead) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
     ) {
@@ -291,10 +306,11 @@ fun NotificationItemView(notification: NotificationItem) {
 }
 
 private fun getNotificationTypeDetails(type: String): Pair<ImageVector, Color> {
-    return when (type) {
-        "SPENDING_SPIKE" -> Icons.AutoMirrored.Filled.TrendingUp to Color.Red
-        "UNUSUAL_EXPENSE" -> Icons.Default.Warning to Color(0xFFFFA000) // Amber
-        else -> Icons.Default.Info to Color(0xFF2196F3) // Blue
+    return when (type.uppercase()) {
+        "SPENDING_SPIKE", "WEEKLY_SPIKE" -> Icons.AutoMirrored.Filled.TrendingUp to Color.Red
+        "UNUSUAL_EXPENSE" -> Icons.Default.Warning to Color(0xFFFFA000)
+        "BUDGET_EXCEEDED" -> Icons.Default.Warning to Color.Red
+        else -> Icons.Default.Info to Color(0xFF2196F3)
     }
 }
 

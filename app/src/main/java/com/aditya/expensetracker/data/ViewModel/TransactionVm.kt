@@ -129,9 +129,14 @@ class TransactionVm @Inject constructor(
 
                 // Automatically trigger notification generation after a successful transaction
                 try {
+                    val userId = tokenManager.getUserId().first() ?: ""
                     notificationRepo.generateNotifications("Bearer $token")
+                    
+                    // Also trigger client-side checks for immediate local alerts
+                    val transactionsResponse = repo.getTransactions("Bearer $token")
+                    notificationRepo.generateClientSideAlerts(userId, transactionsResponse.transactions)
                 } catch (e: Exception) {
-                    // Fail silently or log - we don't want to break the transaction flow if notification generation fails
+                    // Fail silently or log
                 }
 
                 _transactionState.value = ResultState.Success(response)

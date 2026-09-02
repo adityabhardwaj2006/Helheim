@@ -167,20 +167,17 @@ fun HistoryScreen(
                             modifier = Modifier.animateItem(),
                             enableDismissFromStartToEnd = false,
                             backgroundContent = {
-                                val color = when (dismissState.dismissDirection) {
-                                    SwipeToDismissBoxValue.EndToStart -> Color.Red
-                                    else -> Color.Transparent
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(vertical = 4.dp)
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .background(color)
-                                        .padding(horizontal = 20.dp),
-                                    contentAlignment = Alignment.CenterEnd
-                                ) {
-                                    if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                                if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                                    val color = Color.Red
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(vertical = 4.dp)
+                                            .clip(RoundedCornerShape(16.dp))
+                                            .background(color)
+                                            .padding(horizontal = 20.dp),
+                                        contentAlignment = Alignment.CenterEnd
+                                    ) {
                                         Icon(
                                             Icons.Default.Delete,
                                             contentDescription = "Delete",

@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import com.aditya.expensetracker.ui.theme.BackgroundDark
+import com.aditya.expensetracker.ui.theme.SurfaceDark
 
 /**
  * A simple, easy-to-understand shimmer effect.
@@ -28,8 +30,11 @@ fun Modifier.shimmer(): Modifier = composed {
     )
 
     // The colors for the shimmer effect - now using theme-aware colors
-    val baseColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
-    val highlightColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+    val isDark = MaterialTheme.colorScheme.background == BackgroundDark
+    val alphaMultiplier = if (isDark) 0.6f else 1f // Reduced intensity in dark mode
+    
+    val baseColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f * alphaMultiplier)
+    val highlightColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f * alphaMultiplier)
     
     val shimmerColors = listOf(
         baseColor,

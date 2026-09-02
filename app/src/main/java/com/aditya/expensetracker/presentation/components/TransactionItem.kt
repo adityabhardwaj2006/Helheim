@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aditya.expensetracker.data.model.TransactionItem
 import com.aditya.expensetracker.data.model.TransactionType
+import com.aditya.expensetracker.ui.theme.GrayDark
+import com.aditya.expensetracker.ui.theme.GrayMedium
 import com.aditya.expensetracker.ui.theme.responsiveSp
 import java.text.SimpleDateFormat
 import java.util.*
@@ -115,9 +117,9 @@ private fun getCategoryIcon(type: String): ImageVector{
 // Helper to determine color based on category
 private fun getCategoryColor(category: String): Color {
     return when (category.lowercase()) {
-        "work" -> Color(0xFFE91E63) // Pinkish
-        "food", "groceries" -> Color(0xFF2196F3) // Blue
-        else -> Color(0xFF673AB7) // Purple
+        "work" -> GrayDark
+        "food", "groceries" -> GrayMedium
+        else -> GrayMedium
     }
 }
 

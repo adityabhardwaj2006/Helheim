@@ -1,3 +1,4 @@
+
 package com.aditya.expensetracker.presentation.components
 
 import android.os.Build
@@ -12,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -246,16 +248,16 @@ fun StatisticsChart(
                     Column(
                         modifier = Modifier
                             .shadow(8.dp, RoundedCornerShape(8.dp))
-                            .background(Color.White, RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
                             .padding(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = dataPoint.label, fontSize = 10.sp, color = Color.Gray)
+                        Text(text = dataPoint.label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                         Text(
                             text = "₹${String.format(Locale.getDefault(), "%,.2f", dataPoint.value)}",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
