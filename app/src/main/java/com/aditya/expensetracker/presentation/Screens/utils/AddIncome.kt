@@ -27,11 +27,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.presentation.components.shimmer
+import com.aditya.expensetracker.presentation.navigation.Routes
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -42,7 +44,8 @@ import java.util.Locale
 fun AddIncome(
     onDismiss : ()->Unit,
     authViewModel: AuthViewModel = hiltViewModel(),
-    paymentViewModel: PaymentViewModel = hiltViewModel()
+    paymentViewModel: PaymentViewModel = hiltViewModel(),
+    navController: NavController
 ) {
     val preferredPaymentMethod by paymentViewModel.preferredPaymentMethod.collectAsState()
     val transactionVm : TransactionVm = hiltViewModel()
@@ -65,17 +68,14 @@ fun AddIncome(
     LaunchedEffect(addIncomeState) {
         when(val state = addIncomeState){
             is ResultState.Success -> {
-                if (amount.isNotEmpty()) {
-                    transactionVm.resetTransactionState()
-                    scope.launch {
-                        sheetState.hide()
-                        onDismiss()
-                    }
+                navController.navigate(Routes.HomeUi)
+                scope.launch {
+                    sheetState.hide()
+                    onDismiss()
                 }
             }
             is ResultState.Error -> {
                 snackbarHostState.showSnackbar(state.message)
-                transactionVm.resetTransactionState()
             }
             else -> {}
         }
@@ -85,7 +85,6 @@ fun AddIncome(
         tonalElevation = 0.dp,
         onDismissRequest = {
             scope.launch{
-                transactionVm.resetTransactionState()
                 sheetState.hide()
                 onDismiss()
             }
@@ -277,5 +276,4 @@ private fun convertMillisToDate(millis: Long): String {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun AddIncomePreview() {
-    AddIncome(onDismiss = {})
 }

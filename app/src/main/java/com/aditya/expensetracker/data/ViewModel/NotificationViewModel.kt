@@ -7,6 +7,8 @@ import com.aditya.expensetracker.data.TokenManager
 import com.aditya.expensetracker.data.model.LocalNotification
 import com.aditya.expensetracker.data.model.NotificationItem
 import com.aditya.expensetracker.data.model.NotificationResponse
+import com.aditya.expensetracker.data.model.TransactionResponse
+import com.aditya.expensetracker.data.model.getTransactionResponse
 import com.aditya.expensetracker.domain.repo.NotificationRepo
 import com.aditya.expensetracker.domain.repo.TransactionRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -31,6 +34,8 @@ class NotificationViewModel @Inject constructor(
     private val _notificationState = MutableStateFlow<ResultState<NotificationResponse>>(ResultState.Idle)
     val notificationState = _notificationState.asStateFlow()
 
+    val transactionState = transactionRepo.transactions
+
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing = _isRefreshing.asStateFlow()
 
@@ -43,18 +48,25 @@ class NotificationViewModel @Inject constructor(
 
     fun getNotifications() {
         if (_notificationState.value is ResultState.Loading) return
-        
+
         _notificationState.value = ResultState.Loading
         viewModelScope.launch {
             try {
                 val token = tokenManager.getToken().first() ?: ""
                 val userId = tokenManager.getUserId().first() ?: ""
                 
-                // 1. Fetch remote
-                val remoteResponse = repo.getNotifications("Bearer $token")
+                // Fetch remote data in parallel using shared repo state
+                val remoteNotificationsDeferred = async { 
+                    repo.getNotifications("Bearer $token") 
+                }
+                val transactionsDeferred = async { 
+                    transactionRepo.getTransactions("Bearer $token") 
+                }
+
+                val remoteResponse = remoteNotificationsDeferred.await()
+                val transactionsResponse = transactionsDeferred.await()
                 
-                // 2. Fetch transactions and generate missing alerts
-                val transactionsResponse = transactionRepo.getTransactions("Bearer $token")
+                // Generate missing alerts
                 repo.generateClientSideAlerts(userId, transactionsResponse.transactions)
 
                 // 3. Fetch all local and remote for final list
@@ -73,7 +85,10 @@ class NotificationViewModel @Inject constructor(
                     )
                 }
                 
-                val combined = (remoteResponse.notifications + localItems).sortedByDescending { it.createdAt }.distinctBy { it._id }
+                val combined = (remoteResponse.notifications + localItems)
+                    .sortedByDescending { it.createdAt }
+                    .distinctBy { it._id }
+                
                 _notificationState.value = ResultState.Success(remoteResponse.copy(notifications = combined))
                 
             } catch (e: Exception) {

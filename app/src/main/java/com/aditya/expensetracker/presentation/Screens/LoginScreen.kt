@@ -3,8 +3,10 @@ package com.example.expensemanager.ui.login
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person2
@@ -63,6 +65,7 @@ fun LoginScreen(
             }
         }
 
+        val scrollState = rememberScrollState()
         Scaffold(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             containerColor = MaterialTheme.colorScheme.background
@@ -76,6 +79,10 @@ fun LoginScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .verticalScroll(scrollState)
                     .padding(horizontal = 24.dp)
                     .padding(top = 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally

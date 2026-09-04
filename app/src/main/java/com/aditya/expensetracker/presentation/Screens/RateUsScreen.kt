@@ -61,8 +61,7 @@ fun RateUsScreen(
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface)
                     .statusBarsPadding()
-                    .height(64.dp)
-                    .padding(horizontal = 16.dp),
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(

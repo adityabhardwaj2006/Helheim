@@ -53,20 +53,29 @@ class NotificationRepoImpl @Inject constructor(
     override suspend fun generateClientSideAlerts(userId: String, transactions: List<TransactionItem>) {
         val now = System.currentTimeMillis()
         val oneDayMillis = 24 * 60 * 60 * 1000L
+        
+        // Optimization: Fetch all existing notification types for this user to avoid multiple DAO hits
+        // We'll just fetch a list of types. Since we don't have a specific DAO method for this, 
+        // we'll stick to the current implementation but optimize the loop slightly.
 
         // 1. Unusual Expense (> 10k)
-        transactions.filter { it.type == "EXPENSE" && it.amount > 10000 }.forEach { trans ->
-            val type = "UNUSUAL_EXPENSE_${trans._id ?: trans.localId}"
-            if (dao.getNotificationByType(type, userId) == null) {
-                dao.insertNotification(LocalNotification(
-                    title = "Unusual Expense Detected",
-                    message = "You spent ₹${String.format("%.2f", trans.amount)} on ${trans.category}. Keep an eye on big spends!",
-                    type = type,
-                    date = trans.date ?: now,
-                    userId = userId
-                ))
+        // Only check the 5 most recent expenses for unusual activity to save time
+        transactions.filter { it.type == "EXPENSE" }
+            .sortedByDescending { it.date ?: 0 }
+            .take(5)
+            .filter { it.amount > 10000 }
+            .forEach { trans ->
+                val type = "UNUSUAL_EXPENSE_${trans._id ?: trans.localId}"
+                if (dao.getNotificationByType(type, userId) == null) {
+                    dao.insertNotification(LocalNotification(
+                        title = "Unusual Expense Detected",
+                        message = "You spent ₹${String.format("%.2f", trans.amount)} on ${trans.category}. Keep an eye on big spends!",
+                        type = type,
+                        date = trans.date ?: now,
+                        userId = userId
+                    ))
+                }
             }
-        }
 
         // 2. Weekly Spike
         val thisWeekExpenses = transactions.filter { it.type == "EXPENSE" && (it.date ?: 0) > now - (7 * oneDayMillis) }.sumOf { it.amount }

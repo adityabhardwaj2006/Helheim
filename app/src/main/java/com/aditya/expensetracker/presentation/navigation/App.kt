@@ -83,9 +83,9 @@ fun App(
     }
     
     when (currentSheet) {
-        SheetType.INCOME -> AddIncome(onDismiss = { currentSheet = SheetType.NONE })
-        SheetType.EXPENSE -> AddScreen(onDismiss = { currentSheet = SheetType.NONE })
-        SheetType.SAVING -> AddSaving(onDismiss = { currentSheet = SheetType.NONE })
+        SheetType.INCOME -> AddIncome(navController = navController,onDismiss = { currentSheet = SheetType.NONE })
+        SheetType.EXPENSE -> AddScreen(navController = navController,onDismiss = { currentSheet = SheetType.NONE })
+        SheetType.SAVING -> AddSaving(navController = navController, onDismiss = { currentSheet = SheetType.NONE })
         SheetType.NONE -> {}
     }
     

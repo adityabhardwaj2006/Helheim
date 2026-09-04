@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.presentation.components.shimmer
+import com.aditya.expensetracker.presentation.navigation.Routes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,8 +49,7 @@ fun EditProfileScreen(
 
     LaunchedEffect(updateState) {
         if (updateState is ResultState.Success) {
-
-            navController.popBackStack()
+                navController.popBackStack()
         } else if (updateState is ResultState.Error) {
             snackbarHostState.showSnackbar((updateState as ResultState.Error).message)
         }
@@ -64,8 +64,7 @@ fun EditProfileScreen(
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface)
                     .statusBarsPadding()
-                    .height(64.dp)
-                    .padding(horizontal = 16.dp),
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(

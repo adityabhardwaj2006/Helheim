@@ -95,14 +95,13 @@ fun StatisticsScreen(
             }
         },
         topBar = {
-            // Top Bar
+            // Top Bar - Flexible height with status bar padding
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface)
                     .statusBarsPadding()
-                    .height(64.dp)
-                    .padding(horizontal = 16.dp),
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
@@ -202,7 +201,7 @@ fun StatisticsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(40.dp)
-                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), RoundedCornerShape(20.dp)),
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(20.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TimeFilterItem(
@@ -232,7 +231,7 @@ fun StatisticsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp)
-                            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp)),
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(24.dp)),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         ChartTypeFilterItem(

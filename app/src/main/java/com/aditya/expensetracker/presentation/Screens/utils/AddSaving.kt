@@ -27,11 +27,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.presentation.components.shimmer
+import com.aditya.expensetracker.presentation.navigation.Routes
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -42,7 +44,8 @@ import java.util.Locale
 fun AddSaving(
     onDismiss : ()->Unit,
     authViewModel: AuthViewModel = hiltViewModel(),
-    paymentViewModel: PaymentViewModel = hiltViewModel()
+    paymentViewModel: PaymentViewModel = hiltViewModel(),
+    navController: NavController
 ) {
     val transactionVm : TransactionVm = hiltViewModel()
     val preferredPaymentMethod by paymentViewModel.preferredPaymentMethod.collectAsState()
@@ -66,17 +69,14 @@ fun AddSaving(
     LaunchedEffect(addSavingState) {
         when(val state = addSavingState){
             is ResultState.Success -> {
-                if (amount.isNotEmpty()) {
-                    transactionVm.resetTransactionState()
+                    navController.navigate(Routes.HomeUi)
                     scope.launch {
                         sheetState.hide()
                         onDismiss()
                     }
-                }
             }
             is ResultState.Error -> {
                 snackbarHostState.showSnackbar(state.message)
-                transactionVm.resetTransactionState()
             }
             else -> {}
         }
@@ -86,7 +86,6 @@ fun AddSaving(
         tonalElevation = 0.dp,
         onDismissRequest = {
             scope.launch {
-                transactionVm.resetTransactionState()
                 sheetState.hide()
                 onDismiss()
             }

@@ -30,61 +30,15 @@ class TransactionVm @Inject constructor(
     private val _transactionState = MutableStateFlow<ResultState<TransactionResponse>>(ResultState.Idle)
     val transactionState = _transactionState.asStateFlow()
 
-    private val _getTransactionState = MutableStateFlow<ResultState<getTransactionResponse>>(
-        ResultState.Idle)
-    val getTransactionState = _getTransactionState.asStateFlow()
+    val getTransactionState = repo.transactions
+
     fun getTransaction() {
-        _getTransactionState.value = ResultState.Loading
         viewModelScope.launch {
             try {
-                val userId = tokenManager.getUserId().first() ?: ""
-                val list = localRepo.getAllTransaction(userId).first()
-
-                if(list.isNotEmpty()){
-                    val newList = list.map {
-                        TransactionItem(
-                            _id = it.backendId,
-                            localId = it.id,
-                            amount = it.amount,
-                            date = it.date,
-                            type = it.type,
-                            paidTo = it.paidTo,
-                            category = it.category,
-                            savedFor = it.savedFor,
-                            receivedFrom = it.receivedFrom,
-                            paymentMethod = it.paymentMethod
-                        )
-                    }.distinctBy { it._id ?: it.localId }
-                    _getTransactionState.value = ResultState.Success(getTransactionResponse(
-                        success = true,
-                        transactions = newList
-                    ))
-                }else{
-                    val token = tokenManager.getToken().first() ?: ""
-                    val response = repo.getTransactions("Bearer $token")
-                    val distinctTransactions = response.transactions.distinctBy { it._id ?: it.localId }
-                    _getTransactionState.value = ResultState.Success(response.copy(transactions = distinctTransactions))
-
-                    distinctTransactions.forEach {
-                        localRepo.insertTransaction(
-                            Transaction(
-                                backendId = it._id,
-                                amount = it.amount,
-                                date = it.date,
-                                type = it.type,
-                                paidTo = it.paidTo,
-                                category = it.category,
-                                savedFor = it.savedFor,
-                                receivedFrom = it.receivedFrom,
-                                paymentMethod = it.paymentMethod,
-                                userId = userId
-                            )
-                        )
-                    }
-                }
+                val token = tokenManager.getToken().first() ?: ""
+                repo.getTransactions("Bearer $token")
             } catch (error: Exception) {
-                _getTransactionState.value =
-                    ResultState.Error(error.message ?: "Cannot get the transactions")
+                // Error handled in repository's StateFlow
             }
         }
     }
@@ -125,21 +79,25 @@ class TransactionVm @Inject constructor(
                             userId = userId
                         )
                     )
-                }
-
-                // Automatically trigger notification generation after a successful transaction
-                try {
-                    val userId = tokenManager.getUserId().first() ?: ""
-                    notificationRepo.generateNotifications("Bearer $token")
-                    
-                    // Also trigger client-side checks for immediate local alerts
-                    val transactionsResponse = repo.getTransactions("Bearer $token")
-                    notificationRepo.generateClientSideAlerts(userId, transactionsResponse.transactions)
-                } catch (e: Exception) {
-                    // Fail silently or log
+                    // Refresh the shared transaction list
+                    repo.getTransactions("Bearer $token")
                 }
 
                 _transactionState.value = ResultState.Success(response)
+
+                // Trigger notification and background tasks asynchronously
+                viewModelScope.launch {
+                    try {
+                        val userId = tokenManager.getUserId().first() ?: ""
+                        notificationRepo.generateNotifications("Bearer $token")
+                        
+                        // Also trigger client-side checks for immediate local alerts
+                        val transactionsResponse = repo.getTransactions("Bearer $token")
+                        notificationRepo.generateClientSideAlerts(userId, transactionsResponse.transactions)
+                    } catch (e: Exception) {
+                        // Fail silently in background
+                    }
+                }
             }catch (error : Exception){
                 _transactionState.value = ResultState.Error(error.message?:"Transaction couldn't be saved")
             }
@@ -147,19 +105,14 @@ class TransactionVm @Inject constructor(
 
     }
 
-    fun resetTransactionState() {
-        _transactionState.value = ResultState.Idle
-    }
-
     fun deleteTransaction(transactionItem: TransactionItem) {
-        val currentState = _getTransactionState.value
-        if (currentState is ResultState.Success) {
-            val originalList = currentState.data.transactions
-            // Optimistic UI Update
+        val currentState = getTransactionState.value
+        if (currentState is ResultState.Success<*>) {
+            val data = currentState.data as getTransactionResponse
+            val originalList = data.transactions
+            // Optimistic UI Update in shared repository
             val updatedList = originalList.filter { it._id != transactionItem._id }
-            _getTransactionState.value = ResultState.Success(
-                currentState.data.copy(transactions = updatedList)
-            )
+            repo.updateLocalState(data.copy(transactions = updatedList))
 
             viewModelScope.launch {
                 try {
@@ -178,7 +131,6 @@ class TransactionVm @Inject constructor(
                             if (it.backendId != null && transactionItem._id != null) {
                                 it.backendId == transactionItem._id
                             } else {
-                                // Fallback for legacy items without backendId
                                 it.amount == transactionItem.amount &&
                                 it.date == transactionItem.date &&
                                 it.type == transactionItem.type &&
@@ -191,15 +143,11 @@ class TransactionVm @Inject constructor(
                         }
                     } else {
                         // Rollback UI if backend reported failure
-                        _getTransactionState.value = ResultState.Success(
-                            currentState.data.copy(transactions = originalList)
-                        )
+                        repo.updateLocalState(data)
                     }
                 } catch (e: Exception) {
                     // Rollback UI if network error occurred
-                    _getTransactionState.value = ResultState.Success(
-                        currentState.data.copy(transactions = originalList)
-                    )
+                    repo.updateLocalState(data)
                 }
             }
         }

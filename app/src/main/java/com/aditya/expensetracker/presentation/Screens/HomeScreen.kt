@@ -56,87 +56,102 @@ fun HomeScreen(
 ) {
     LaunchedEffect(Unit) {
         authViewModel.getProfile()
-        transactionVm.getTransaction()
         notificationViewModel.getNotifications()
     }
     val userState : ResultState<profileResponse>? by authViewModel.userState.collectAsState()
     val isLoadingUser = userState is ResultState.Loading || userState is ResultState.Idle
 
-    val transactionState by transactionVm.getTransactionState.collectAsState()
+    val transactionState by notificationViewModel.transactionState.collectAsState()
     val notificationState by notificationViewModel.notificationState.collectAsState()
 
     val hasUnreadNotifications = when (val state = notificationState) {
         is ResultState.Success -> state.data.notifications.any { !it.isRead }
         else -> false
     }
-    
-    var totalIncome = 0.0
-    var totalSavings = 0.0
-    var totalExpense = 0.0
-    
-    var currentIncome = 0.0
-    var currentSavings = 0.0
-    var currentExpense = 0.0
-    
-    var prevIncome = 0.0
-    var prevSavings = 0.0
-    var prevExpense = 0.0
 
-    val currentMonth = YearMonth.now()
-    val prevMonth = currentMonth.minusMonths(1)
+    val listState = when(val state = transactionState){
+        is ResultState.Success -> state.data
+        else -> getTransactionResponse(success = false, transactions = emptyList())
+    }
 
-    var listState = getTransactionResponse(
-        success = false,
-        transactions = emptyList()
+    data class TransactionSummary(
+        val balance: Double,
+        val incomeChange: String,
+        val expenseChange: String,
+        val savingsChange: String,
+        val totalIncome: Double,
+        val totalExpense: Double,
+        val totalSavings: Double
     )
-    
-    when(val state = transactionState){
-        is ResultState.Success -> {
-            listState = state.data
-            listState.transactions.forEach { trans ->
-                val amount = trans.amount
-                val type = trans.type.lowercase()
-                
-                // Total calculation for balance
+
+    val transactionSummary = remember(listState) {
+        var tIncome = 0.0
+        var tSavings = 0.0
+        var tExpense = 0.0
+        
+        var currentIncome = 0.0
+        var currentSavings = 0.0
+        var currentExpense = 0.0
+        
+        var prevIncome = 0.0
+        var prevSavings = 0.0
+        var prevExpense = 0.0
+
+        val currentMonth = YearMonth.now()
+        val prevMonth = currentMonth.minusMonths(1)
+
+        listState.transactions.forEach { trans ->
+            val amount = trans.amount
+            val type = trans.type.lowercase()
+            
+            // Total calculation for balance
+            when(type){
+                "income" -> tIncome += amount
+                "expense" -> tExpense += amount
+                "savings" -> tSavings += amount
+            }
+            
+            // Month based calculation for growth
+            val transDate = Instant.ofEpochMilli(trans.date ?: 0L)
+                .atZone(ZoneId.systemDefault()).toLocalDate()
+            val transYearMonth = YearMonth.from(transDate)
+            
+            if (transYearMonth == currentMonth) {
                 when(type){
-                    "income" -> totalIncome += amount
-                    "expense" -> totalExpense += amount
-                    "savings" -> totalSavings += amount
+                    "income" -> currentIncome += amount
+                    "expense" -> currentExpense += amount
+                    "savings" -> currentSavings += amount
                 }
-                
-                // Month based calculation for growth
-                val transDate = Instant.ofEpochMilli(trans.date ?: 0L)
-                    .atZone(ZoneId.systemDefault()).toLocalDate()
-                val transYearMonth = YearMonth.from(transDate)
-                
-                if (transYearMonth == currentMonth) {
-                    when(type){
-                        "income" -> currentIncome += amount
-                        "expense" -> currentExpense += amount
-                        "savings" -> currentSavings += amount
-                    }
-                } else if (transYearMonth == prevMonth) {
-                    when(type){
-                        "income" -> prevIncome += amount
-                        "expense" -> prevExpense += amount
-                        "savings" -> prevSavings += amount
-                    }
+            } else if (transYearMonth == prevMonth) {
+                when(type){
+                    "income" -> prevIncome += amount
+                    "expense" -> prevExpense += amount
+                    "savings" -> prevSavings += amount
                 }
             }
         }
-        else -> {}
+
+        fun calculateGrowth(current: Double, previous: Double): String {
+            if (previous == 0.0) return if (current > 0) "+100%" else "0%"
+            val growth = ((current - previous) / previous) * 100
+            val sign = if (growth >= 0) "+" else ""
+            return "$sign${Math.round(growth)}%"
+        }
+
+        TransactionSummary(
+            balance = tIncome - tExpense - tSavings,
+            incomeChange = calculateGrowth(currentIncome, prevIncome),
+            expenseChange = calculateGrowth(currentExpense, prevExpense),
+            savingsChange = calculateGrowth(currentSavings, prevSavings),
+            totalIncome = tIncome,
+            totalExpense = tExpense,
+            totalSavings = tSavings
+        )
     }
 
-    fun calculateGrowth(current: Double, previous: Double): String {
-        if (previous == 0.0) return if (current > 0) "+100%" else "0%"
-        val growth = ((current - previous) / previous) * 100
-        val sign = if (growth >= 0) "+" else ""
-        return "$sign${Math.round(growth)}%"
-    }
-
-    val incomeChange = calculateGrowth(currentIncome, prevIncome)
-    val expenseChange = calculateGrowth(currentExpense, prevExpense)
-    val savingsChange = calculateGrowth(currentSavings, prevSavings)
+    val incomeChange = transactionSummary.incomeChange
+    val expenseChange = transactionSummary.expenseChange
+    val savingsChange = transactionSummary.savingsChange
 
 
     val transactionListState = rememberLazyListState()
@@ -245,7 +260,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // 2. Premium Balance Card
-            BalanceCard(balance = (totalIncome - totalExpense - totalSavings))
+            BalanceCard(balance = transactionSummary.balance)
 
             Spacer(modifier = Modifier.height(32.dp))
 

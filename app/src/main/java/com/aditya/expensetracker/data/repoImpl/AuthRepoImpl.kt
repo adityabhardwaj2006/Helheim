@@ -40,6 +40,14 @@ class AuthRepoImpl @Inject constructor(
         tokenManager.saveToken(response.token)
         tokenManager.saveUserId(response.user.id)
 
+        // Cache user info immediately for instant UI display
+        userDao.insertUser(UserEntity(
+            userId = response.user.id,
+            firstName = response.user.firstName,
+            lastName = response.user.lastName,
+            username = response.user.username
+        ))
+
         return response
     }
 

@@ -71,6 +71,8 @@ import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.data.model.TransactionType
 import com.aditya.expensetracker.presentation.components.shimmer
 import androidx.compose.ui.draw.clip
+import androidx.navigation.NavController
+import com.aditya.expensetracker.presentation.navigation.Routes
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -87,7 +89,8 @@ fun AddScreen(
     onDismiss : ()->Unit,
     transactionVm: TransactionVm = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel(),
-    paymentViewModel: PaymentViewModel = hiltViewModel()
+    paymentViewModel: PaymentViewModel = hiltViewModel(),
+    navController : NavController
 ) {
 
     //Calling repo
@@ -115,17 +118,14 @@ fun AddScreen(
     LaunchedEffect(addScreenState) {
         when(val state = addScreenState){
             is ResultState.Success -> {
-                if (amount.isNotEmpty()) {
-                    transactionVm.resetTransactionState()
+                navController.navigate(Routes.HomeUi)
                     scope.launch {
                         sheetState.hide()
                         onDismiss()
                     }
-                }
             }
             is ResultState.Error -> {
                 snackbarHostState.showSnackbar("${state.message}")
-                transactionVm.resetTransactionState()
             }
             else -> {}
         }
@@ -136,7 +136,6 @@ fun AddScreen(
             tonalElevation = 0.dp,
             onDismissRequest = {
                 scope.launch{
-                    transactionVm.resetTransactionState()
                     sheetState.hide()
                     onDismiss()
                 }
@@ -409,8 +408,3 @@ private fun convertMillisToDate(millis: Long): String {
     return formatter.format(Date(millis))
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun AddScreenPreview() {
-    AddScreen(onDismiss = {})
-}

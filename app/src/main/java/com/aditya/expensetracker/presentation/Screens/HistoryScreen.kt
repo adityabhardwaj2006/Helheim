@@ -79,14 +79,13 @@ fun HistoryScreen(
         },
         topBar = {
 
-            // Top Bar
+            // Top Bar - Flexible height with status bar padding
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface)
                     .statusBarsPadding()
-                    .height(64.dp)
-                    .padding(horizontal = 16.dp),
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
