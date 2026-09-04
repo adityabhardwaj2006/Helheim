@@ -54,7 +54,14 @@ class TransactionRepoImpl @Inject constructor(
     }
 
     override suspend fun getTransactions(token: String): getTransactionResponse {
-        _transactions.value = ResultState.Loading
+        val currentState = _transactions.value
+        val shouldShowLoading = currentState !is ResultState.Success<*> || 
+                (currentState.data as getTransactionResponse).transactions.isEmpty()
+        
+        if (shouldShowLoading) {
+            _transactions.value = ResultState.Loading
+        }
+
         return try {
             val userId = tokenManager.getUserId().first() ?: ""
             val localList = localRepo.getAllTransaction(userId).first()
@@ -102,7 +109,9 @@ class TransactionRepoImpl @Inject constructor(
                 response
             }
         } catch (e: Exception) {
-            _transactions.value = ResultState.Error(e.message ?: "Failed to fetch transactions")
+            if (shouldShowLoading) {
+                _transactions.value = ResultState.Error(e.message ?: "Failed to fetch transactions")
+            }
             throw e
         }
     }

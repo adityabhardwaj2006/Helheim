@@ -47,9 +47,13 @@ class NotificationViewModel @Inject constructor(
     }
 
     fun getNotifications() {
-        if (_notificationState.value is ResultState.Loading) return
+        val currentState = _notificationState.value
+        val shouldShowLoading = currentState !is ResultState.Success || currentState.data.notifications.isEmpty()
+        
+        if (shouldShowLoading) {
+            _notificationState.value = ResultState.Loading
+        }
 
-        _notificationState.value = ResultState.Loading
         viewModelScope.launch {
             try {
                 val token = tokenManager.getToken().first() ?: ""
@@ -92,7 +96,9 @@ class NotificationViewModel @Inject constructor(
                 _notificationState.value = ResultState.Success(remoteResponse.copy(notifications = combined))
                 
             } catch (e: Exception) {
-                _notificationState.value = ResultState.Error(e.message ?: "An unknown error occurred")
+                if (shouldShowLoading) {
+                    _notificationState.value = ResultState.Error(e.message ?: "An unknown error occurred")
+                }
             }
         }
     }

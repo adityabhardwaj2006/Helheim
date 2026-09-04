@@ -61,7 +61,7 @@ import java.util.Locale
 @Composable
 fun StatisticsScreen(
     navController: NavController,
-    transactionVm : TransactionVm = hiltViewModel()
+    transactionVm : TransactionVm
 ) {
     var selectedChartType by remember { mutableStateOf(ChartType.EXPENSE) }
     var selectedTimeFilter by remember { mutableStateOf(TimeFilter.YEAR) }
@@ -481,9 +481,3 @@ fun SpendingItem(title: String, date: String, amount: String, icon: ImageVector)
     }
 }
 
-
-@Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
-@Composable
-fun StatisticsScreenPreview() {
-    StatisticsScreen(rememberNavController())
-}

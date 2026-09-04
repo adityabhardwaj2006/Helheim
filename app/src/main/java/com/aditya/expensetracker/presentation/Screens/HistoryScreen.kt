@@ -44,7 +44,6 @@ import com.aditya.expensetracker.presentation.navigation.Routes
 
 @Composable
 fun HistoryScreen(
-    viewModel: TransactionViewModel = hiltViewModel(),
     navController : NavController,
     transactionVm : TransactionVm = hiltViewModel()
 ) {
@@ -250,10 +249,4 @@ fun ShimmerHistoryItem() {
             }
         }
     }
-}
-
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-fun historyPreview(){
-    HistoryScreen( hiltViewModel(),rememberNavController())
 }

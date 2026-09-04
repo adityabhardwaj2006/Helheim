@@ -356,8 +356,3 @@ fun CardItem(
 }
 
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun ProfilePreview(){
-    ProfileScreen(rememberNavController())
-}

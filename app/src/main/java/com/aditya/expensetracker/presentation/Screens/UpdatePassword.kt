@@ -56,7 +56,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun UpdatePassword(
                    navController: NavController,
-                   authViewModel: AuthViewModel = hiltViewModel()
+                   authViewModel: AuthViewModel
 ) {
     val updateState by authViewModel.updatePasswordState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }

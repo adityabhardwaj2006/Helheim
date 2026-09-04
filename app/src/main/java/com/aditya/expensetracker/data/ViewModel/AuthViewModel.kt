@@ -105,12 +105,20 @@ class AuthViewModel @Inject constructor(
     }
     fun getProfile(){
         viewModelScope.launch {
-            _userState.value = ResultState.Loading
+            val currentState = _userState.value
+            val hasData = (currentState as? ResultState.Success<profileResponse>)?.data?.data != null
+            
+            if (!hasData) {
+                _userState.value = ResultState.Loading
+            }
+
             try{
                 val response = authRepo.getProfile()
                 _userState.value = ResultState.Success(response)
             }catch (err : Exception){
-                _userState.value = ResultState.Error(err.message?: "Cannot get profile, please try again")
+                if (!hasData) {
+                    _userState.value = ResultState.Error(err.message?: "Cannot get profile, please try again")
+                }
             }
         }
 

@@ -44,7 +44,7 @@ import java.util.Locale
 @Composable
 fun NotificationScreen(
     navController: NavController,
-    viewModel: NotificationViewModel = hiltViewModel()
+    viewModel: NotificationViewModel
 ) {
     val state by viewModel.notificationState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()

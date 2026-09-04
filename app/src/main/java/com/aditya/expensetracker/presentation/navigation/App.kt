@@ -57,6 +57,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
+import com.aditya.expensetracker.data.ViewModel.NotificationViewModel
+import com.aditya.expensetracker.data.ViewModel.TransactionViewModel
+import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.presentation.Screens.UpdatePassword
 
 enum class SheetType { NONE, INCOME, EXPENSE, SAVING }
@@ -64,7 +67,9 @@ enum class SheetType { NONE, INCOME, EXPENSE, SAVING }
 @Composable
 fun App(
     modifier: Modifier = Modifier,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    notificationViewModel : NotificationViewModel = hiltViewModel(),
+    transactionViewModel: TransactionVm = hiltViewModel()
 ) {
     val navController = rememberNavController()
     var currentSheet by remember { mutableStateOf(SheetType.NONE) }
@@ -209,23 +214,27 @@ fun App(
                 startDestination = Routes.HomeUi
             ) {
                 composable<Routes.HomeUi> {
-                    HomeScreen(navController)
+                    HomeScreen(navController,
+                        authViewModel = authViewModel,
+                        notificationViewModel = notificationViewModel,
+                        transactionVm = transactionViewModel)
                 }
                 composable<Routes.Profile> {
-                    ProfileScreen(navController)
+                    ProfileScreen(navController,authViewModel)
                 }
                 composable<Routes.EditProfile> {
-                    EditProfileScreen(navController)
+                    EditProfileScreen(navController, authViewModel = authViewModel)
                 }
                 composable<Routes.Statistics> {
-                    StatisticsScreen(navController)
+                    StatisticsScreen(navController, transactionVm = transactionViewModel)
                 }
                 composable<Routes.History> {
-                    HistoryScreen(navController = navController)
+                    HistoryScreen(navController = navController, transactionVm = transactionViewModel)
                 }
                 composable<Routes.UpdatePassword> {
                     UpdatePassword(
-                        navController = navController
+                        navController = navController,
+                        authViewModel = authViewModel
                     )
                 }
                 composable<Routes.PrivacyPolicy> {
@@ -244,7 +253,8 @@ fun App(
                     PaymentMethodsScreen(navController)
                 }
                 composable<Routes.Notification> {
-                    NotificationScreen(navController)
+                    NotificationScreen(navController,
+                        viewModel = notificationViewModel)
                 }
                 composable<Routes.Chat> {
                     ChatScreen(navController)

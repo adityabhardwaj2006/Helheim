@@ -50,9 +50,9 @@ import kotlin.collections.emptyList
 @Composable
 fun HomeScreen(
     navController: NavController,
-    authViewModel : AuthViewModel = hiltViewModel(),
-    transactionVm : TransactionVm = hiltViewModel(),
-    notificationViewModel: NotificationViewModel = hiltViewModel()
+    authViewModel : AuthViewModel,
+    transactionVm : TransactionVm,
+    notificationViewModel: NotificationViewModel
 ) {
     LaunchedEffect(Unit) {
         authViewModel.getProfile()
@@ -61,7 +61,7 @@ fun HomeScreen(
     val userState : ResultState<profileResponse>? by authViewModel.userState.collectAsState()
     val isLoadingUser = userState is ResultState.Loading || userState is ResultState.Idle
 
-    val transactionState by notificationViewModel.transactionState.collectAsState()
+    val transactionState by transactionVm.getTransactionState.collectAsState()
     val notificationState by notificationViewModel.notificationState.collectAsState()
 
     val hasUnreadNotifications = when (val state = notificationState) {
@@ -299,10 +299,4 @@ fun HomeScreen(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    HomeScreen(rememberNavController())
 }
