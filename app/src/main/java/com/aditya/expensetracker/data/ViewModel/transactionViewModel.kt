@@ -39,11 +39,8 @@ class TransactionViewModel @Inject constructor(
             repo.deleteTransaction(transaction)
         }
     }
-    fun deleteAllTransaction(){
-        viewModelScope.launch {
-            repo.deleteAllTransaction()
-        }
-    }
+
+
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val transactions = tokenManager.getUserId()

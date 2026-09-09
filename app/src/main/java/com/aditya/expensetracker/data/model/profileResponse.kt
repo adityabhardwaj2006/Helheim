@@ -8,9 +8,11 @@ data class profileResponse(
 )
 
 data class profileData(
-    @SerializedName("_id")
+    @SerializedName("userId")
     val userId : String?,
     val firstName : String?,
     val lastName : String?,
     val username : String?,
+    val email: String? = null,
+    val profilePictureUrl: String? = null
 )

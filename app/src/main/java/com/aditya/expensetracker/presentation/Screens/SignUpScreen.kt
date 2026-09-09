@@ -1,16 +1,15 @@
 package com.aditya.expensetracker.presentation.Screens
 
-import androidx.compose.foundation.BorderStroke
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person2
 import androidx.compose.material.icons.filled.Visibility
@@ -21,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -34,11 +34,9 @@ import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.R
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
-import com.aditya.expensetracker.presentation.components.shimmer
+import com.aditya.expensetracker.presentation.components.SocialButton
 import com.aditya.expensetracker.presentation.navigation.Routes
-import com.aditya.expensetracker.presentation.navigation.SubNavigation
 import com.airbnb.lottie.compose.LottieAnimation
-import androidx.compose.ui.draw.clip
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
@@ -54,8 +52,15 @@ fun SignUpScreen(
     var firstname by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     val signUpState by authViewModel.signUpState.collectAsState()
+    val loginState by authViewModel.loginState.collectAsState()
     val snackbarHostState = remember{ SnackbarHostState() }
     val scrollState = rememberScrollState()
+
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        authViewModel.onGoogleSignInResult(result.data)
+    }
 
     LaunchedEffect(signUpState) {
         when(val state = signUpState){
@@ -67,6 +72,19 @@ fun SignUpScreen(
             }
             else -> {}
 
+        }
+    }
+
+    LaunchedEffect(loginState) {
+        when(val state = loginState){
+            is ResultState.Success<*> -> {
+                navController.navigate(Routes.HomeUi)
+            }
+            is ResultState.Error -> {
+                snackbarHostState.showSnackbar(state.message)
+            }
+
+            else -> {}
         }
     }
 
@@ -216,6 +234,45 @@ fun SignUpScreen(
                             username,
                             password
                         )
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    HorizontalDivider(
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Text(
+                        text = " OR ",
+                        color = Color.Gray
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                SocialButton(
+                    text = "Continue with Google",
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.google_icon_logo_svgrepo_com) ,
+                            contentDescription = "Google",
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(
+                                24.dp
+                            )
+                        )
+                    },
+                    onClick = {
+                        googleSignInLauncher.launch(authViewModel.getGoogleSignInIntent())
                     }
                 )
 

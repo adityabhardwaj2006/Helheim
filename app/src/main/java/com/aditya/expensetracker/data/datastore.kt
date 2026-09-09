@@ -22,7 +22,8 @@ class TokenManager @Inject constructor(
 
         val TOKEN = stringPreferencesKey("token")
         val USER_ID = stringPreferencesKey("user_id")
-        val PREFERRED_PAYMENT_METHOD = stringPreferencesKey("preferred_payment_method")
+        val PREFERRED_CURRENCY = stringPreferencesKey("preferred_currency")
+        val PREFERRED_CURRENCY_CODE = stringPreferencesKey("preferred_currency_code")
 
     }
 
@@ -40,9 +41,14 @@ class TokenManager @Inject constructor(
         }
     }
 
-    suspend fun savePaymentMethod(method: String) {
+    suspend fun saveCurrency(currency: String) {
         context.dataStore.edit {
-            it[PREFERRED_PAYMENT_METHOD] = method
+            it[PREFERRED_CURRENCY] = currency
+        }
+    }
+    suspend fun saveCurrencyCode(code: String) {
+        context.dataStore.edit {
+            it[PREFERRED_CURRENCY_CODE] = code
         }
     }
 
@@ -60,9 +66,14 @@ class TokenManager @Inject constructor(
         }
     }
 
-    fun getPaymentMethod(): Flow<String?> {
+    fun getCurrencyMethod(): Flow<String?> {
         return context.dataStore.data.map {
-            it[PREFERRED_PAYMENT_METHOD]
+            it[PREFERRED_CURRENCY]
+        }
+    }
+    fun getCurrencyCode(): Flow<String?> {
+        return context.dataStore.data.map {
+            it[PREFERRED_CURRENCY_CODE]
         }
     }
 

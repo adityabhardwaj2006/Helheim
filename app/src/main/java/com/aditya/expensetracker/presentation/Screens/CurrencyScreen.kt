@@ -3,6 +3,7 @@ package com.aditya.expensetracker.presentation.Screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -27,23 +28,18 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
+import com.aditya.expensetracker.data.model.getCurrency
+import com.aditya.expensetracker.presentation.Screens.components.CurrencyItem
 
 @Composable
-fun PaymentMethodsScreen(
+fun CurrencyScreen(
     navController: NavController,
-    viewModel: PaymentViewModel = hiltViewModel()
+    viewModel: PaymentViewModel = hiltViewModel(),
 ) {
-    val preferredMethod by viewModel.preferredPaymentMethod.collectAsState()
+    var selectedCurrency = viewModel.preferredPaymentMethod.collectAsState()
+    var selectedCurrencyCode = viewModel.preferredPaymentCode.collectAsState()
 
-    val paymentMethods = listOf(
-        PaymentOption("Cash", Icons.Default.Payments),
-        PaymentOption("Credit Card", Icons.Default.CreditCard),
-        PaymentOption("Debit Card", Icons.Default.CreditCard),
-        PaymentOption("UPI", Icons.Default.QrCodeScanner),
-        PaymentOption("Bank Transfer", Icons.Default.AccountBalance),
-        PaymentOption("Phone Pay", Icons.Default.Payments),
-        PaymentOption("Wallet", Icons.Default.AccountBalanceWallet)
-    )
+    val currencies = getCurrency()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -70,7 +66,7 @@ fun PaymentMethodsScreen(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = "Payment Methods",
+                    text = "Set Currency",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -91,19 +87,20 @@ fun PaymentMethodsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Select Preferred Method",
+                text = "Select Preferred Currency",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            paymentMethods.forEach { method ->
-                PaymentMethodCard(
-                    option = method,
-                    isSelected = preferredMethod == method.name,
+            currencies.forEach { currency->
+                CurrencyItem(
+                    currency = currency,
+                    isSelected = selectedCurrencyCode.value == currency.code,
                     onClick = {
-                        viewModel.updatePaymentMethod(method.name)
+                        viewModel.setPreferredPaymentMethod(currency.symbol)
+                        viewModel.setPreferredCurrencyCode(currency.code)
                     }
                 )
             }
@@ -113,66 +110,3 @@ fun PaymentMethodsScreen(
     }
 }
 
-data class PaymentOption(val name: String, val icon: ImageVector)
-
-@Composable
-fun PaymentMethodCard(
-    option: PaymentOption,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.05f) else MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 0.dp else 0.5.dp),
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(20.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .background(
-                        if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
-                        CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = option.icon,
-                    contentDescription = null,
-                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Text(
-                text = option.name,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                fontSize = 16.sp,
-                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f)
-            )
-            
-            if (isSelected) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = "Selected",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
-    }
-}

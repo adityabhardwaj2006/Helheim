@@ -31,6 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.common.ResultState
+import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.data.ViewModel.TransactionViewModel
 import com.aditya.expensetracker.data.model.Transaction
@@ -45,9 +46,11 @@ import com.aditya.expensetracker.presentation.navigation.Routes
 @Composable
 fun HistoryScreen(
     navController : NavController,
-    transactionVm : TransactionVm = hiltViewModel()
+    transactionVm : TransactionVm = hiltViewModel(),
+    paymentViewModel : PaymentViewModel = hiltViewModel()
 ) {
     val state by transactionVm.getTransactionState.collectAsState()
+    val symbol by paymentViewModel.preferredPaymentMethod.collectAsState()
     var transactions: List<TransactionItem>? = null
     LaunchedEffect(Unit) {
         transactionVm.getTransaction()
@@ -185,7 +188,7 @@ fun HistoryScreen(
                                 }
                             },
                             content = {
-                                TransactionHistoryItem(transaction = transaction)
+                                TransactionHistoryItem(transaction = transaction, symbol = symbol)
                             }
                         )
                     }

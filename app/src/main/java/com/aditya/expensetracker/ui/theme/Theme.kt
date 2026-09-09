@@ -33,6 +33,8 @@ private val DarkColorScheme = darkColorScheme(
     outline = GrayMedium,
     onBackground = WhitePure,
     onSurface = WhitePure,
+    inverseSurface = WhitePure,
+    inverseOnSurface = BlackPrimary,
     surfaceTint = Color.Transparent // Disable purple tint
 )
 
@@ -53,6 +55,8 @@ private val LightColorScheme = lightColorScheme(
     outline = GrayLight,
     onBackground = BlackPrimary,
     onSurface = BlackPrimary,
+    inverseSurface = BlackPrimary,
+    inverseOnSurface = WhitePure,
     surfaceTint = Color.Transparent
 )
 

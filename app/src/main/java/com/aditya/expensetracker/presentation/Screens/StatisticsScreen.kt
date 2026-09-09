@@ -39,6 +39,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.common.ResultState
+import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.data.ViewModel.getTransactionVm
 import com.aditya.expensetracker.data.model.ChartType
@@ -61,11 +62,14 @@ import java.util.Locale
 @Composable
 fun StatisticsScreen(
     navController: NavController,
-    transactionVm : TransactionVm
+    transactionVm : TransactionVm,
+    paymentViewModel: PaymentViewModel = hiltViewModel()
 ) {
     var selectedChartType by remember { mutableStateOf(ChartType.EXPENSE) }
     var selectedTimeFilter by remember { mutableStateOf(TimeFilter.YEAR) }
     val state by transactionVm.getTransactionState.collectAsState()
+
+    val symbol by paymentViewModel.preferredPaymentMethod.collectAsState()
 
     LaunchedEffect(Unit) {
         transactionVm.getTransaction()
@@ -182,7 +186,7 @@ fun StatisticsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "₹${String.format(Locale.getDefault(), "%,.2f", totalAmount)}",
+                            text = "$symbol${String.format(Locale.getDefault(), "%,.2f", totalAmount)}",
                             fontSize = responsiveSp(32),
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.onBackground
@@ -274,7 +278,8 @@ fun StatisticsScreen(
                             ChartType.INCOME -> Color(0xFF4CAF50)
                             ChartType.EXPENSE -> Color(0xFFF44336)
                             ChartType.SAVINGS -> Color(0xFF2196F3)
-                        }
+                        },
+                        symbol = symbol
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
@@ -313,7 +318,7 @@ fun StatisticsScreen(
                                         ChartType.SAVINGS -> transaction.savedFor ?: "Unknown"
                                     },
                                     date = SimpleDateFormat("dd MMM, yyyy", Locale.getDefault()).format(Date(transaction.date?:0L)),
-                                    amount = "$amountPrefix₹${String.format(Locale.getDefault(), "%,.2f", transaction.amount)}",
+                                    amount = "$amountPrefix $symbol${String.format(Locale.getDefault(), "%,.2f", transaction.amount)}",
                                     icon = when(selectedChartType) {
                                         ChartType.INCOME -> Icons.AutoMirrored.Filled.TrendingUp
                                         ChartType.EXPENSE -> Icons.Default.ShoppingCart

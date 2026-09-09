@@ -9,6 +9,8 @@ import com.aditya.expensetracker.data.Api.TransactionApi
 import com.aditya.expensetracker.data.DAO.TransactionDao
 import com.aditya.expensetracker.data.DAO.UserDao
 import com.aditya.expensetracker.data.Database.RoomsDatabase
+import com.aditya.expensetracker.data.remote.AuthInterceptor
+import com.aditya.expensetracker.data.remote.AuthManager
 import com.aditya.expensetracker.data.repoImpl.AuthRepoImpl
 import com.aditya.expensetracker.data.repoImpl.ChatRepoImpl
 import com.aditya.expensetracker.data.repoImpl.NotificationRepoImpl
@@ -31,6 +33,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
 import okhttp3.OkHttpClient
+import com.aditya.expensetracker.BuildConfig
+import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -78,8 +82,21 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideAuthManager(
+        @ApplicationContext context: Context
+    ): AuthManager {
+        return AuthManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
         return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
+            .addInterceptor(loggingInterceptor)
             .connectTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
@@ -90,7 +107,7 @@ object DataModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient) : Retrofit{
         return Retrofit.Builder()
-            .baseUrl("https://expensetrackerbackend-2-rxtw.onrender.com")
+            .baseUrl(BuildConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

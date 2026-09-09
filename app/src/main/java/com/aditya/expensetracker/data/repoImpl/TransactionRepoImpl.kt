@@ -85,6 +85,11 @@ class TransactionRepoImpl @Inject constructor(
                 _transactions.value = ResultState.Success(response)
                 response
             } else {
+                if (token.replace("Bearer ", "").trim().isEmpty()) {
+                    val response = getTransactionResponse(success = false, transactions = emptyList())
+                    _transactions.value = ResultState.Error("Authentication token is missing")
+                    return response
+                }
                 val networkResponse = api.getTransactions(token)
                 val distinctTransactions = networkResponse.transactions.distinctBy { it._id ?: it.localId }
                 
@@ -109,10 +114,15 @@ class TransactionRepoImpl @Inject constructor(
                 response
             }
         } catch (e: Exception) {
-            if (shouldShowLoading) {
-                _transactions.value = ResultState.Error(e.message ?: "Failed to fetch transactions")
+            if (e is retrofit2.HttpException && e.code() == 401) {
+                tokenManager.clearToken()
             }
-            throw e
+            val errorMessage = e.message ?: "Failed to fetch transactions"
+            if (shouldShowLoading) {
+                _transactions.value = ResultState.Error(errorMessage)
+            }
+            // Return a failed response instead of throwing to prevent crashes in background scopes
+            getTransactionResponse(success = false, transactions = emptyList())
         }
     }
 
@@ -123,4 +133,6 @@ class TransactionRepoImpl @Inject constructor(
     override fun updateLocalState(response: getTransactionResponse) {
         _transactions.value = ResultState.Success(response)
     }
+
+
 }

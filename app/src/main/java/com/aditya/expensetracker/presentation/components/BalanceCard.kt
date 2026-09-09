@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aditya.expensetracker.ui.theme.responsiveSp
+import java.util.Locale
 
 /**
  * A premium credit card-style component to display the total balance.
@@ -34,7 +35,8 @@ import com.aditya.expensetracker.ui.theme.responsiveSp
 fun BalanceCard(
     balance: Double,
     modifier: Modifier = Modifier,
-    spendingProgress: Float = 0.4f // Dummy progress for the UI
+    spendingProgress: Float = 0.4f,
+    symbol: String = "₹"
 ) {
     Card(
         modifier = modifier
@@ -71,7 +73,7 @@ fun BalanceCard(
                 ) {
                     Column {
                         Text(
-                            text = "₹ ${String.format("%,.2f", balance)}",
+                            text = "$symbol ${String.format(Locale.getDefault(), "%,.2f", balance)}",
                             color = Color.White,
                             fontSize = responsiveSp(32),
                             fontWeight = FontWeight.Bold

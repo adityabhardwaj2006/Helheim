@@ -20,6 +20,12 @@ room = "2.7.2"
 hilt = "2.57.1"
 
 ksp = "2.2.10-2.0.2"
+firebaseAuth = "24.2.0"
+credentials = "1.3.0"
+credentialsPlayServicesAuth = "1.3.0"
+googleid = "1.2.0"
+play-services-auth = "21.2.0"
+coil = "3.0.0-rc01"
 
 [libraries]
 
@@ -60,6 +66,13 @@ hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hil
 
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-animation = { group = "androidx.compose.animation", name = "animation" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 
 [plugins]
 

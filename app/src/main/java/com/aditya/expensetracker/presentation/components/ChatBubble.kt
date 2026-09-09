@@ -19,14 +19,15 @@ fun ChatBubble(
 ) {
     Box(
         modifier = modifier
-            .size(56.dp)
-            .clickable(onClick = onClick),
+            .size(56.dp),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             painter = painterResource(id = R.drawable.robot),
             contentDescription = "Chat with AI",
-            modifier = Modifier.size(56.dp),
+            modifier = Modifier
+                .size(56.dp)
+                .clickable(onClick = onClick),
             tint = Color.Unspecified
         )
     }

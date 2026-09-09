@@ -1,6 +1,7 @@
 package com.aditya.expensetracker.data.Api
 
 import com.aditya.expensetracker.data.model.ChangePasswordRequest
+import com.aditya.expensetracker.data.model.GoogleLoginRequest
 import com.aditya.expensetracker.data.model.LoginRequest
 import com.aditya.expensetracker.data.model.LoginResponse
 import com.aditya.expensetracker.data.model.RatingRequest
@@ -17,6 +18,11 @@ interface AuthApi{
     @POST("/signin")
     suspend fun signin(
         @Body request : LoginRequest
+    ) : LoginResponse
+
+    @POST("/signin/google")
+    suspend fun googleSignin(
+        @Body request : GoogleLoginRequest
     ) : LoginResponse
 
 

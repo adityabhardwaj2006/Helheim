@@ -2,10 +2,12 @@ package com.aditya.expensetracker.data.repoImpl
 
 import android.util.Log
 import com.aditya.expensetracker.data.Api.AuthApi
+import com.aditya.expensetracker.data.DAO.NotificationDao
 import com.aditya.expensetracker.data.DAO.TransactionDao
 import com.aditya.expensetracker.data.DAO.UserDao
 import com.aditya.expensetracker.data.TokenManager
 import com.aditya.expensetracker.data.model.ChangePasswordRequest
+import com.aditya.expensetracker.data.model.GoogleLoginRequest
 import com.aditya.expensetracker.data.model.LoginRequest
 import com.aditya.expensetracker.data.model.LoginResponse
 import com.aditya.expensetracker.data.model.SignUpRequest
@@ -24,29 +26,67 @@ class AuthRepoImpl @Inject constructor(
     private val authApi : AuthApi,
     private val tokenManager : TokenManager,
     private val userDao : UserDao,
-    private val transactionDao: TransactionDao
+    private val transactionDao: TransactionDao,
+    private val notificationDao: NotificationDao
 ) : AuthRepo{
+
+    private val TAG = "AuthDebug"
 
     override suspend fun login(
         username: String,
         password: String
     ): LoginResponse {
-        val response = authApi.signin(
-            LoginRequest(
-                username,
-                password
+        try {
+            val response = authApi.signin(
+                LoginRequest(
+                    username,
+                    password
+                )
             )
-        )
-        tokenManager.saveToken(response.token)
-        tokenManager.saveUserId(response.user.id)
+            return handleLoginResponse(response)
+        } catch (e: HttpException) {
+            throw Exception(parseError(e))
+        }
+    }
 
-        // Cache user info immediately for instant UI display
-        userDao.insertUser(UserEntity(
-            userId = response.user.id,
-            firstName = response.user.firstName,
-            lastName = response.user.lastName,
-            username = response.user.username
-        ))
+    override suspend fun googleLogin(idToken: String, email: String?, photoUrl: String?): LoginResponse {
+        Log.d(TAG, "Calling backend /signin/google with token length: ${idToken.length}")
+        try {
+            val response = authApi.googleSignin(
+                GoogleLoginRequest(idToken)
+            )
+            Log.d(TAG, "Backend response received: ${response.success}")
+            return handleLoginResponse(response, email, photoUrl)
+        } catch (e: HttpException) {
+            val errorMsg = parseError(e)
+            Log.e(TAG, "Google login failed: $errorMsg")
+            throw Exception(errorMsg)
+        }
+    }
+
+    private suspend fun handleLoginResponse(
+        response: LoginResponse,
+        fallbackEmail: String? = null,
+        fallbackPhotoUrl: String? = null
+    ): LoginResponse {
+        if (response.success) {
+            Log.d(TAG, "Saving token and user info to local storage")
+            tokenManager.saveToken(response.token)
+            tokenManager.saveUserId(response.user.id)
+
+            // Cache user info immediately for instant UI display
+            // Use Google data as fallback if backend doesn't provide it yet
+            userDao.insertUser(UserEntity(
+                userId = response.user.id,
+                firstName = response.user.firstName,
+                lastName = response.user.lastName,
+                username = response.user.username,
+                email = response.user.email ?: fallbackEmail,
+                profilePictureUrl = response.user.profilePictureUrl ?: fallbackPhotoUrl
+            ))
+        } else {
+            Log.w(TAG, "Login response was not successful: ${response.message}")
+        }
 
         return response
     }
@@ -57,12 +97,14 @@ class AuthRepoImpl @Inject constructor(
         username: String,
         password: String
     ): SignUpResponse {
-        val response = authApi.signup(SignUpRequest(
-            firstName,lastName,username,password
-        ))
-
-        return response
-
+        try {
+            val response = authApi.signup(SignUpRequest(
+                firstName,lastName,username,password
+            ))
+            return response
+        } catch (e: HttpException) {
+            throw Exception(parseError(e))
+        }
     }
 
     override suspend fun logout() {
@@ -70,6 +112,7 @@ class AuthRepoImpl @Inject constructor(
         tokenManager.clearToken()
         transactionDao.deleteAllTransaction()
         userDao.deleteUser()
+        notificationDao.deleteAllNotifications()
 
     }
 
@@ -83,11 +126,13 @@ class AuthRepoImpl @Inject constructor(
                     userId = localUser.userId,
                     firstName = localUser.firstName,
                     lastName = localUser.lastName,
-                    username = localUser.username
+                    username = localUser.username,
+                    email = localUser.email,
+                    profilePictureUrl = localUser.profilePictureUrl
                 )
             )
         } else {
-            val token = tokenManager.getToken().first() ?: throw Exception("Token not found")
+            val token = tokenManager.getToken().first() ?: return profileResponse(success = false, data = null)
             val storedUserId = tokenManager.getUserId().first() ?: ""
             
             try {
@@ -98,24 +143,29 @@ class AuthRepoImpl @Inject constructor(
                     throw Exception("Profile data is null")
                 }
 
-
                 // Use storedUserId as fallback if network response doesn't have it
                 val finalUserId = responseData.userId ?: storedUserId
-
-
 
                 // Save to Room
                 userDao.insertUser(UserEntity(
                     userId = finalUserId,
                     firstName = responseData.firstName ?: "",
                     lastName = responseData.lastName ?: "",
-                    username = responseData.username ?: ""
+                    username = responseData.username ?: "",
+                    email = responseData.email,
+                    profilePictureUrl = responseData.profilePictureUrl
                 ))
-                android.util.Log.d("AuthRepo", "getProfile: saved to local storage")
+                Log.d(TAG, "getProfile: saved to local storage")
                 
                 return networkResponse
+            } catch (e: HttpException) {
+                Log.e(TAG, "getProfile: HTTP error ${e.code()}: ${e.message()}")
+                if (e.code() == 401) {
+                    tokenManager.clearToken()
+                }
+                throw e
             } catch (e: Exception) {
-                android.util.Log.e("AuthRepo", "getProfile: network fetch failed: ${e.message}")
+                Log.e(TAG, "getProfile: network fetch failed: ${e.message}")
                 throw e
             }
         }
@@ -126,8 +176,8 @@ class AuthRepoImpl @Inject constructor(
         lastName: String,
         username: String
     ) {
-        try{
-            val token = tokenManager.getToken().first() ?: throw Exception("Token not found")
+        try {
+            val token = tokenManager.getToken().first() ?: throw Exception("Login required to update profile")
             authApi.updateProfile(
                 token = "Bearer $token",
                 request = UserDTO(
@@ -139,26 +189,30 @@ class AuthRepoImpl @Inject constructor(
             )
 
             val storedUserId = tokenManager.getUserId().first() ?: ""
-            val currFirstName = userDao.getUser()!!.firstName
-            val currLastName = userDao.getUser()!!.lastName
-            val currUsername = userDao.getUser()!!.username
+            val localUser = userDao.getUser()
+            val currFirstName = localUser?.firstName ?: ""
+            val currLastName = localUser?.lastName ?: ""
+            val currUsername = localUser?.username ?: ""
+            val currEmail = localUser?.email
+            val currProfilePictureUrl = localUser?.profilePictureUrl
 
             userDao.insertUser(UserEntity(
                 userId = storedUserId,
-                firstName =
-                    if(firstName=="")currFirstName
-                else firstName,
-                lastName =
-                    if(lastName=="")currLastName
-                    else lastName,
-                username =
-                    if(username=="")currUsername
-                    else username,
+                firstName = if (firstName == "") currFirstName else firstName,
+                lastName = if (lastName == "") currLastName else lastName,
+                username = if (username == "") currUsername else username,
+                email = currEmail,
+                profilePictureUrl = currProfilePictureUrl
             ))
-        }catch(err: Exception){
+        } catch (e: HttpException) {
+            Log.e(TAG, "updateProfile: HTTP error ${e.code()}")
+            if (e.code() == 401) {
+                tokenManager.clearToken()
+            }
+            throw e
+        } catch (err: Exception) {
             throw err
         }
-
     }
 
     override suspend fun updatePassword(newPassword: String): SignUpResponse {
@@ -172,17 +226,20 @@ class AuthRepoImpl @Inject constructor(
             )
             return response
 
-        } catch (err: HttpException) {
-            val errorBody = err.response()?.errorBody()?.string()
-            val message = try {
-                val errorResponse = Gson().fromJson(errorBody, SignUpResponse::class.java)
-                errorResponse.message
-            } catch (_: Exception) {
-                err.message() ?: "Conflict occurred"
-            }
-            throw Exception(message)
+        } catch (e: HttpException) {
+            throw Exception(parseError(e))
         } catch (err: Exception) {
             throw err
+        }
+    }
+
+    private fun parseError(e: HttpException): String {
+        return try {
+            val errorBody = e.response()?.errorBody()?.string()
+            val errorResponse = Gson().fromJson(errorBody, SignUpResponse::class.java)
+            errorResponse.message
+        } catch (_: Exception) {
+            e.message() ?: "Something went wrong"
         }
     }
 

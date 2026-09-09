@@ -47,6 +47,8 @@ fun AddSaving(
     paymentViewModel: PaymentViewModel = hiltViewModel(),
     navController: NavController
 ) {
+    val symbol by paymentViewModel.preferredPaymentMethod.collectAsState()
+
     val transactionVm : TransactionVm = hiltViewModel()
     val preferredPaymentMethod by paymentViewModel.preferredPaymentMethod.collectAsState()
     val addSavingState by transactionVm.transactionState.collectAsState()
@@ -153,12 +155,21 @@ fun AddSaving(
                         singleLine = true,
                         textStyle = TextStyle(fontSize = 40.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurface),
                         decorationBox = { innerTextField ->
-                            Row(modifier = Modifier.wrapContentWidth()){
-                                if (amount.isEmpty()) {
-                                    Text("₹ 0", fontSize = 40.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), textAlign = TextAlign.Center)
-                                } else {
-                                    innerTextField()
+                            if (amount.isEmpty()) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "$symbol 0",
+                                        fontSize = 40.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                                    )
                                 }
+                            } else {
+                                innerTextField()
                             }
                         }
                     )
@@ -203,14 +214,15 @@ fun AddSaving(
                 var categoryMenuOpen by remember { mutableStateOf(false) }
                 val categories = listOf("Emergency Fund", "Retirement", "Vacation", "Car", "Other")
                 Box {
-                    SimpleRow(leftText = category ?: "Category") {
+                    SimpleRow(
+                        leftText = category ?: "Category",
+                        onClick = { categoryMenuOpen = true }
+                    ) {
                         Box {
                             Icon(
                                 Icons.Default.Add,
                                 contentDescription = "Choose category",
-                                modifier = Modifier.clickable {
-                                    categoryMenuOpen = true
-                                }
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                             DropdownMenu(
                                 expanded = categoryMenuOpen,
@@ -237,9 +249,12 @@ fun AddSaving(
                 var paymentMenuOpen by remember { mutableStateOf(false) }
                 val paymentOptions = listOf("Cash", "Credit Card","Debit Card", "UPI", "Bank Transfer","Phone Pay","Wallet")
                 Box {
-                    SimpleRow(leftText = "Payment") {
+                    SimpleRow(
+                        leftText = "Payment",
+                        onClick = { paymentMenuOpen = true }
+                    ) {
                         Box {
-                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { paymentMenuOpen = true }) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(paymentMethod, color = MaterialTheme.colorScheme.onSurface)
                                 Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
                             }
@@ -257,9 +272,14 @@ fun AddSaving(
 }
 
 @Composable
-private fun SimpleRow(leftText: String, trailing: @Composable () -> Unit) {
+private fun SimpleRow(leftText: String, onClick: () -> Unit, trailing: @Composable () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp, vertical = 16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            .padding(horizontal = 16.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

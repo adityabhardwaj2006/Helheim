@@ -8,6 +8,7 @@ import com.aditya.expensetracker.data.model.profileResponse
 
 interface AuthRepo {
     suspend fun login(username: String, password: String): LoginResponse
+    suspend fun googleLogin(idToken: String, email: String? = null, photoUrl: String? = null): LoginResponse
     suspend fun signup(firstName:String,lastName:String,username: String,password: String) : SignUpResponse
     suspend fun logout()
     suspend fun getProfile() : profileResponse

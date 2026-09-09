@@ -2,7 +2,8 @@ package com.aditya.expensetracker.data.model
 
 data class chatRequest(
     val message : String,
-    val history: List<HistoryMessage> = emptyList()
+    val history: List<HistoryMessage> = emptyList(),
+    val currency: String
 )
 
 data class HistoryMessage(

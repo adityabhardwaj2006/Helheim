@@ -56,7 +56,11 @@ class NotificationViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val token = tokenManager.getToken().first() ?: ""
+                val token = tokenManager.getToken().first()
+                if (token.isNullOrEmpty()) {
+                    _notificationState.value = ResultState.Error("Authentication token is missing")
+                    return@launch
+                }
                 val userId = tokenManager.getUserId().first() ?: ""
                 
                 // Fetch remote data in parallel using shared repo state

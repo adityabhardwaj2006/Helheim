@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.aditya.expensetracker.common.ResultState
@@ -36,6 +37,7 @@ fun EditProfileScreen(
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
+    var profilePhoto by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(profileState) {
         if (profileState is ResultState.Success) {
@@ -43,6 +45,7 @@ fun EditProfileScreen(
             firstName = data?.firstName ?: ""
             lastName = data?.lastName ?: ""
             username = data?.username ?: ""
+            profilePhoto = data?.profilePictureUrl
         }
     }
 
@@ -104,18 +107,29 @@ fun EditProfileScreen(
 
             // Profile Image Section with Camera Icon
             Box(contentAlignment = Alignment.BottomEnd) {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(MaterialTheme.colorScheme.primary, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(50.dp)
+                if (profilePhoto != null) {
+                    AsyncImage(
+                        model = profilePhoto,
+                        contentDescription = "Profile Photo",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface, CircleShape)
                     )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .background(MaterialTheme.colorScheme.primary, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(50.dp)
+                        )
+                    }
                 }
 
             }

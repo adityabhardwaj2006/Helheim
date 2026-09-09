@@ -30,7 +30,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun TransactionHistoryItem(transaction: TransactionItem) {
+fun TransactionHistoryItem(transaction: TransactionItem,symbol : String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -102,7 +102,7 @@ fun TransactionHistoryItem(transaction: TransactionItem) {
             }
             
             Text(
-                text = "$prefix ₹${String.format(Locale.getDefault(), "%.2f", transaction.amount)}",
+                text = "$prefix $symbol${String.format(Locale.getDefault(), "%.2f", transaction.amount)}",
                 fontSize = responsiveSp(16),
                 fontWeight = FontWeight.ExtraBold,
                 color = if (transaction.type == "INCOME") Color(0xFF4CAF50) 

@@ -92,6 +92,8 @@ fun AddScreen(
     paymentViewModel: PaymentViewModel = hiltViewModel(),
     navController : NavController
 ) {
+    val symbol by paymentViewModel.preferredPaymentMethod.collectAsState()
+
 
     //Calling repo
     val addScreenState by transactionVm.transactionState.collectAsState()
@@ -231,22 +233,22 @@ fun AddScreen(
                                 color = MaterialTheme.colorScheme.onSurface
                             ),
                             decorationBox = { innerTextField ->
-                                Row(modifier = Modifier.wrapContentWidth()){
-                                    if (amount.isEmpty()) {
+                                if (amount.isEmpty()) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
                                         Text(
-                                            "₹ 0",
+                                            text = "$symbol 0",
                                             fontSize = 40.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                                            textAlign = TextAlign.Center
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                                         )
-                                    }else{
-                                        innerTextField()
                                     }
-
-
+                                } else {
+                                    innerTextField()
                                 }
-
                             }
                         )
                         Spacer(modifier = Modifier.height(4.dp))
@@ -303,14 +305,13 @@ fun AddScreen(
                     val categories = listOf("Food", "Transport", "Shopping", "Bills", "Entertainment", "Health", "Other")
                     Box {
                         SimpleRow(
-                            leftText = category ?: "Category"
+                            leftText = category ?: "Category",
+                            onClick = { categoryMenuOpen = true }
                         ) {
                             Column() {
                                 Icon(
                                     Icons.Default.Add, contentDescription = "Choose category",
-                                    modifier = Modifier.clickable {
-                                        categoryMenuOpen = true
-                                    },
+                                    tint = MaterialTheme.colorScheme.onSurface
                                 )
                                 DropdownMenu(expanded = categoryMenuOpen,
                                     onDismissRequest = { categoryMenuOpen = false },
@@ -351,12 +352,12 @@ fun AddScreen(
                     val paymentOptions = listOf("Cash", "Credit Card","Debit Card", "UPI", "Bank Transfer","Phone Pay","Wallet")
                     Box {
                         SimpleRow(
-                            leftText = "Payment"
+                            leftText = "Payment",
+                            onClick = { paymentMenuOpen = true }
                         ) {
                             Column()
                             {
-                                Row(verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.clickable { paymentMenuOpen = true }) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(paymentMethod, color = MaterialTheme.colorScheme.onSurface)
                                     Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Change payment method", tint = MaterialTheme.colorScheme.onSurface)
                                 }
@@ -388,12 +389,15 @@ fun AddScreen(
 @Composable
 private fun SimpleRow(
     leftText: String,
+    onClick: () -> Unit,
     trailing: @Composable () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             .padding(horizontal = 16.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

@@ -37,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -44,6 +45,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.aditya.expensetracker.presentation.navigation.Routes
 import com.aditya.expensetracker.times
 import com.aditya.expensetracker.transform
@@ -127,7 +129,8 @@ fun CustomBottomNavigation(
     onProfileClick: () -> Unit,
     onStatisticsClick: () -> Unit,
     onHomeClick: () -> Unit,
-    onHistoryClick : () -> Unit = {}
+    onHistoryClick : () -> Unit = {},
+    profilePictureUrl: String? = null
 ) {
     Surface(
         modifier = Modifier
@@ -180,7 +183,8 @@ fun CustomBottomNavigation(
                     icon = Icons.Default.Person,
                     label = "Profile",
                     selected = currentRoute == Routes.Profile::class.qualifiedName,
-                    onClick = onProfileClick
+                    onClick = onProfileClick,
+                    profilePictureUrl = profilePictureUrl
                 )
             }
         }
@@ -192,18 +196,34 @@ fun NavigationItem(
     icon: ImageVector,
     label: String,
     selected: Boolean,
+    profilePictureUrl: String? = null,
     onClick: () -> Unit
 ) {
     IconButton(
         onClick = onClick,
         modifier = Modifier.size(52.dp)
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            tint = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-            modifier = Modifier.size(26.dp)
-        )
+        if (label == "Profile" && profilePictureUrl != null) {
+            AsyncImage(
+                model = profilePictureUrl,
+                contentDescription = label,
+                modifier = Modifier
+                    .size(26.dp)
+                    .clip(CircleShape)
+                    .border(
+                        width = if (selected) 1.dp else 0.dp,
+                        color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                        shape = CircleShape
+                    )
+            )
+        } else {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                modifier = Modifier.size(26.dp)
+            )
+        }
     }
 }
 

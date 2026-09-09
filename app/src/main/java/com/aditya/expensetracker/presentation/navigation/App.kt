@@ -1,7 +1,5 @@
 package com.aditya.expensetracker.presentation.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -11,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -22,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -30,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.aditya.expensetracker.common.ResultState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.presentation.Screens.AboutAppScreen
@@ -39,7 +36,7 @@ import com.aditya.expensetracker.presentation.Screens.HistoryScreen
 import com.aditya.expensetracker.presentation.Screens.HomeScreen
 import com.aditya.expensetracker.presentation.Screens.NotificationScreen
 import com.aditya.expensetracker.presentation.Screens.ChatScreen
-import com.aditya.expensetracker.presentation.Screens.PaymentMethodsScreen
+import com.aditya.expensetracker.presentation.Screens.CurrencyScreen
 import com.aditya.expensetracker.presentation.Screens.PrivacyPolicyScreen
 import com.aditya.expensetracker.presentation.Screens.ProfileScreen
 import com.aditya.expensetracker.presentation.Screens.RateUsScreen
@@ -51,14 +48,8 @@ import com.aditya.expensetracker.presentation.Screens.utils.AddScreen
 import com.aditya.expensetracker.presentation.Screens.utils.CustomBottomNavigation
 import com.aditya.expensetracker.presentation.Screens.utils.MorphingFab
 import com.aditya.expensetracker.presentation.components.HomeSkeleton
-import com.example.expensemanager.ui.login.LoginScreen
-import com.aditya.expensetracker.presentation.components.shimmer
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.height
+import com.aditya.expensetracker.presentation.Screens.LoginScreen
 import com.aditya.expensetracker.data.ViewModel.NotificationViewModel
-import com.aditya.expensetracker.data.ViewModel.TransactionViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.presentation.Screens.UpdatePassword
 
@@ -74,6 +65,8 @@ fun App(
     val navController = rememberNavController()
     var currentSheet by remember { mutableStateOf(SheetType.NONE) }
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
+    val userState by authViewModel.userState.collectAsState()
+    val profilePictureUrl = (userState as? ResultState.Success)?.data?.data?.profilePictureUrl
 
     if (isLoggedIn == null) {
         // Full screen skeleton loader
@@ -149,6 +142,7 @@ fun App(
                 ) {
                     CustomBottomNavigation(
                         currentRoute = currentRoute,
+                        profilePictureUrl = profilePictureUrl,
                         onProfileClick = {
                             if (currentRoute != Routes.Profile::class.qualifiedName) {
                                 navController.navigate(Routes.Profile) {
@@ -250,7 +244,8 @@ fun App(
                     RateUsScreen(navController)
                 }
                 composable<Routes.PaymentMethods> {
-                    PaymentMethodsScreen(navController)
+                    CurrencyScreen(
+                        navController)
                 }
                 composable<Routes.Notification> {
                     NotificationScreen(navController,

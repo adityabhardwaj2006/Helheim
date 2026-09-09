@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.aditya.expensetracker.data.model.TransactionItem
 import com.aditya.expensetracker.data.model.TransactionType
 import com.aditya.expensetracker.ui.theme.GrayDark
@@ -37,7 +38,7 @@ import java.util.*
  * Matches the theme colors and uses responsive typography.
  */
 @Composable
-fun TransactionItem(expense: TransactionItem) {
+fun TransactionItem(expense: TransactionItem,symbol : String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -92,7 +93,7 @@ fun TransactionItem(expense: TransactionItem) {
             else if (expense.type == TransactionType.EXPENSE.name)"-" else
                 "•"
             Text(
-                text = "$prefix₹${String.format("%.2f", expense.amount)}",
+                text = "$symbol${String.format("%.2f", expense.amount)}",
                 fontSize = responsiveSp(16),
                 fontWeight = FontWeight.ExtraBold,
                 color = if (expense.type == TransactionType.INCOME.name) Color(0xFF4CAF50) 

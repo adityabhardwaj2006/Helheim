@@ -1,17 +1,21 @@
 package com.aditya.expensetracker.presentation.Screens
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,12 +31,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Payment
@@ -41,45 +41,51 @@ import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
-import androidx.compose.ui.unit.sp
-import com.aditya.expensetracker.ui.theme.responsiveSp
+import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import coil3.compose.AsyncImage
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
-import com.aditya.expensetracker.presentation.components.shimmer
 import com.aditya.expensetracker.presentation.navigation.Routes
+import com.aditya.expensetracker.ui.theme.responsiveSp
 
 @Composable
 fun ProfileScreen(navController: NavController,
                   authViewModel: AuthViewModel = hiltViewModel()) {
     val scrollState = rememberScrollState()
     val progress = (scrollState.value/300f).coerceIn(0f,1f)
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(Unit) {
         authViewModel.getProfile()
@@ -89,11 +95,15 @@ fun ProfileScreen(navController: NavController,
     
     var username = ""
     var name = ""
+    var email = ""
+    var profilePhoto: String? = null
     
     when(val state = profileState){
         is ResultState.Success ->{
             username = state.data.data?.username?:""
             name = state.data.data?.firstName + " "+ state.data.data?.lastName
+            email = state.data.data?.email?:""
+            profilePhoto = state.data.data?.profilePictureUrl
         }
         is ResultState.Error -> {
             name = "Unknown"
@@ -102,21 +112,39 @@ fun ProfileScreen(navController: NavController,
     }
 
     val iconSize by animateDpAsState(
-        targetValue = lerp(96.dp,30.dp,progress)
+        targetValue = lerp(96.dp,30.dp,progress), label = ""
     )
     val nameSize by animateFloatAsState(
-        targetValue = 20f - (4f*progress)
+        targetValue = 20f - (4f*progress), label = ""
     )
     val emailAlpha by animateFloatAsState(
-        targetValue = 1f - progress
+        targetValue = 1f - progress, label = ""
     )
     val headerTopPadding by animateDpAsState(
-        targetValue = lerp(10.dp,0.dp,progress)
+        targetValue = lerp(10.dp,0.dp,progress), label = ""
     )
     val spaceBelowIcon by animateDpAsState(
         targetValue = lerp(24.dp, 8.dp, progress),
         label = ""
     )
+
+    // Check notification access and refresh when returning to screen
+    var isAutoTrackEnabled by remember {
+        mutableStateOf(isNotificationServiceEnabled(context))
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isAutoTrackEnabled = isNotificationServiceEnabled(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -169,15 +197,26 @@ fun ProfileScreen(navController: NavController,
                 contentAlignment = Alignment.Center
             ) {
                 Box(contentAlignment = Alignment.BottomEnd) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        contentDescription = "Profile",
-                        modifier = Modifier
-                            .size(iconSize)
-                            .background(MaterialTheme.colorScheme.surface, CircleShape)
-                            .padding(16.dp)
-                    )
+                    if (profilePhoto != null) {
+                        AsyncImage(
+                            model = profilePhoto,
+                            contentDescription = "Profile",
+                            modifier = Modifier
+                                .size(iconSize)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surface, CircleShape)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            contentDescription = "Profile",
+                            modifier = Modifier
+                                .size(iconSize)
+                                .background(MaterialTheme.colorScheme.surface, CircleShape)
+                                .padding(16.dp)
+                        )
+                    }
 
                 }
             }
@@ -192,7 +231,6 @@ fun ProfileScreen(navController: NavController,
                             .width(180.dp)
                             .height(28.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .shimmer()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Box(
@@ -200,7 +238,6 @@ fun ProfileScreen(navController: NavController,
                             .width(120.dp)
                             .height(20.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .shimmer()
                     )
                 }
             } else {
@@ -222,6 +259,17 @@ fun ProfileScreen(navController: NavController,
                         .alpha(emailAlpha),
                     textAlign = TextAlign.Center
                 )
+                if (email.isNotEmpty()) {
+                    Text(
+                        text = email,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f),
+                        fontSize = responsiveSp(13),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(emailAlpha),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(spaceBelowIcon))
@@ -237,12 +285,42 @@ fun ProfileScreen(navController: NavController,
                         navController.navigate(Routes.UpdatePassword)
                     }
                 )
-                CardItem(icon = Icons.Default.Notifications, text = "Notifications") {
-                    navController.navigate(Routes.Notification)
-                }
-                CardItem(icon = Icons.Default.Payment, text = "Payment Methods") {
+
+                CardItem(icon = Icons.Default.Payment, text = "Select Currency") {
                     navController.navigate(Routes.PaymentMethods)
                 }
+
+                val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestPermission()
+                ) { isGranted ->
+                    if (isGranted) {
+                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                    }
+                }
+
+                CardItem(
+                    icon = Icons.Default.Notifications,
+                    text = "Auto-track Transactions",
+                    trailingContent = {
+                        Switch(
+                            checked = isAutoTrackEnabled,
+                            onCheckedChange = {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                                }
+                            }
+                        )
+                    }
+                ) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                    }
+                }
+
                 CardItem(icon = Icons.Default.PrivacyTip, text = "Privacy Policy", showDivider = false) {
                     navController.navigate(Routes.PrivacyPolicy)
                 }
@@ -260,6 +338,9 @@ fun ProfileScreen(navController: NavController,
                 }
                 CardItem(icon = Icons.Default.Star, text = "Rate Us", showDivider = false) {
                     navController.navigate(Routes.RateUs)
+                }
+                CardItem(icon = Icons.Default.Notifications, text = "View Debug Logs", showDivider = false) {
+                    navController.navigate(Routes.Notification)
                 }
             }
 
@@ -281,6 +362,11 @@ fun ProfileScreen(navController: NavController,
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
+}
+
+fun isNotificationServiceEnabled(context: Context): Boolean {
+    val packageNames = NotificationManagerCompat.getEnabledListenerPackages(context)
+    return packageNames.contains(context.packageName)
 }
 
 @Composable
@@ -313,6 +399,7 @@ fun CardItem(
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     iconTint: Color = MaterialTheme.colorScheme.onSurface,
     showDivider: Boolean = true,
+    trailingContent: (@Composable () -> Unit)? = null,
     onClick: () -> Unit
 ) {
     Column {
@@ -339,11 +426,16 @@ fun CardItem(
                 color = textColor,
                 modifier = Modifier.weight(1f)
             )
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-            )
+            
+            if (trailingContent != null) {
+                trailingContent()
+            } else {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                )
+            }
         }
         if (showDivider) {
             Divider(
@@ -354,5 +446,3 @@ fun CardItem(
         }
     }
 }
-
-

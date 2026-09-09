@@ -42,8 +42,13 @@ interface NotificationDao {
 
     @Query("SELECT * FROM notifications WHERE type = :type AND userId = :userId LIMIT 1")
     suspend fun getNotificationByType(type: String, userId: String): com.aditya.expensetracker.data.model.LocalNotification?
-    
+
     @Query("UPDATE notifications SET isRead = 1 WHERE id = :id")
     suspend fun markAsRead(id: Int)
+
+    @Query("DELETE FROM notifications")
+    suspend fun deleteAllNotifications()
+
+
 }
 

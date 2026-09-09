@@ -11,6 +11,7 @@ import com.aditya.expensetracker.data.model.getTransactionResponse
 import com.aditya.expensetracker.domain.repo.NotificationRepo
 import com.aditya.expensetracker.domain.repo.Repo
 import com.aditya.expensetracker.domain.repo.TransactionRepo
+import com.aditya.expensetracker.data.manager.TransactionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,8 +24,8 @@ import javax.inject.Inject
 class TransactionVm @Inject constructor(
     private val repo : TransactionRepo,
     private val tokenManager: TokenManager,
-    private val localRepo : Repo,
-    private val notificationRepo: NotificationRepo
+    private val localRepo: Repo,
+    private val transactionManager: TransactionManager
 ) : ViewModel(){
 
     private val _transactionState = MutableStateFlow<ResultState<TransactionResponse>>(ResultState.Idle)
@@ -35,7 +36,14 @@ class TransactionVm @Inject constructor(
     fun getTransaction() {
         viewModelScope.launch {
             try {
-                val token = tokenManager.getToken().first() ?: ""
+                val token = tokenManager.getToken().first()
+                if (token.isNullOrEmpty()) {
+                    // repo.transactions StateFlow will be updated by repo itself if we call it with empty token,
+                    // but we can also handle it here if preferred.
+                    // However, TransactionRepoImpl.getTransactions already handles empty token now.
+                    repo.getTransactions("Bearer ")
+                    return@launch
+                }
                 repo.getTransactions("Bearer $token")
             } catch (error: Exception) {
                 // Error handled in repository's StateFlow
@@ -55,54 +63,16 @@ class TransactionVm @Inject constructor(
     ){
         _transactionState.value = ResultState.Loading
         viewModelScope.launch {
-            try{
-                val token = tokenManager.getToken().first() ?: ""
-                val response = repo.saveTransaction(
-                    amount,date,type,paidTo,category,savedFor,receivedFrom,paymentMethod,
-                    token = "Bearer $token"
+            try {
+                val userId = tokenManager.getUserId().first() ?: ""
+                val response = transactionManager.saveTransaction(
+                    amount, date, type, paidTo, category, savedFor, receivedFrom, paymentMethod, userId
                 )
-                
-                // If backend save is successful, save to local database with the backend _id
-                if (response.success && response.transaction != null) {
-                    val userId = tokenManager.getUserId().first() ?: ""
-                    localRepo.insertTransaction(
-                        Transaction(
-                            backendId = response.transaction._id,
-                            amount = response.transaction.amount,
-                            date = response.transaction.date,
-                            type = response.transaction.type,
-                            paidTo = response.transaction.paidTo,
-                            category = response.transaction.category,
-                            savedFor = response.transaction.savedFor,
-                            receivedFrom = response.transaction.receivedFrom,
-                            paymentMethod = response.transaction.paymentMethod,
-                            userId = userId
-                        )
-                    )
-                    // Refresh the shared transaction list
-                    repo.getTransactions("Bearer $token")
-                }
-
                 _transactionState.value = ResultState.Success(response)
-
-                // Trigger notification and background tasks asynchronously
-                viewModelScope.launch {
-                    try {
-                        val userId = tokenManager.getUserId().first() ?: ""
-                        notificationRepo.generateNotifications("Bearer $token")
-                        
-                        // Also trigger client-side checks for immediate local alerts
-                        val transactionsResponse = repo.getTransactions("Bearer $token")
-                        notificationRepo.generateClientSideAlerts(userId, transactionsResponse.transactions)
-                    } catch (e: Exception) {
-                        // Fail silently in background
-                    }
-                }
-            }catch (error : Exception){
-                _transactionState.value = ResultState.Error(error.message?:"Transaction couldn't be saved")
+            } catch (error: Exception) {
+                _transactionState.value = ResultState.Error(error.message ?: "Transaction couldn't be saved")
             }
         }
-
     }
 
     fun deleteTransaction(transactionItem: TransactionItem) {

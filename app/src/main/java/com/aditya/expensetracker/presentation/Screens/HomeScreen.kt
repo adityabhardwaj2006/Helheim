@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsNone
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.aditya.expensetracker.ui.theme.responsiveSp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -33,6 +35,7 @@ import androidx.navigation.compose.rememberNavController
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.data.ViewModel.NotificationViewModel
+import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
 import com.aditya.expensetracker.data.model.getTransactionResponse
 import com.aditya.expensetracker.data.model.profileResponse
@@ -52,7 +55,9 @@ fun HomeScreen(
     navController: NavController,
     authViewModel : AuthViewModel,
     transactionVm : TransactionVm,
-    notificationViewModel: NotificationViewModel
+    notificationViewModel: NotificationViewModel,
+    paymentViewModel: PaymentViewModel = hiltViewModel()
+
 ) {
     LaunchedEffect(Unit) {
         authViewModel.getProfile()
@@ -63,6 +68,8 @@ fun HomeScreen(
 
     val transactionState by transactionVm.getTransactionState.collectAsState()
     val notificationState by notificationViewModel.notificationState.collectAsState()
+
+    val currencySymbol by paymentViewModel.preferredPaymentMethod.collectAsState()
 
     val hasUnreadNotifications = when (val state = notificationState) {
         is ResultState.Success -> state.data.notifications.any { !it.isRead }
@@ -183,6 +190,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp)
+                .padding(top = 12.dp)
         ) {
 
             // 1. Personalized Header Section
@@ -191,76 +199,89 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(
-                        text = "Welcome!",
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-                        fontSize = responsiveSp(18),
-                        fontWeight = FontWeight.Medium
-                    )
-                    if (isLoadingUser) {
-                        Box(
-                            modifier = Modifier
-                                .width(150.dp)
-                                .height(32.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .shimmer()
-                        )
-                    } else {
-                        val name = when(val state = userState){
-                            is ResultState.Success ->{
-                                state.data.data?.firstName + " " + state.data.data?.lastName
-                            }
-                            else -> "Unknown"
-                        }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
                         Text(
-                            text = name,
-                            fontSize = responsiveSp(24),
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
+                            text = "Welcome!",
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                            fontSize = responsiveSp(18),
+                            fontWeight = FontWeight.Medium
                         )
+                        if (isLoadingUser) {
+                            Box(
+                                modifier = Modifier
+                                    .width(120.dp)
+                                    .height(24.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .shimmer()
+                            )
+                        } else {
+                            val name = when (val state = userState) {
+                                is ResultState.Success -> {
+                                    state.data.data?.firstName + " " + state.data.data?.lastName
+                                }
+                                else -> "Unknown"
+                            }
+                            Text(
+                                text = name,
+                                fontSize = responsiveSp(24),
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
                     }
                 }
-                
-                // Notification icon with circular background
-                Box(
-                    modifier = Modifier
-                        .size(45.dp)
-                        .background(MaterialTheme.colorScheme.surface, CircleShape)
-                        .clip(CircleShape)
-                        .clickable {
-                            navController.navigate(Routes.Notification)
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if(hasUnreadNotifications){
-                        BadgedBox(
-                            badge = {
-                                Badge()
-                            }
+
+                if (isLoadingUser) {
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(CircleShape)
+                            .shimmer()
+                    )
+                } else {
+                    val profilePhoto = (userState as? ResultState.Success)?.data?.data?.profilePictureUrl
+                    if (profilePhoto != null) {
+                        AsyncImage(
+                            model = profilePhoto,
+                            contentDescription = "Profile",
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    navController.navigate(Routes.Profile)
+                                }
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .background(MaterialTheme.colorScheme.surface, CircleShape)
+                                .clip(CircleShape)
+                                .clickable {
+                                    navController.navigate(Routes.Profile)
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notifications",
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Profile",
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
-                    }else{
-                        Icon(
-                            imageVector = Icons.Default.NotificationsNone,
-                            contentDescription = "Notifications",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
                     }
-
-
                 }
+
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
             // 2. Premium Balance Card
-            BalanceCard(balance = transactionSummary.balance)
+            BalanceCard(balance = transactionSummary.balance, symbol = currencySymbol)
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -294,7 +315,7 @@ fun HomeScreen(
                     items = transactions.reversed(),
                     key = { it._id ?: it.localId ?: it.hashCode() }
                 ) { expense ->
-                    TransactionItem(expense = expense)
+                    TransactionItem(expense = expense, symbol = currencySymbol)
                 }
             }
         }

@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1091511301783",
+    "project_id": "helhime-eedc3",
+    "storage_bucket": "helhime-eedc3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1091511301783:android:ec97e7603522d72be31bd2",
+        "android_client_info": {
+          "package_name": "com.aditya.expensetracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1091511301783-728228d8sc1mi8apqj5jsopbeb04nsah.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aditya.expensetracker",
+            "certificate_hash": "8cd9aad6a55921e42f4c0def42af359e832af359"
+          }
+        },
+        {
+          "client_id": "1091511301783-tborav4pmf5itt630s62q48cc4i5k8gt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aditya.expensetracker",
+            "certificate_hash": "f2b33fc8f74b0277d2447f9dc66eca81b7535b11"
+          }
+        },
+        {
+          "client_id": "1091511301783-4o2o0rgao3r88jt28n28u47o3317mvs3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAX-WSWCUYDRx877uDr936vmGO31z9KPdk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1091511301783-4o2o0rgao3r88jt28n28u47o3317mvs3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

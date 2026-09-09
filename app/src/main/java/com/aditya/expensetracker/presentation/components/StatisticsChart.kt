@@ -54,7 +54,8 @@ fun StatisticsChart(
     backgroundColor: Color = Color.Transparent,
     strokeWidth: Dp = 4.dp,
     pointRadius: Dp = 4.dp,
-    sharedMaxValue: Float? = null
+    sharedMaxValue: Float? = null,
+    symbol : String
 ) {
     val isPreview = LocalInspectionMode.current
     val chartPoints = remember(transactions, chartType, timeFilter) {
@@ -254,7 +255,7 @@ fun StatisticsChart(
                     ) {
                         Text(text = dataPoint.label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
                         Text(
-                            text = "₹${String.format(Locale.getDefault(), "%,.2f", dataPoint.value)}",
+                            text = "$symbol${String.format(Locale.getDefault(), "%,.2f", dataPoint.value)}",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface

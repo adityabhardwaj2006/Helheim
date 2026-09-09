@@ -30,4 +30,5 @@ interface TransactionRepo {
     ): TransactionResponse
 
     fun updateLocalState(response: getTransactionResponse)
+
 }

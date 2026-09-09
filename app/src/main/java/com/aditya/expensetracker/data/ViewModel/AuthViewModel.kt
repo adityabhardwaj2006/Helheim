@@ -1,5 +1,8 @@
 package com.aditya.expensetracker.data.ViewModel
 
+import android.content.Context
+import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aditya.expensetracker.common.ResultState
@@ -7,10 +10,10 @@ import com.aditya.expensetracker.data.model.LoginResponse
 import com.aditya.expensetracker.data.model.SignUpResponse
 import com.aditya.expensetracker.domain.repo.AuthRepo
 import com.aditya.expensetracker.data.TokenManager
-import com.aditya.expensetracker.data.model.TransactionResponse
-import com.aditya.expensetracker.data.model.UserDTO
 import com.aditya.expensetracker.data.model.profileResponse
+import com.aditya.expensetracker.data.remote.AuthManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,8 +26,12 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepo : AuthRepo,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val authManager: AuthManager,
+    @ApplicationContext private val context: Context
 ) : ViewModel(){
+
+    private val TAG = "AuthDebug"
 
     private val _userState = MutableStateFlow<ResultState<profileResponse>?>(ResultState.Idle)
     val userState = _userState.asStateFlow()
@@ -73,9 +80,35 @@ class AuthViewModel @Inject constructor(
             }
         }
 
+    fun getGoogleSignInIntent(): Intent {
+        return authManager.getSignInIntent()
+    }
+
+    fun onGoogleSignInResult(data: Intent?) {
+        viewModelScope.launch {
+            _loginState.value = ResultState.Loading
+            val result = authManager.handleSignInResult(data)
+            result.onSuccess { userData ->
+                try {
+                    val response = authRepo.googleLogin(
+                        idToken = userData.googleIdToken,
+                        email = userData.email,
+                        photoUrl = userData.profilePictureUrl?.toString()
+                    )
+                    _loginState.value = ResultState.Success(response)
+                } catch (e: Exception) {
+                    _loginState.value = ResultState.Error(e.message ?: "Backend login failed")
+                }
+            }.onFailure { e ->
+                _loginState.value = ResultState.Error(e.message ?: "Google Sign-in failed")
+            }
+        }
+    }
+
     fun logout(){
         viewModelScope.launch {
             authRepo.logout()
+            authManager.signOut()
         }
     }
 
@@ -158,5 +191,3 @@ class AuthViewModel @Inject constructor(
     }
 
 }
-
-
