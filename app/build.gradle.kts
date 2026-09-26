@@ -122,6 +122,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.material.icons.extended)
 
+    implementation("androidx.compose.material3:material3-window-size-class")
 
     implementation(libs.androidx.hilt.navigation.compose)
 

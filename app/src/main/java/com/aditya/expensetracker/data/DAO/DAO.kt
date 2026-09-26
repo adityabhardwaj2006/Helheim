@@ -27,6 +27,9 @@ interface TransactionDao{
     @Query("SELECT * FROM 'transactions' WHERE userId = :userId")
     fun getAllTransaction(userId: String) : Flow<List<Transaction>>
 
+    @Query("SELECT * FROM 'transactions' WHERE isSynced = 0 AND userId = :userId")
+    fun getUnsyncedTransaction(userId: String) : Flow<List<Transaction>>
+
 }
 
 @Dao

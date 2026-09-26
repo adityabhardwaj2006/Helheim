@@ -19,11 +19,19 @@ class NotificationRepoImpl @Inject constructor(
     private val dao: NotificationDao
 ) : NotificationRepo {
     override suspend fun getNotifications(token: String): NotificationResponse {
-        return api.getNotifications(token)
+        return try {
+            api.getNotifications(token)
+        } catch (e: Exception) {
+            NotificationResponse(success = false, notifications = emptyList())
+        }
     }
 
     override suspend fun generateNotifications(token: String): GenerateNotificationResponse {
-        return api.generateNotifications(token)
+        return try {
+            api.generateNotifications(token)
+        } catch (e: Exception) {
+            GenerateNotificationResponse(success = false, message = e.message ?: "Failed to generate notifications")
+        }
     }
 
     override suspend fun deleteNotification(token: String, id: String): TransactionResponse {

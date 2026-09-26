@@ -66,10 +66,10 @@ fun TransactionHistoryItem(transaction: TransactionItem,symbol : String) {
             
             Column(modifier = Modifier.weight(1f)) {
                 val title = when (transaction.type) {
-                    "INCOME" -> "Income from ${transaction.receivedFrom}"
-                    "EXPENSE" -> "Paid to ${transaction.paidTo}"
-                    "SAVINGS" -> "Saved for ${transaction.savedFor}"
-                    else -> {"Income from ${transaction.receivedFrom}"}
+                    "INCOME" -> "Income from ${transaction.receivedFrom ?: "Unknown"}"
+                    "EXPENSE" -> "Paid to ${transaction.paidTo ?: "Unknown"}"
+                    "SAVINGS" -> "Saved for ${transaction.savedFor ?: "Unknown"}"
+                    else -> {"Income from ${transaction.receivedFrom ?: "Unknown"}"}
                 }
                 
                 Text(

@@ -18,13 +18,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import android.content.Intent
+import android.net.Uri
 
 @Composable
 fun HelpSupportScreen(navController: NavController) {
+    val context = LocalContext.current
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -80,8 +84,13 @@ fun HelpSupportScreen(navController: NavController) {
             ContactCard(
                 icon = Icons.Default.Email,
                 title = "Email Support",
-                subtitle = "support@expensetracker.com",
-                onClick = { /* Handle email click */ }
+                subtitle = "adityabhardwaj2032@gmail.com",
+                onClick = {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:adityabhardwaj2032@gmail.com")
+                    }
+                    context.startActivity(intent)
+                }
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -89,8 +98,13 @@ fun HelpSupportScreen(navController: NavController) {
             ContactCard(
                 icon = Icons.Default.Phone,
                 title = "Phone Support",
-                subtitle = "+1 234 567 890 (Mon-Fri, 10am-5pm)",
-                onClick = { /* Handle phone click */ }
+                subtitle = "+91 7827349380 (Mon-Fri, 10am-5pm)",
+                onClick = {
+                    val intent = Intent(Intent.ACTION_DIAL).apply {
+                        data = Uri.parse("tel:+917827349380")
+                    }
+                    context.startActivity(intent)
+                }
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -121,6 +135,26 @@ fun HelpSupportScreen(navController: NavController) {
             FaqItem(
                 question = "How do I change my password?",
                 answer = "Navigate to the Profile tab and select 'Change Password'. Enter your current and new password to update it."
+            )
+
+            FaqItem(
+                question = "Can I create custom categories?",
+                answer = "Yes, you can manage your categories in the Settings section."
+            )
+
+            FaqItem(
+                question = "Does it support multiple currencies?",
+                answer = "Yes, you can change your preferred currency in the Profile settings."
+            )
+
+            FaqItem(
+                question = "How do I view my spending statistics?",
+                answer = "Navigate to the Statistics tab to see a detailed breakdown of your finances."
+            )
+
+            FaqItem(
+                question = "Is my data secure?",
+                answer = "Yes, we use industry-standard encryption to protect your data both in transit and at rest."
             )
 
             Spacer(modifier = Modifier.height(32.dp))

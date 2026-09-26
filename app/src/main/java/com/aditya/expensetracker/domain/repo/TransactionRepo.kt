@@ -31,4 +31,8 @@ interface TransactionRepo {
 
     fun updateLocalState(response: getTransactionResponse)
 
+    suspend fun syncOfflineTransaction(
+        token: String
+    ) : TransactionResponse
+
 }

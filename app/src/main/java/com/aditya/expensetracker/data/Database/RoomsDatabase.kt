@@ -14,7 +14,7 @@ import com.aditya.expensetracker.data.model.UserEntity
 
 @Database(
     entities = [UserEntity::class,Transaction::class, LocalNotification::class],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

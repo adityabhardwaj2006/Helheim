@@ -1,5 +1,6 @@
 package com.aditya.expensetracker.data.repoImpl
 
+import androidx.compose.runtime.collectAsState
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.Api.TransactionApi
 import com.aditya.expensetracker.data.model.TransactionRequest
@@ -8,12 +9,16 @@ import com.aditya.expensetracker.data.model.getTransactionResponse
 import com.aditya.expensetracker.data.model.Transaction
 import com.aditya.expensetracker.data.model.TransactionItem
 import com.aditya.expensetracker.data.TokenManager
+import com.aditya.expensetracker.data.connectivity.AndroidConnectivityObserver
+import com.aditya.expensetracker.data.connectivity.ConnectivityObserver
 import com.aditya.expensetracker.domain.repo.Repo
 import com.aditya.expensetracker.domain.repo.TransactionRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,11 +26,14 @@ import javax.inject.Singleton
 class TransactionRepoImpl @Inject constructor(
     private val api : TransactionApi,
     private val localRepo: Repo,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val connectivityObserver: ConnectivityObserver
 ) : TransactionRepo {
 
     private val _transactions = MutableStateFlow<ResultState<getTransactionResponse>>(ResultState.Idle)
     override val transactions: StateFlow<ResultState<getTransactionResponse>> = _transactions.asStateFlow()
+
+
 
     override suspend fun saveTransaction(
         amount: Double,
@@ -85,6 +93,14 @@ class TransactionRepoImpl @Inject constructor(
                 _transactions.value = ResultState.Success(response)
                 response
             } else {
+
+                val isConnected = connectivityObserver.isConnected.first()
+                if(!isConnected){
+                    val errorResponse = getTransactionResponse(success = false, transactions = emptyList())
+                    _transactions.value = ResultState.Error("No internet connection")
+                    return errorResponse
+                }
+
                 if (token.replace("Bearer ", "").trim().isEmpty()) {
                     val response = getTransactionResponse(success = false, transactions = emptyList())
                     _transactions.value = ResultState.Error("Authentication token is missing")
@@ -100,10 +116,10 @@ class TransactionRepoImpl @Inject constructor(
                             amount = it.amount,
                             date = it.date,
                             type = it.type,
-                            paidTo = it.paidTo,
+                            paidTo = it.paidTo ?: "",
                             category = it.category,
-                            savedFor = it.savedFor,
-                            receivedFrom = it.receivedFrom,
+                            savedFor = it.savedFor ?: "",
+                            receivedFrom = it.receivedFrom ?: "",
                             paymentMethod = it.paymentMethod,
                             userId = userId
                         )
@@ -114,7 +130,8 @@ class TransactionRepoImpl @Inject constructor(
                 response
             }
         } catch (e: Exception) {
-            if (e is retrofit2.HttpException && e.code() == 401) {
+
+            if (e is HttpException && e.code() == 401) {
                 tokenManager.clearToken()
             }
             val errorMessage = e.message ?: "Failed to fetch transactions"
@@ -134,5 +151,50 @@ class TransactionRepoImpl @Inject constructor(
         _transactions.value = ResultState.Success(response)
     }
 
+    override suspend fun syncOfflineTransaction(token: String): TransactionResponse {
+        val userId = tokenManager.getUserId().first() ?: ""
+        val unsyncedTransactions: List<Transaction> = localRepo.getUnsyncedTransaction(userId).first()
 
+        if (unsyncedTransactions.isEmpty()) {
+            return TransactionResponse(success = true, message = "No transactions to sync")
+        }
+
+        var allSuccessful = true
+        unsyncedTransactions.forEach { tx: Transaction ->
+            try {
+                val response = api.saveTransaction(
+                    TransactionRequest(
+                        amount = tx.amount,
+                        date = tx.date,
+                        type = tx.type,
+                        paidTo = tx.paidTo,
+                        category = tx.category,
+                        savedFor = tx.savedFor,
+                        receivedFrom = tx.receivedFrom,
+                        paymentMethod = tx.paymentMethod
+                    ),
+                    token = token
+                )
+
+                if (response.success && response.transaction != null) {
+                    localRepo.updateTransaction(
+                        tx.copy(
+                            backendId = response.transaction._id,
+                            isSynced = true
+                        )
+                    )
+                } else {
+                    allSuccessful = false
+                }
+            } catch (e: Exception) {
+                allSuccessful = false
+            }
+        }
+
+        return if (allSuccessful) {
+            TransactionResponse(success = true, message = "All transactions synced successfully")
+        } else {
+            TransactionResponse(success = false, message = "Some transactions failed to sync")
+        }
+    }
 }

@@ -68,10 +68,13 @@ import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
+import com.aditya.expensetracker.data.model.TransactionResponse
 import com.aditya.expensetracker.data.model.TransactionType
 import com.aditya.expensetracker.presentation.components.shimmer
 import androidx.compose.ui.draw.clip
 import androidx.navigation.NavController
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import com.aditya.expensetracker.presentation.navigation.Routes
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -99,6 +102,7 @@ fun AddScreen(
     val addScreenState by transactionVm.transactionState.collectAsState()
     val preferredPaymentMethod by paymentViewModel.preferredPaymentMethod.collectAsState()
     val snackbarHostState = remember{ SnackbarHostState() }
+    val context = LocalContext.current
 
 
 
@@ -120,11 +124,16 @@ fun AddScreen(
     LaunchedEffect(addScreenState) {
         when(val state = addScreenState){
             is ResultState.Success -> {
+                val response = state.data as? TransactionResponse
+                if (response?.message?.contains("Offline", ignoreCase = true) == true) {
+                    Toast.makeText(context, response.message, Toast.LENGTH_LONG).show()
+                }
+                transactionVm.resetTransactionState()
                 navController.navigate(Routes.HomeUi)
-                    scope.launch {
-                        sheetState.hide()
-                        onDismiss()
-                    }
+                scope.launch {
+                    sheetState.hide()
+                    onDismiss()
+                }
             }
             is ResultState.Error -> {
                 snackbarHostState.showSnackbar("${state.message}")
@@ -411,4 +420,3 @@ private fun convertMillisToDate(millis: Long): String {
     val formatter = SimpleDateFormat("dd/MMMM/yyyy", Locale.getDefault())
     return formatter.format(Date(millis))
 }
-

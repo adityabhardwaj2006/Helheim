@@ -20,7 +20,8 @@ data class Transaction(
     val savedFor : String,
     val receivedFrom : String,
     val paymentMethod: String,
-    val userId: String = ""
+    val userId: String = "",
+    val isSynced : Boolean = false
 )
 
 enum class TransactionType {

@@ -10,9 +10,9 @@ data class TransactionItem(
     val amount : Double,
     val date : Long?,
     val type : String,
-    val paidTo : String,
+    val paidTo : String?,
     val category : String?,
-    val savedFor : String,
-    val receivedFrom : String,
+    val savedFor : String?,
+    val receivedFrom : String?,
     val paymentMethod : String
 )

@@ -82,7 +82,7 @@ fun TransactionItem(expense: TransactionItem,symbol : String) {
                 )
                 val formatter = SimpleDateFormat("dd MMM, yyyy", Locale.getDefault())
                 Text(
-                    text = formatter.format(expense.date),
+                    text = formatter.format(Date(expense.date ?: 0L)),
                     fontSize = responsiveSp(12),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )

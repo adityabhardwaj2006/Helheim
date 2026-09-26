@@ -57,6 +57,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
+import kotlin.toString
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -134,7 +135,8 @@ fun StatisticsScreen(
             }
         }
     ) {innerPadding->
-        when(state){
+        val resultState = state
+        when(resultState){
             is ResultState.Loading -> {
                 ShimmerStatisticsScreen(innerPadding)
             }
@@ -148,15 +150,20 @@ fun StatisticsScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = (state as ResultState.Error).message,
+                        text = resultState.message,
                         fontSize = responsiveSp(18),
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { transactionVm.getTransaction() }) {
+                        Text("Retry")
+                    }
                 }
 
             }
             is ResultState.Success -> {
-               val response = (state as ResultState.Success<getTransactionResponse>).data
+               val response = resultState.data
                 val transactions = response.transactions
 
                 // Calculate shared max value for consistent scaling across tabs

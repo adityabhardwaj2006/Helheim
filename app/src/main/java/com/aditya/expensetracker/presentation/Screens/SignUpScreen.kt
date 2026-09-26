@@ -89,16 +89,13 @@ fun SignUpScreen(
     }
 
     Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            ,
+        modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
-                .navigationBarsPadding()
                 .imePadding()
                 .verticalScroll(scrollState)
         ) {
@@ -108,7 +105,7 @@ fun SignUpScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 24.dp)
-                    .padding(bottom = 40.dp),
+                    .padding(bottom = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 

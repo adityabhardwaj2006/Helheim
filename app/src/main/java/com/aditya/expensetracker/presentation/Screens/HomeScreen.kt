@@ -185,13 +185,19 @@ fun HomeScreen(
             }
         }
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp)
-                .padding(top = 12.dp)
+                .padding(innerPadding),
+            contentAlignment = Alignment.TopCenter
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .widthIn(max = 800.dp)
+                    .padding(horizontal = 15.dp)
+                    .padding(top = 12.dp)
+            ) {
 
             // 1. Personalized Header Section
             Row(
@@ -304,20 +310,44 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            LazyColumn(
-                state = transactionListState,
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(bottom = 100.dp) // Extra padding for bottom navigation
-            ) {
-                val transactions = listState.transactions.distinctBy { it._id ?: it.localId }
-                items(
-                    items = transactions.reversed(),
-                    key = { it._id ?: it.localId ?: it.hashCode() }
-                ) { expense ->
-                    TransactionItem(expense = expense, symbol = currencySymbol)
+            val state = transactionState
+            when(state) {
+                is ResultState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(bottom = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = state.message,
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { transactionVm.getTransaction() }) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+                }
+                else -> {
+                    LazyColumn(
+                        state = transactionListState,
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp)
+                    ) {
+                        val transactions = listState.transactions.distinctBy { it._id ?: it.localId }
+                        items(
+                            items = transactions.reversed(),
+                            key = { it._id ?: it.localId ?: it.hashCode() }
+                        ) { expense ->
+                            TransactionItem(expense = expense, symbol = currencySymbol)
+                        }
+                    }
                 }
             }
         }
     }
+}
 }

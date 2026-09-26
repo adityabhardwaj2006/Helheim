@@ -13,5 +13,7 @@ interface Repo  {
 
     suspend fun deleteTransaction(transaction: Transaction)
 
+    fun getUnsyncedTransaction(userId: String) : Flow<List<Transaction>>
+
 
 }

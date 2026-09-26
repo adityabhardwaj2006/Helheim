@@ -17,6 +17,8 @@ import com.aditya.expensetracker.data.repoImpl.NotificationRepoImpl
 import com.aditya.expensetracker.data.repoImpl.RatingRepoImpl
 import com.aditya.expensetracker.data.repoImpl.RepoImpl
 import com.aditya.expensetracker.data.repoImpl.TransactionRepoImpl
+import com.aditya.expensetracker.data.connectivity.ConnectivityObserver
+import com.aditya.expensetracker.data.connectivity.AndroidConnectivityObserver
 import com.aditya.expensetracker.domain.repo.AuthRepo
 import com.aditya.expensetracker.domain.repo.ChatRepo
 import com.aditya.expensetracker.domain.repo.NotificationRepo
@@ -137,6 +139,13 @@ object DataModule {
         return retrofit.create(NotificationApi::class.java)
     }
 
+    @Provides
+    @Singleton
+    fun provideConnectivityObserver(
+        @ApplicationContext context: Context
+    ): ConnectivityObserver {
+        return AndroidConnectivityObserver(context)
+    }
 
     @Provides
     @Singleton

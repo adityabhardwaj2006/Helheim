@@ -1,10 +1,13 @@
 package com.aditya.expensetracker.presentation.Screens
 
 import android.Manifest
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import android.service.notification.NotificationListenerService
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
@@ -48,6 +51,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -136,7 +140,11 @@ fun ProfileScreen(navController: NavController,
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                isAutoTrackEnabled = isNotificationServiceEnabled(context)
+                val isEnabled = isNotificationServiceEnabled(context)
+                isAutoTrackEnabled = isEnabled
+                if (isEnabled) {
+                    requestNotificationListenerRebind(context)
+                }
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -240,6 +248,21 @@ fun ProfileScreen(navController: NavController,
                             .clip(RoundedCornerShape(8.dp))
                     )
                 }
+            } else if (profileState is ResultState.Error) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = (profileState as ResultState.Error).message,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = responsiveSp(14),
+                        textAlign = TextAlign.Center
+                    )
+                    TextButton(onClick = { authViewModel.getProfile() }) {
+                        Text("Retry")
+                    }
+                }
             } else {
                 Text(
                     text = name,
@@ -339,9 +362,6 @@ fun ProfileScreen(navController: NavController,
                 CardItem(icon = Icons.Default.Star, text = "Rate Us", showDivider = false) {
                     navController.navigate(Routes.RateUs)
                 }
-                CardItem(icon = Icons.Default.Notifications, text = "View Debug Logs", showDivider = false) {
-                    navController.navigate(Routes.Notification)
-                }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -367,6 +387,18 @@ fun ProfileScreen(navController: NavController,
 fun isNotificationServiceEnabled(context: Context): Boolean {
     val packageNames = NotificationManagerCompat.getEnabledListenerPackages(context)
     return packageNames.contains(context.packageName)
+}
+
+fun requestNotificationListenerRebind(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        try {
+            NotificationListenerService.requestRebind(
+                ComponentName(context, com.aditya.expensetracker.service.TransactionNotificationListener::class.java)
+            )
+        } catch (e: Exception) {
+            Log.e("ProfileScreen", "Failed to rebind notification listener: ${e.message}")
+        }
+    }
 }
 
 @Composable

@@ -2,6 +2,7 @@ package com.aditya.expensetracker.data.ViewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.util.Log
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.TokenManager
 import com.aditya.expensetracker.data.model.Transaction
@@ -33,20 +34,22 @@ class TransactionVm @Inject constructor(
 
     val getTransactionState = repo.transactions
 
+    fun resetTransactionState() {
+        _transactionState.value = ResultState.Idle
+    }
+
     fun getTransaction() {
         viewModelScope.launch {
             try {
                 val token = tokenManager.getToken().first()
                 if (token.isNullOrEmpty()) {
-                    // repo.transactions StateFlow will be updated by repo itself if we call it with empty token,
-                    // but we can also handle it here if preferred.
-                    // However, TransactionRepoImpl.getTransactions already handles empty token now.
                     repo.getTransactions("Bearer ")
                     return@launch
                 }
                 repo.getTransactions("Bearer $token")
             } catch (error: Exception) {
-                // Error handled in repository's StateFlow
+                // If the repository didn't update the StateFlow, we could potentially handle it here,
+                // but usually the Repo is responsible for updating repo.transactions.
             }
         }
     }
@@ -69,8 +72,24 @@ class TransactionVm @Inject constructor(
                     amount, date, type, paidTo, category, savedFor, receivedFrom, paymentMethod, userId
                 )
                 _transactionState.value = ResultState.Success(response)
+                // Refresh list after save (online or offline)
+                getTransaction()
             } catch (error: Exception) {
                 _transactionState.value = ResultState.Error(error.message ?: "Transaction couldn't be saved")
+            }
+        }
+    }
+
+    fun syncOfflineTransactions() {
+        viewModelScope.launch {
+            try {
+                val token = tokenManager.getToken().first()
+                if (!token.isNullOrEmpty()) {
+                    repo.syncOfflineTransaction("Bearer $token")
+                    getTransaction()
+                }
+            } catch (e: Exception) {
+                Log.e("TransactionVm", "Failed to sync offline transactions: ${e.message}")
             }
         }
     }

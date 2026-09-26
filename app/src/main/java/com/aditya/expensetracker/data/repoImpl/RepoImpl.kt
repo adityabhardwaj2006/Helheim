@@ -25,4 +25,8 @@ class RepoImpl @Inject constructor(
         return dao.deleteTransaction(transaction)
     }
 
+    override fun getUnsyncedTransaction(userId: String): Flow<List<Transaction>> {
+        return dao.getUnsyncedTransaction(userId)
+    }
+
 }

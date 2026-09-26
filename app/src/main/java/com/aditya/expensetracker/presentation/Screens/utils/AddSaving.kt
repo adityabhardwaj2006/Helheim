@@ -19,6 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -32,6 +34,7 @@ import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
+import com.aditya.expensetracker.data.model.TransactionResponse
 import com.aditya.expensetracker.presentation.components.shimmer
 import com.aditya.expensetracker.presentation.navigation.Routes
 import kotlinx.coroutines.launch
@@ -52,6 +55,7 @@ fun AddSaving(
     val transactionVm : TransactionVm = hiltViewModel()
     val preferredPaymentMethod by paymentViewModel.preferredPaymentMethod.collectAsState()
     val addSavingState by transactionVm.transactionState.collectAsState()
+    val context = LocalContext.current
 
     var amount by remember { mutableStateOf("") }
     var dateMillis by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
@@ -71,11 +75,16 @@ fun AddSaving(
     LaunchedEffect(addSavingState) {
         when(val state = addSavingState){
             is ResultState.Success -> {
-                    navController.navigate(Routes.HomeUi)
-                    scope.launch {
-                        sheetState.hide()
-                        onDismiss()
-                    }
+                val response = state.data as? TransactionResponse
+                if (response?.message?.contains("Offline", ignoreCase = true) == true) {
+                    Toast.makeText(context, response.message, Toast.LENGTH_LONG).show()
+                }
+                transactionVm.resetTransactionState()
+                navController.navigate(Routes.HomeUi)
+                scope.launch {
+                    sheetState.hide()
+                    onDismiss()
+                }
             }
             is ResultState.Error -> {
                 snackbarHostState.showSnackbar(state.message)

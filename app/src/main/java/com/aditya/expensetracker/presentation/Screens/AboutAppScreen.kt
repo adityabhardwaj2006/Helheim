@@ -1,5 +1,6 @@
 package com.aditya.expensetracker.presentation.Screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,18 +9,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.aditya.expensetracker.R
+import android.content.Intent
+import android.net.Uri
+import com.aditya.expensetracker.presentation.navigation.Routes
 
 @Composable
 fun AboutAppScreen(navController: NavController) {
@@ -60,6 +67,7 @@ fun AboutAppScreen(navController: NavController) {
             }
         }
     ) { innerPadding ->
+        val context = LocalContext.current
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -70,64 +78,123 @@ fun AboutAppScreen(navController: NavController) {
         ) {
             Spacer(modifier = Modifier.height(20.dp))
 
-            // App Icon Placeholder
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(24.dp)),
-                contentAlignment = Alignment.Center
+            // Stylized App Icon
+            Surface(
+                modifier = Modifier.size(120.dp),
+                shape = RoundedCornerShape(32.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shadowElevation = 8.dp
             ) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(60.dp)
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Image(
+                        painter = painterResource(id = R.mipmap.helhime_foreground),
+                        contentDescription = "Helheim Icon",
+                        modifier = Modifier.size(80.dp)
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Expense Tracker",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Text(
-                text = "Version 1.0.0",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Text(
-                text = "Track your finances with ease. Our app helps you manage your income, expenses, and savings in one place, providing insightful statistics to help you reach your financial goals.",
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center,
-                lineHeight = 24.sp
-            )
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            Divider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            AboutSection(title = "Key Features", content = "• Real-time balance tracking\n• Category-wise transaction management\n• Interactive financial charts\n• Secure data synchronization\n• Easy profile management")
+            Text(
+                text = "Helheim",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
-            AboutSection(title = "Technologies Used", content = "Built with modern Android technologies including Jetpack Compose, Hilt Dependency Injection, Room Database for offline storage, and a secure Node.js backend.")
+            Surface(
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Text(
+                    text = "Version 1.0.0",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                )
+            }
 
-            AboutSection(title = "Developer", content = "Developed by Aditya Bhardwaj. Focused on providing a clean and premium user experience for financial management.")
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Track your finances with ease. Helheim helps you manage your income, expenses, and savings in one place, providing insightful statistics to help you reach your financial goals.",
+                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 22.sp,
+                    modifier = Modifier.padding(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            AboutSection(
+                title = "Key Features",
+                items = listOf(
+                    "Real-time balance tracking",
+                    "Category-wise transaction management",
+                    "Interactive financial charts",
+                    "Secure data synchronization",
+                    "Easy profile management"
+                )
+            )
+
+            AboutSection(
+                title = "Technologies Used",
+                content = "Built with modern Android technologies including Jetpack Compose, Hilt Dependency Injection, Room Database for offline storage, and a secure Node.js backend."
+            )
+
+            AboutSection(
+                title = "Developer",
+                content = "Developed by Aditya Bhardwaj. Focused on providing a clean and premium user experience for financial management."
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text(
+                text = "Links & Legal",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                LinkButton(
+                    modifier = Modifier.weight(1f),
+                    text = "Privacy Policy",
+                    onClick = {
+                        navController.navigate(Routes.PrivacyPolicy)
+                    }
+                )
+                LinkButton(
+                    modifier = Modifier.weight(1f),
+                    text = "GitHub",
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/aditya-bhardwaj/Helheim")).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
+                    }
+                )
+            }
 
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "© 2026 Expense Tracker App",
+                text = "© 2026 Helheim App",
                 fontSize = 12.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
             )
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -136,25 +203,55 @@ fun AboutAppScreen(navController: NavController) {
 }
 
 @Composable
-fun AboutSection(title: String, content: String) {
-    Column(
+fun AboutSection(title: String, content: String? = null, items: List<String>? = null) {
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 24.dp),
-        horizontalAlignment = Alignment.Start
+            .padding(bottom = 16.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Text(
-            text = title,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = content,
-            fontSize = 15.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-            lineHeight = 22.sp
-        )
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (content != null) {
+                Text(
+                    text = content,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                    lineHeight = 20.sp
+                )
+            }
+            items?.forEach { item ->
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 2.dp)) {
+                    Box(modifier = Modifier.size(6.dp).background(MaterialTheme.colorScheme.primary, CircleShape))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = item, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f))
+                }
+            }
+        }
     }
+}
+
+@Composable
+fun LinkButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(width = 1.dp)
+    ) {
+        Text(text = text, fontSize = 13.sp)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AboutAppScreenPreview() {
+    AboutAppScreen(navController = androidx.navigation.compose.rememberNavController())
 }

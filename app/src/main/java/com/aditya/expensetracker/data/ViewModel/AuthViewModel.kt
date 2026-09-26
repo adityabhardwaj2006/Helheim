@@ -150,7 +150,12 @@ class AuthViewModel @Inject constructor(
                 _userState.value = ResultState.Success(response)
             }catch (err : Exception){
                 if (!hasData) {
-                    _userState.value = ResultState.Error(err.message?: "Cannot get profile, please try again")
+                    val errorMessage = if (err is java.net.UnknownHostException || err is java.net.ConnectException) {
+                        "Offline: Profile data not available"
+                    } else {
+                        err.message ?: "Cannot get profile, please try again"
+                    }
+                    _userState.value = ResultState.Error(errorMessage)
                 }
             }
         }
