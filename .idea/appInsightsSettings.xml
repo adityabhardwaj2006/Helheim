@@ -6,6 +6,14 @@
         <entry key="Firebase Crashlytics">
           <value>
             <InsightsFilterSettings>
+              <option name="connection">
+                <ConnectionSetting>
+                  <option name="appId" value="com.aditya.expensetracker" />
+                  <option name="mobileSdkAppId" value="1:1091511301783:android:ec97e7603522d72be31bd2" />
+                  <option name="projectId" value="helhime-eedc3" />
+                  <option name="projectNumber" value="1091511301783" />
+                </ConnectionSetting>
+              </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
               <option name="timeIntervalDays" value="THIRTY_DAYS" />
               <option name="visibilityType" value="ALL" />

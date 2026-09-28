@@ -204,7 +204,7 @@ fun NavigationItem(
         onClick = onClick,
         modifier = Modifier.size(52.dp)
     ) {
-        if (label == "Profile" && profilePictureUrl != null) {
+        if (label == "Profile" && !profilePictureUrl.isNullOrBlank()) {
             AsyncImage(
                 model = profilePictureUrl,
                 contentDescription = label,

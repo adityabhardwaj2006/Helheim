@@ -107,7 +107,10 @@ class TransactionRepoImpl @Inject constructor(
                     return response
                 }
                 val networkResponse = api.getTransactions(token)
-                val distinctTransactions = networkResponse.transactions.distinctBy { it._id ?: it.localId }
+                // Deduplicate transactions by ID and by content (amount, type, recipient, and date within 5 minutes)
+                val distinctTransactions = networkResponse.transactions
+                    .distinctBy { it._id ?: it.localId }
+                    .distinctBy { "${it.amount}_${it.type}_${it.paidTo}_${it.receivedFrom}_${(it.date ?: 0) / 300000}" }
                 
                 distinctTransactions.forEach {
                     localRepo.insertTransaction(

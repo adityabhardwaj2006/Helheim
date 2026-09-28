@@ -11,10 +11,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +30,8 @@ import androidx.navigation.NavController
 import com.aditya.expensetracker.R
 import android.content.Intent
 import android.net.Uri
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.aditya.expensetracker.presentation.navigation.Routes
 
 @Composable
@@ -67,7 +73,6 @@ fun AboutAppScreen(navController: NavController) {
             }
         }
     ) { innerPadding ->
-        val context = LocalContext.current
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -81,16 +86,24 @@ fun AboutAppScreen(navController: NavController) {
             // Stylized App Icon
             Surface(
                 modifier = Modifier.size(120.dp),
-                shape = RoundedCornerShape(32.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.onPrimary,
                 shadowElevation = 8.dp
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Image(
-                        painter = painterResource(id = R.mipmap.helhime_foreground),
-                        contentDescription = "Helheim Icon",
-                        modifier = Modifier.size(80.dp)
-                    )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.clip(CircleShape)
+                ) {
+                    val iconPainter = rememberDrawablePainter(R.mipmap.helhime_round)
+                    if (iconPainter != null) {
+                        Image(
+                            painter = iconPainter,
+                            contentDescription = "Helheim Icon",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape)
+                        )
+                    }
                 }
             }
 
@@ -177,16 +190,16 @@ fun AboutAppScreen(navController: NavController) {
                         navController.navigate(Routes.PrivacyPolicy)
                     }
                 )
-                LinkButton(
-                    modifier = Modifier.weight(1f),
-                    text = "GitHub",
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/aditya-bhardwaj/Helheim")).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                        context.startActivity(intent)
-                    }
-                )
+//                LinkButton(
+//                    modifier = Modifier.weight(1f),
+//                    text = "GitHub",
+//                    onClick = {
+//                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/aditya-bhardwaj/Helheim")).apply {
+//                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                        }
+//                        context.startActivity(intent)
+//                    }
+//                )
             }
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -247,6 +260,18 @@ fun LinkButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier)
         border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(width = 1.dp)
     ) {
         Text(text = text, fontSize = 13.sp)
+    }
+}
+
+@Composable
+fun rememberDrawablePainter(drawableId: Int): Painter? {
+    val context = LocalContext.current
+    return remember(drawableId) {
+        val drawable = ContextCompat.getDrawable(context, drawableId) ?: return@remember null
+        val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 108
+        val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 108
+        val bitmap = drawable.toBitmap(width = width, height = height)
+        BitmapPainter(bitmap.asImageBitmap())
     }
 }
 

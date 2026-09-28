@@ -107,7 +107,7 @@ fun EditProfileScreen(
 
             // Profile Image Section with Camera Icon
             Box(contentAlignment = Alignment.BottomEnd) {
-                if (profilePhoto != null) {
+                if (!profilePhoto.isNullOrBlank()) {
                     AsyncImage(
                         model = profilePhoto,
                         contentDescription = "Profile Photo",

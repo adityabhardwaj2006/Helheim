@@ -33,6 +33,7 @@
 
         <service
             android:name=".service.TransactionNotificationListener"
+            android:enabled="true"
             android:exported="true"
             android:label="Helheim Auto-fill"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"

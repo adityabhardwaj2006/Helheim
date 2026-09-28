@@ -15,5 +15,8 @@ interface Repo  {
 
     fun getUnsyncedTransaction(userId: String) : Flow<List<Transaction>>
 
+    // Check if a matching transaction already exists locally to prevent duplicate entries
+    suspend fun hasMatchingTransaction(userId: String, amount: Double, type: String, date: Long): Boolean
+
 
 }

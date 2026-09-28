@@ -2,7 +2,6 @@ package com.aditya.expensetracker.presentation.Screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -53,7 +52,7 @@ fun SignUpScreen(
     var lastName by remember { mutableStateOf("") }
     val signUpState by authViewModel.signUpState.collectAsState()
     val loginState by authViewModel.loginState.collectAsState()
-    val snackbarHostState = remember{ SnackbarHostState() }
+    val snackbarHostState = remember { SnackbarHostState() }
     val scrollState = rememberScrollState()
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -63,164 +62,155 @@ fun SignUpScreen(
     }
 
     LaunchedEffect(signUpState) {
-        when(val state = signUpState){
+        when (val state = signUpState) {
             is ResultState.Success -> {
-                authViewModel.login(username,password)
-            }
-            is ResultState.Error ->{
-                snackbarHostState.showSnackbar(state.message)
-            }
-            else -> {}
-
-        }
-    }
-
-    LaunchedEffect(loginState) {
-        when(val state = loginState){
-            is ResultState.Success<*> -> {
-                navController.navigate(Routes.HomeUi)
+                authViewModel.login(username, password)
             }
             is ResultState.Error -> {
                 snackbarHostState.showSnackbar(state.message)
             }
-
             else -> {}
         }
     }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
+    LaunchedEffect(loginState) {
+        when (val state = loginState) {
+            is ResultState.Success<*> -> {
+                navController.navigate(Routes.HomeUi) {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+            is ResultState.Error -> {
+                snackbarHostState.showSnackbar(state.message)
+            }
+            else -> {}
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
+        Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
-                .imePadding()
-                .verticalScroll(scrollState)
+                .padding(innerPadding),
+            color = MaterialTheme.colorScheme.background
         ) {
-
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .imePadding()
+                    .verticalScroll(scrollState)
                     .padding(horizontal = 24.dp)
-                    .padding(bottom = 16.dp),
+                    .padding(top = 16.dp, bottom = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 LottieAnimation(
                     composition = rememberLottieComposition(
                         LottieCompositionSpec.RawRes(R.raw.lottie_animation)
                     ).value,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(170.dp),
+                        .height(150.dp),
                     iterations = LottieConstants.IterateForever,
                     contentScale = ContentScale.Fit
                 )
 
-
                 Text(
                     text = "Create a new account",
-                    fontSize = 26.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
 
-                Spacer(Modifier.height(28.dp))
+                Spacer(Modifier.height(20.dp))
 
-                Text(
-                    text = "First Name",
-                    fontSize = 16.sp,
+                // First Name and Last Name side-by-side in one Row
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                )
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "First Name",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                        )
 
-                Spacer(Modifier.height(6.dp))
+                        Spacer(Modifier.height(4.dp))
 
-                NameTextField(
-                    placeholder = "Enter your first name",
-                    firstname = firstname,
-                    onValueChange = {
-                        firstname = it
-                    },
-                    keyboardType = KeyboardType.Text
-                )
+                        NameTextField(
+                            placeholder = "Enter first name",
+                            value = firstname,
+                            onValueChange = { firstname = it },
+                            keyboardType = KeyboardType.Text
+                        )
+                    }
 
-                Spacer(Modifier.height(18.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Last Name",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                        )
 
-                Text(
-                    text = "Last Name",
-                    fontSize = 16.sp,
-                    modifier = Modifier.fillMaxWidth(),
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                )
+                        Spacer(Modifier.height(4.dp))
 
-                Spacer(Modifier.height(6.dp))
+                        NameTextField(
+                            placeholder = "Enter last name",
+                            value = lastName,
+                            onValueChange = { lastName = it },
+                            keyboardType = KeyboardType.Text
+                        )
+                    }
+                }
 
-                NameTextField(
-                    placeholder = "Enter your last name",
-                    firstname = lastName,
-                    onValueChange = {
-                        lastName = it
-                    },
-                    keyboardType = KeyboardType.Text
-                )
-
-                Spacer(Modifier.height(18.dp))
+                Spacer(Modifier.height(14.dp))
 
                 Text(
                     text = "Username",
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     modifier = Modifier.fillMaxWidth(),
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                 )
 
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(4.dp))
 
                 SignUpTextField(
                     placeholder = "Enter username",
-                    firstname = username,
-                    onValueChange = {
-                        username = it
-                    },
+                    value = username,
+                    onValueChange = { username = it },
                     keyboardType = KeyboardType.Text,
                     passwordVisible = passwordVisible,
-                    onEyeClick = {
-                        passwordVisible = !passwordVisible
-                    }
+                    onEyeClick = { passwordVisible = !passwordVisible }
                 )
 
-                Spacer(Modifier.height(18.dp))
+                Spacer(Modifier.height(14.dp))
 
                 Text(
                     text = "Password",
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     modifier = Modifier.fillMaxWidth(),
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                 )
 
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(4.dp))
 
                 SignUpTextField(
                     placeholder = "Enter password",
-                    firstname = password,
-                    onValueChange = {
-                        password = it
-                    },
+                    value = password,
+                    onValueChange = { password = it },
                     keyboardType = KeyboardType.Password,
                     passwordVisible = passwordVisible,
-                    onEyeClick = {
-                        passwordVisible = !passwordVisible
-                    }
+                    onEyeClick = { passwordVisible = !passwordVisible }
                 )
 
-                Spacer(Modifier.height(28.dp))
+                Spacer(Modifier.height(20.dp))
 
                 SignUpButton(
                     loading = signUpState is ResultState.Loading,
@@ -234,38 +224,29 @@ fun SignUpScreen(
                     }
                 )
 
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f)
-                    )
-
+                    HorizontalDivider(modifier = Modifier.weight(1f))
                     Text(
                         text = " OR ",
                         color = Color.Gray
                     )
-
-                    HorizontalDivider(
-                        modifier = Modifier.weight(1f)
-                    )
+                    HorizontalDivider(modifier = Modifier.weight(1f))
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 SocialButton(
                     text = "Continue with Google",
                     icon = {
                         Icon(
-                            painter = painterResource(R.drawable.google_icon_logo_svgrepo_com) ,
+                            painter = painterResource(R.drawable.google_icon_logo_svgrepo_com),
                             contentDescription = "Google",
                             tint = Color.Unspecified,
-                            modifier = Modifier.size(
-                                24.dp
-                            )
+                            modifier = Modifier.size(24.dp)
                         )
                     },
                     onClick = {
@@ -273,7 +254,7 @@ fun SignUpScreen(
                     }
                 )
 
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -290,7 +271,9 @@ fun SignUpScreen(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable {
-                            navController.navigate(Routes.LoginScreen)
+                            navController.navigate(Routes.LoginScreen) {
+                                popUpTo(Routes.SignUpScreen) { inclusive = true }
+                            }
                         }
                     )
                 }
@@ -308,7 +291,7 @@ fun SignUpButton(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(52.dp),
         enabled = !loading,
         shape = RoundedCornerShape(16.dp),
         elevation = ButtonDefaults.buttonElevation(
@@ -337,21 +320,26 @@ fun SignUpButton(
 }
 
 @Composable
-fun NameTextField(placeholder: String, firstname: String,
-                  onValueChange: (String) -> Unit,
-                  keyboardType: KeyboardType) {
+fun NameTextField(
+    placeholder: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    keyboardType: KeyboardType
+) {
     TextField(
-        value = firstname,
+        value = value,
         onValueChange = onValueChange,
         modifier = Modifier
             .fillMaxWidth()
-            .height(58.dp),
+            .height(54.dp),
         placeholder = {
             Text(
-                text = placeholder, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                text = placeholder,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                fontSize = 13.sp
             )
         },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         colors = TextFieldDefaults.colors(
@@ -365,59 +353,62 @@ fun NameTextField(placeholder: String, firstname: String,
 }
 
 @Composable
-fun SignUpTextField(placeholder: String, firstname: String,
-                    onValueChange: (String) -> Unit,
-                    keyboardType: KeyboardType,
-                    passwordVisible : Boolean,
-                    onEyeClick : (Boolean) -> Unit) {
+fun SignUpTextField(
+    placeholder: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    keyboardType: KeyboardType,
+    passwordVisible: Boolean,
+    onEyeClick: () -> Unit
+) {
     TextField(
-        value = firstname,
+        value = value,
         onValueChange = onValueChange,
         modifier = Modifier
             .fillMaxWidth()
-            .height(58.dp),
+            .height(54.dp),
         placeholder = {
             Text(
-                text = placeholder, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                text = placeholder,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                fontSize = 13.sp
             )
         },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         leadingIcon = {
-            if(placeholder == "Enter username"){
+            if (placeholder == "Enter username") {
                 Icon(
                     imageVector = Icons.Default.Person2,
-                    contentDescription = "",
+                    contentDescription = "Username",
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
-            }else{
+            } else {
                 Icon(
                     imageVector = Icons.Default.Lock,
-                    contentDescription = "",
+                    contentDescription = "Password",
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
         },
-        visualTransformation =
-            if(placeholder == "Enter password" && !passwordVisible){
-                PasswordVisualTransformation()
-            }else{
-                VisualTransformation.None
-            },
+        visualTransformation = if (placeholder == "Enter password" && !passwordVisible) {
+            PasswordVisualTransformation()
+        } else {
+            VisualTransformation.None
+        },
         trailingIcon = {
-            if(placeholder == "Enter password"){
+            if (placeholder == "Enter password") {
                 Icon(
-                    imageVector =
-                        if(!passwordVisible){
-                            Icons.Default.VisibilityOff
-                        }else{
-                            Icons.Default.Visibility
-                        },
-                    contentDescription = "",
+                    imageVector = if (passwordVisible) {
+                        Icons.Default.Visibility
+                    } else {
+                        Icons.Default.VisibilityOff
+                    },
+                    contentDescription = if (passwordVisible) "Hide password" else "Show password",
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.clickable{
-                        onEyeClick(passwordVisible)
+                    modifier = Modifier.clickable {
+                        onEyeClick()
                     }
                 )
             }

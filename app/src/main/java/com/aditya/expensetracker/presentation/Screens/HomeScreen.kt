@@ -251,7 +251,7 @@ fun HomeScreen(
                     )
                 } else {
                     val profilePhoto = (userState as? ResultState.Success)?.data?.data?.profilePictureUrl
-                    if (profilePhoto != null) {
+                    if (!profilePhoto.isNullOrBlank()) {
                         AsyncImage(
                             model = profilePhoto,
                             contentDescription = "Profile",

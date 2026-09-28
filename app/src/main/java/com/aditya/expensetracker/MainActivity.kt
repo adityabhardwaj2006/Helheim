@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import com.aditya.expensetracker.presentation.Screens.isNotificationServiceEnabled
+import com.aditya.expensetracker.presentation.Screens.requestNotificationListenerRebind
 import com.aditya.expensetracker.presentation.navigation.App
 import com.aditya.expensetracker.ui.theme.ExpenseTrackerTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,6 +23,15 @@ class MainActivity : ComponentActivity() {
             ExpenseTrackerTheme {
                 App(windowSizeClass = windowSizeClass)
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (isNotificationServiceEnabled(this)) {
+            requestNotificationListenerRebind(this)
+        } else {
+            com.aditya.expensetracker.presentation.Screens.stopNotificationListener(this)
         }
     }
 }

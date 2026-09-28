@@ -40,6 +40,18 @@ class TransactionManager @Inject constructor(
         }
         val bearerToken = "Bearer $token"
 
+        val txDate = date ?: System.currentTimeMillis()
+
+        // Deduplication Check: Prevent saving if an identical transaction exists in Room DB
+        if (localRepo.hasMatchingTransaction(userId, amount, type, txDate)) {
+            Log.d("TransactionManager", "Duplicate transaction detected ($amount $type). Skipping save.")
+            return@withContext TransactionResponse(
+                success = true,
+                message = "Duplicate transaction skipped",
+                transaction = null
+            )
+        }
+
         val isOnline = connectivityObserver.isConnected.first()
 
         if (!isOnline) {

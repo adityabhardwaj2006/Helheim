@@ -143,7 +143,9 @@ fun ProfileScreen(navController: NavController,
                 val isEnabled = isNotificationServiceEnabled(context)
                 isAutoTrackEnabled = isEnabled
                 if (isEnabled) {
-                    requestNotificationListenerRebind(context)
+                    forceRebindNotificationListener(context)
+                } else {
+                    stopNotificationListener(context)
                 }
             }
         }
@@ -205,7 +207,7 @@ fun ProfileScreen(navController: NavController,
                 contentAlignment = Alignment.Center
             ) {
                 Box(contentAlignment = Alignment.BottomEnd) {
-                    if (profilePhoto != null) {
+                    if (!profilePhoto.isNullOrBlank()) {
                         AsyncImage(
                             model = profilePhoto,
                             contentDescription = "Profile",
@@ -321,27 +323,42 @@ fun ProfileScreen(navController: NavController,
                     }
                 }
 
+                val openAutoTrackSettings = {
+                    // Always ensure component state is ENABLED before opening system settings so app appears in System Notification Access list
+                    try {
+                        val componentName = ComponentName(context, com.aditya.expensetracker.service.TransactionNotificationListener::class.java)
+                        context.packageManager.setComponentEnabledSetting(
+                            componentName,
+                            android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                            android.content.pm.PackageManager.DONT_KILL_APP
+                        )
+                    } catch (e: Exception) {
+                        Log.e("ProfileScreen", "Failed to ensure component enabled: ${e.message}")
+                    }
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                        androidx.core.content.ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.POST_NOTIFICATIONS
+                        ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+                    ) {
+                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                    }
+                }
+
                 CardItem(
                     icon = Icons.Default.Notifications,
                     text = "Auto-track Transactions",
                     trailingContent = {
                         Switch(
                             checked = isAutoTrackEnabled,
-                            onCheckedChange = {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                } else {
-                                    context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-                                }
-                            }
+                            onCheckedChange = { openAutoTrackSettings() }
                         )
                     }
                 ) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    } else {
-                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-                    }
+                    openAutoTrackSettings()
                 }
 
                 CardItem(icon = Icons.Default.PrivacyTip, text = "Privacy Policy", showDivider = false) {
@@ -389,16 +406,59 @@ fun isNotificationServiceEnabled(context: Context): Boolean {
     return packageNames.contains(context.packageName)
 }
 
-fun requestNotificationListenerRebind(context: Context) {
+fun forceRebindNotificationListener(context: Context) {
+    val componentName = ComponentName(context, com.aditya.expensetracker.service.TransactionNotificationListener::class.java)
+
+    // 1. Ensure component is ENABLED in PackageManager
+    try {
+        val pm = context.packageManager
+        pm.setComponentEnabledSetting(
+            componentName,
+            android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            android.content.pm.PackageManager.DONT_KILL_APP
+        )
+    } catch (e: Exception) {
+        Log.e("ProfileScreen", "Failed to enable component: ${e.message}")
+    }
+
+    // 2. Explicitly start foreground service
+    try {
+        val intent = Intent(context, com.aditya.expensetracker.service.TransactionNotificationListener::class.java)
+        androidx.core.content.ContextCompat.startForegroundService(context, intent)
+    } catch (e: Exception) {
+        Log.e("ProfileScreen", "Failed to startForegroundService: ${e.message}")
+    }
+
+    // 3. Attempt system requestRebind API
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         try {
-            NotificationListenerService.requestRebind(
-                ComponentName(context, com.aditya.expensetracker.service.TransactionNotificationListener::class.java)
-            )
+            NotificationListenerService.requestRebind(componentName)
         } catch (e: Exception) {
             Log.e("ProfileScreen", "Failed to rebind notification listener: ${e.message}")
         }
     }
+}
+
+fun stopNotificationListener(context: Context) {
+    // 1. Explicitly stop foreground service
+    try {
+        val intent = Intent(context, com.aditya.expensetracker.service.TransactionNotificationListener::class.java)
+        context.stopService(intent)
+    } catch (e: Exception) {
+        Log.e("ProfileScreen", "Failed to stopService: ${e.message}")
+    }
+
+    // 2. Explicitly cancel notification 1001 from NotificationManager
+    try {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? android.app.NotificationManager
+        notificationManager?.cancel(1001)
+    } catch (e: Exception) {
+        Log.e("ProfileScreen", "Failed to cancel notification 1001: ${e.message}")
+    }
+}
+
+fun requestNotificationListenerRebind(context: Context) {
+    forceRebindNotificationListener(context)
 }
 
 @Composable

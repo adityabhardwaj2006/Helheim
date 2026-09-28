@@ -3,6 +3,7 @@ package com.aditya.expensetracker.service
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.provider.Telephony
@@ -53,6 +54,13 @@ class TransactionNotificationListener : NotificationListenerService() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("NotificationListener", "onStartCommand triggered")
+        createNotificationChannel()
+        startMonitoringForeground()
+        return START_STICKY
+    }
+
     override fun onListenerConnected() {
         super.onListenerConnected()
         Log.d("NotificationListener", "Service connected and listening")
@@ -61,6 +69,23 @@ class TransactionNotificationListener : NotificationListenerService() {
         startMonitoringForeground()
         
         logDebugMessage("Service started and listening for SMS transaction notifications")
+    }
+
+    override fun onListenerDisconnected() {
+        super.onListenerDisconnected()
+        Log.d("NotificationListener", "Service disconnected")
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+            }
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as? NotificationManager
+            notificationManager?.cancel(NOTIFICATION_ID)
+        } catch (e: Exception) {
+            Log.e("NotificationListener", "Error stopping foreground on disconnect: ${e.message}")
+        }
     }
 
     private fun createNotificationChannel() {
@@ -83,7 +108,7 @@ class TransactionNotificationListener : NotificationListenerService() {
             val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Expense Monitoring Active")
                 .setContentText("Listening for transaction SMS notifications...")
-                .setSmallIcon(R.mipmap.helhime)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setOngoing(true)
                 .build()
@@ -205,11 +230,19 @@ class TransactionNotificationListener : NotificationListenerService() {
             return
         }
 
+        val postTime = sbn.postTime
+        val prefKey = "notif_${sbnPackage}_${postTime}"
+        val prefs = getSharedPreferences("processed_notifs_pref", android.content.Context.MODE_PRIVATE)
+        if (prefs.getBoolean(prefKey, false)) {
+            Log.d("NotificationListener", "Skipped already processed notification key: $prefKey")
+            return
+        }
+
         Log.d("NotificationListener", "----------------------------------------")
         Log.d("NotificationListener", "Incoming SMS from $sbnPackage")
         Log.d("NotificationListener", "Content: $fullText")
         
-        parseTransaction(fullText, sbnPackage)
+        parseTransaction(fullText, sbnPackage, postTime, prefKey)
     }
 
     private data class AmountMatch(
@@ -306,7 +339,7 @@ class TransactionNotificationListener : NotificationListenerService() {
         return null
     }
 
-    private fun parseTransaction(text: String, packageName: String) {
+    private fun parseTransaction(text: String, packageName: String, postTime: Long = System.currentTimeMillis(), prefKey: String? = null) {
         val transactionAmount = extractTransactionAmount(text)
         if (transactionAmount == null) {
             Log.d("NotificationListener", "Ignored: No valid transaction amount found in text.")
@@ -337,6 +370,12 @@ class TransactionNotificationListener : NotificationListenerService() {
             processedCache.entries.removeIf { currentTime - it.value > DUPLICATION_WINDOW_MS }
         }
 
+        // Mark notification key as processed in SharedPreferences to persist across restarts
+        if (!prefKey.isNullOrEmpty()) {
+            val prefs = getSharedPreferences("processed_notifs_pref", MODE_PRIVATE)
+            prefs.edit().putBoolean(prefKey, true).apply()
+        }
+
         Log.d("NotificationListener", "MATCH: Detected $type of ₹$transactionAmount from/to $merchant")
         logDebugMessage("Detected $type of ₹$transactionAmount from/to $merchant")
         
@@ -349,7 +388,8 @@ class TransactionNotificationListener : NotificationListenerService() {
             paidTo, 
             receivedFrom, 
             packageName,
-            text
+            text,
+            postTime
         )
     }
 
@@ -405,7 +445,7 @@ class TransactionNotificationListener : NotificationListenerService() {
         return if (extracted.isNotBlank()) extracted else "Auto-tracked"
     }
 
-    private fun saveTransaction(amount: Double, type: String, paidTo: String, receivedFrom: String, packageName: String, fullText: String) {
+    private fun saveTransaction(amount: Double, type: String, paidTo: String, receivedFrom: String, packageName: String, fullText: String, date: Long = System.currentTimeMillis()) {
         serviceScope.launch {
             try {
                 var userId = tokenManager.getUserId().first()
@@ -429,7 +469,7 @@ class TransactionNotificationListener : NotificationListenerService() {
 
                 val response = transactionManager.saveTransaction(
                     amount = amount,
-                    date = System.currentTimeMillis(),
+                    date = date,
                     type = type,
                     paidTo = paidTo,
                     category = "Auto-tracked",

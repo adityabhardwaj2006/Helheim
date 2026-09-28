@@ -30,6 +30,10 @@ interface TransactionDao{
     @Query("SELECT * FROM 'transactions' WHERE isSynced = 0 AND userId = :userId")
     fun getUnsyncedTransaction(userId: String) : Flow<List<Transaction>>
 
+    // Check if a transaction with matching amount, type, and date within 5 minutes exists to prevent duplicates
+    @Query("SELECT COUNT(*) FROM transactions WHERE userId = :userId AND amount = :amount AND type = :type AND abs(date - :date) < 300000")
+    suspend fun countMatchingTransactions(userId: String, amount: Double, type: String, date: Long): Int
+
 }
 
 @Dao

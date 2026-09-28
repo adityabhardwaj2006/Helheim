@@ -1,6 +1,8 @@
 package com.aditya.expensetracker.presentation.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -140,7 +142,7 @@ fun App(
         ) {
             NavigationRail(
                 header = {
-                    if (profilePictureUrl != null) {
+                    if (!profilePictureUrl.isNullOrBlank()) {
                         AsyncImage(
                             model = profilePictureUrl,
                             contentDescription = "Profile",
@@ -324,6 +326,10 @@ fun App(
             NavHost(
                 navController = navController,
                 startDestination = startDestination,
+                enterTransition = { EnterTransition.None },
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { ExitTransition.None },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(

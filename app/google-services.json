@@ -22,6 +22,22 @@
           }
         },
         {
+          "client_id": "1091511301783-jja2kdlh4iq3pt5g45fnh4tbjdvct3le.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aditya.expensetracker",
+            "certificate_hash": "d05a98a2365869629c153a405537fefe7771a298"
+          }
+        },
+        {
+          "client_id": "1091511301783-pjss17fhd2oqrcrrb87kfinqo1u313g1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aditya.expensetracker",
+            "certificate_hash": "992841efb059de0fe789dcdaa77c3b5fbc1b005c"
+          }
+        },
+        {
           "client_id": "1091511301783-tborav4pmf5itt630s62q48cc4i5k8gt.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

@@ -29,4 +29,9 @@ class RepoImpl @Inject constructor(
         return dao.getUnsyncedTransaction(userId)
     }
 
+    // Check if duplicate transaction exists in local database
+    override suspend fun hasMatchingTransaction(userId: String, amount: Double, type: String, date: Long): Boolean {
+        return dao.countMatchingTransactions(userId, amount, type, date) > 0
+    }
+
 }
