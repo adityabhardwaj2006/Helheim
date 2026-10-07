@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1091511301783-1rp4sr2g633jh52c99h5ltvtp5fl46t5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aditya.expensetracker",
+            "certificate_hash": "1a18055aa5a00c2fbcc1c716a27e160e2c7e1992"
+          }
+        },
+        {
           "client_id": "1091511301783-728228d8sc1mi8apqj5jsopbeb04nsah.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

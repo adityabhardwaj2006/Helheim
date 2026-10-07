@@ -38,9 +38,9 @@ android {
 
         targetSdk = 36
 
-        versionCode = 3
+        versionCode = 10
 
-        versionName = "1.0.3"
+        versionName = "1.0.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -137,4 +137,9 @@ dependencies {
 
     implementation("androidx.datastore:datastore-preferences:1.1.7")
 
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
 }

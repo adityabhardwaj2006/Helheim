@@ -13,7 +13,7 @@ class RepoImpl @Inject constructor(
         return dao.getAllTransaction(userId)
     }
 
-    override suspend fun insertTransaction(transaction: Transaction) {
+    override suspend fun insertTransaction(transaction: Transaction): Long {
         return dao.insertTransaction(transaction)
     }
 

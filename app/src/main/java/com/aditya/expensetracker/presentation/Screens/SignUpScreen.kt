@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -45,6 +46,7 @@ fun SignUpScreen(
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -55,10 +57,13 @@ fun SignUpScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollState = rememberScrollState()
 
-    val googleSignInLauncher = rememberLauncherForActivityResult(
+    val addAccountLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        authViewModel.onGoogleSignInResult(result.data)
+    ) {
+        authViewModel.performGoogleSignIn(
+            activityContext = context,
+            onAccountAddRequired = {}
+        )
     }
 
     LaunchedEffect(signUpState) {
@@ -126,7 +131,6 @@ fun SignUpScreen(
 
                 Spacer(Modifier.height(20.dp))
 
-                // First Name and Last Name side-by-side in one Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -250,7 +254,12 @@ fun SignUpScreen(
                         )
                     },
                     onClick = {
-                        googleSignInLauncher.launch(authViewModel.getGoogleSignInIntent())
+                        authViewModel.performGoogleSignIn(
+                            activityContext = context,
+                            onAccountAddRequired = {
+                                addAccountLauncher.launch(authViewModel.getAccountSettingsIntent())
+                            }
+                        )
                     }
                 )
 

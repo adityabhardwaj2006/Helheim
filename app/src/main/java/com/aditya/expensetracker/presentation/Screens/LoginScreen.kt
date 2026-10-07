@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.aditya.expensetracker.R
 import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.presentation.components.SocialButton
@@ -40,50 +41,51 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.aditya.expensetracker.R
 
 @Composable
 fun LoginScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     navController: NavController
 ) {
+    val context = LocalContext.current
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
-        var username by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
+    val loginState by authViewModel.loginState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-        val loginState by authViewModel.loginState.collectAsState()
-        val snackbarHostState = remember { SnackbarHostState() }
+    val addAccountLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        authViewModel.performGoogleSignIn(
+            activityContext = context,
+            onAccountAddRequired = {}
+        )
+    }
 
-        val googleSignInLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-            authViewModel.onGoogleSignInResult(result.data)
-        }
-
-        LaunchedEffect(loginState) {
-            when(val state = loginState){
-                is ResultState.Success<*> -> {
-                    navController.navigate(Routes.HomeUi)
-                }
-                is ResultState.Error -> {
-                    snackbarHostState.showSnackbar(state.message)
-                }
-
-                else -> {}
+    LaunchedEffect(loginState) {
+        when (val state = loginState) {
+            is ResultState.Success<*> -> {
+                navController.navigate(Routes.HomeUi)
             }
+            is ResultState.Error -> {
+                snackbarHostState.showSnackbar(state.message)
+            }
+            else -> {}
         }
+    }
 
-        val scrollState = rememberScrollState()
-        Scaffold(
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-            containerColor = MaterialTheme.colorScheme.background
-        ) { innerPadding ->
-            Surface(
-                modifier = Modifier.fillMaxSize()
-                    .padding(innerPadding),
-                color = MaterialTheme.colorScheme.background
-            ) {
-
+    val scrollState = rememberScrollState()
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            color = MaterialTheme.colorScheme.background
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -93,7 +95,6 @@ fun LoginScreen(
                     .padding(top = 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                //Here the lottie animation space
                 LottieAnimation(
                     composition = rememberLottieComposition(
                         LottieCompositionSpec.RawRes(R.raw.lottie_animation)
@@ -171,7 +172,7 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-    //                        onForgotPasswordClick()
+                            // onForgotPasswordClick()
                         },
                     textAlign = TextAlign.End,
                     color = MaterialTheme.colorScheme.primary,
@@ -183,11 +184,10 @@ fun LoginScreen(
                 LoginButton(
                     loading = loginState is ResultState.Loading,
                     onClick = {
-                            authViewModel.login(
-                                username,
-                                password
-                            )
-
+                        authViewModel.login(
+                            username,
+                            password
+                        )
                     }
                 )
 
@@ -196,7 +196,6 @@ fun LoginScreen(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
                     HorizontalDivider(
                         modifier = Modifier.weight(1f)
                     )
@@ -216,30 +215,28 @@ fun LoginScreen(
                 SocialButton(
                     text = "Continue with Google",
                     icon = {
-
                         Icon(
-                             painter = painterResource(R.drawable.google_icon_logo_svgrepo_com) ,
+                            painter = painterResource(R.drawable.google_icon_logo_svgrepo_com),
                             contentDescription = "Google",
                             tint = Color.Unspecified,
-                            modifier = Modifier.size(
-                                24.dp
-                            )
+                            modifier = Modifier.size(24.dp)
                         )
-
                     },
                     onClick = {
-                        googleSignInLauncher.launch(authViewModel.getGoogleSignInIntent())
+                        authViewModel.performGoogleSignIn(
+                            activityContext = context,
+                            onAccountAddRequired = {
+                                addAccountLauncher.launch(authViewModel.getAccountSettingsIntent())
+                            }
+                        )
                     }
                 )
-
-
 
                 Spacer(modifier = Modifier.weight(1f))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
                     Text(
                         "Don't have an account?",
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
@@ -262,6 +259,7 @@ fun LoginScreen(
         }
     }
 }
+
 @Composable
 fun LoginTextField(
     value: String,
@@ -272,7 +270,6 @@ fun LoginTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     isPassword: Boolean = false
 ) {
-
     var passwordVisible by remember {
         mutableStateOf(false)
     }
@@ -299,7 +296,6 @@ fun LoginTextField(
                 PasswordVisualTransformation()
             else
                 VisualTransformation.None,
-
         trailingIcon = {
             if (isPassword) {
                 Icon(
@@ -308,7 +304,6 @@ fun LoginTextField(
                             Icons.Default.Visibility
                         else
                             Icons.Default.VisibilityOff,
-
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.clickable {
@@ -317,9 +312,7 @@ fun LoginTextField(
                 )
             }
         },
-
         shape = RoundedCornerShape(16.dp),
-
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -337,7 +330,6 @@ fun LoginButton(
     loading: Boolean,
     onClick: () -> Unit
 ) {
-
     Button(
         onClick = onClick,
         modifier = Modifier
@@ -349,26 +341,22 @@ fun LoginButton(
             containerColor = MaterialTheme.colorScheme.primary
         )
     ) {
-
         if (loading) {
-
             CircularProgressIndicator(
                 modifier = Modifier.size(24.dp),
                 color = MaterialTheme.colorScheme.onPrimary,
                 strokeWidth = 2.dp
             )
-
         } else {
-
             Text(
                 "Login",
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 16.sp
             )
-
         }
     }
 }
+
 @Preview(
     showBackground = true,
     showSystemUi = true
@@ -376,6 +364,6 @@ fun LoginButton(
 @Composable
 fun LoginScreenPreview() {
     MaterialTheme {
-        LoginScreen(hiltViewModel(),rememberNavController())
+        LoginScreen(hiltViewModel(), rememberNavController())
     }
 }

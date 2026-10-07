@@ -7,7 +7,7 @@ interface Repo  {
 
     fun getAllTransaction (userId: String) : Flow<List<Transaction>>
 
-    suspend fun insertTransaction(transaction: Transaction)
+    suspend fun insertTransaction(transaction: Transaction): Long
 
     suspend fun updateTransaction(transaction: Transaction)
 

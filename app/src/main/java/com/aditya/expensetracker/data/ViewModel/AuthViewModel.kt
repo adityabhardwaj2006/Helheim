@@ -2,18 +2,16 @@ package com.aditya.expensetracker.data.ViewModel
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aditya.expensetracker.common.ResultState
+import com.aditya.expensetracker.data.TokenManager
 import com.aditya.expensetracker.data.model.LoginResponse
 import com.aditya.expensetracker.data.model.SignUpResponse
-import com.aditya.expensetracker.domain.repo.AuthRepo
-import com.aditya.expensetracker.data.TokenManager
 import com.aditya.expensetracker.data.model.profileResponse
 import com.aditya.expensetracker.data.remote.AuthManager
+import com.aditya.expensetracker.domain.repo.AuthRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,13 +23,10 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepo : AuthRepo,
+    private val authRepo: AuthRepo,
     private val tokenManager: TokenManager,
-    private val authManager: AuthManager,
-    @ApplicationContext private val context: Context
-) : ViewModel(){
-
-    private val TAG = "AuthDebug"
+    private val authManager: AuthManager
+) : ViewModel() {
 
     private val _userState = MutableStateFlow<ResultState<profileResponse>?>(ResultState.Idle)
     val userState = _userState.asStateFlow()
@@ -64,48 +59,55 @@ class AuthViewModel @Inject constructor(
     val signUpState = _signUpState.asStateFlow()
 
     fun login(
-        username : String,
-        password : String
-    ){
-
+        username: String,
+        password: String
+    ) {
         viewModelScope.launch {
             _loginState.value = ResultState.Loading
-            try{
-                val response = authRepo.login(username,password)
+            try {
+                val response = authRepo.login(username, password)
                 _loginState.value = ResultState.Success(response)
-
-            }catch (error : Exception){
+            } catch (error: Exception) {
                 _loginState.value = ResultState.Error(error.message ?: "Cannot login, please try again")
             }
-            }
         }
-
-    fun getGoogleSignInIntent(): Intent {
-        return authManager.getSignInIntent()
     }
 
-    fun onGoogleSignInResult(data: Intent?) {
+    fun getAccountSettingsIntent(): Intent {
+        return authManager.getAccountSettingsIntent()
+    }
+
+    fun performGoogleSignIn(
+        activityContext: Context,
+        onAccountAddRequired: () -> Unit
+    ) {
         viewModelScope.launch {
             _loginState.value = ResultState.Loading
-            val result = authManager.handleSignInResult(data)
-            result.onSuccess { userData ->
-                try {
-                    val response = authRepo.googleLogin(
-                        idToken = userData.googleIdToken,
-                        email = userData.email,
-                        photoUrl = userData.profilePictureUrl?.toString()
-                    )
-                    _loginState.value = ResultState.Success(response)
-                } catch (e: Exception) {
-                    _loginState.value = ResultState.Error(e.message ?: "Backend login failed")
+            authManager.doGoogleSignIn(
+                context = activityContext,
+                onAccountAddRequired = onAccountAddRequired,
+                onSuccess = { userData ->
+                    viewModelScope.launch {
+                        try {
+                            val response = authRepo.googleLogin(
+                                idToken = userData.googleIdToken,
+                                email = userData.email,
+                                photoUrl = userData.profilePictureUrl?.toString()
+                            )
+                            _loginState.value = ResultState.Success(response)
+                        } catch (e: Exception) {
+                            _loginState.value = ResultState.Error(e.message ?: "Backend login failed")
+                        }
+                    }
+                },
+                onError = { errorMessage ->
+                    _loginState.value = ResultState.Error(errorMessage)
                 }
-            }.onFailure { e ->
-                _loginState.value = ResultState.Error(e.message ?: "Google Sign-in failed")
-            }
+            )
         }
     }
 
-    fun logout(){
+    fun logout() {
         viewModelScope.launch {
             authRepo.logout()
             authManager.signOut()
@@ -113,42 +115,40 @@ class AuthViewModel @Inject constructor(
     }
 
     fun signup(
-        firstName : String,
-        lastName : String,
-        username : String,
-        password : String
-    ){
-        viewModelScope.launch{
+        firstName: String,
+        lastName: String,
+        username: String,
+        password: String
+    ) {
+        viewModelScope.launch {
             _signUpState.value = ResultState.Loading
-            try{
-                val response =  authRepo.signup(
+            try {
+                val response = authRepo.signup(
                     firstName,
                     lastName,
                     username,
                     password
                 )
                 _signUpState.value = ResultState.Success(response)
-            }catch(err : Exception){
-
+            } catch (err: Exception) {
                 _signUpState.value = ResultState.Error(err.message ?: "Cannot signup, please try again")
-
             }
-
         }
     }
-    fun getProfile(){
+
+    fun getProfile() {
         viewModelScope.launch {
             val currentState = _userState.value
             val hasData = (currentState as? ResultState.Success<profileResponse>)?.data?.data != null
-            
+
             if (!hasData) {
                 _userState.value = ResultState.Loading
             }
 
-            try{
+            try {
                 val response = authRepo.getProfile()
                 _userState.value = ResultState.Success(response)
-            }catch (err : Exception){
+            } catch (err: Exception) {
                 if (!hasData) {
                     val errorMessage = if (err is java.net.UnknownHostException || err is java.net.ConnectException) {
                         "Offline: Profile data not available"
@@ -159,7 +159,6 @@ class AuthViewModel @Inject constructor(
                 }
             }
         }
-
     }
 
     fun updateProfile(
@@ -172,7 +171,6 @@ class AuthViewModel @Inject constructor(
             try {
                 authRepo.updateProfile(firstName, lastName, username)
                 _updateProfileState.value = ResultState.Success(Unit)
-                // Refresh profile data in state
                 getProfile()
             } catch (err: Exception) {
                 _updateProfileState.value = ResultState.Error(err.message ?: "Cannot update profile, please try again")
@@ -181,18 +179,16 @@ class AuthViewModel @Inject constructor(
     }
 
     fun updatePassword(
-        newPassword : String
-    ){
+        newPassword: String
+    ) {
         viewModelScope.launch {
             _updatePasswordState.value = ResultState.Loading
-            try{
+            try {
                 val response = authRepo.updatePassword(newPassword)
                 _updatePasswordState.value = ResultState.Success(response)
-            }catch(err: Exception){
-                _updatePasswordState.value = ResultState.Error(err.message?:"Something went wrong")
+            } catch (err: Exception) {
+                _updatePasswordState.value = ResultState.Error(err.message ?: "Something went wrong")
             }
         }
-
     }
-
 }

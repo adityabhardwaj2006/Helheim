@@ -3,13 +3,19 @@ package com.aditya.expensetracker.data.remote
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import android.util.Log
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.aditya.expensetracker.BuildConfig
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
+import com.aditya.expensetracker.R
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 
 data class GoogleUserData(
     val googleIdToken: String,
@@ -20,52 +26,88 @@ data class GoogleUserData(
     val profilePictureUrl: Uri?
 )
 
-class AuthManager(private val context : Context) {
+class AuthManager(private val context: Context) {
 
     private val TAG = "AuthDebug"
+    private val credentialManager = CredentialManager.create(context)
 
-    private val googleSignInClient : GoogleSignInClient by lazy {
-        Log.d(TAG, "Initializing GoogleSignInClient")
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
-            .requestEmail()
-            .requestProfile()
-            .build()
-        GoogleSignIn.getClient(context, gso)
-    }
-
-    fun getSignInIntent(): Intent {
-        Log.d(TAG, "Getting sign-in intent")
-        return googleSignInClient.signInIntent
-    }
-
-    fun handleSignInResult(data: Intent?): Result<GoogleUserData> {
-        Log.d(TAG, "Handling sign-in result")
-        return try {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            val account = task.getResult(ApiException::class.java)
-            val idToken = account.idToken ?: throw Exception("ID Token is null")
-            Log.d(TAG,"PHOTOT URL : ${account.photoUrl}")
-
-            Result.success(
-                GoogleUserData(
-                    googleIdToken = idToken,
-                    email = account.email ?: "",
-                    displayName = account.displayName,
-                    firstName = account.givenName,
-                    lastName = account.familyName,
-                    profilePictureUrl = account.photoUrl
-                )
-            )
-
-        } catch (e: ApiException) {
-            Result.failure(Exception("Google Sign-in failed: ${e.statusCode}"))
-        } catch (e: Exception) {
-            Result.failure(e)
+    fun getAccountSettingsIntent(): Intent {
+        return Intent(Settings.ACTION_ADD_ACCOUNT).apply {
+            putExtra(Settings.EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
         }
     }
 
-    fun signOut() {
-        googleSignInClient.signOut()
+    private fun getGoogleIdOption(context: Context): GetGoogleIdOption {
+        val webClientId = context.getString(R.string.web_client_id)
+        return GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(false)
+            .setAutoSelectEnabled(false)
+            .setServerClientId(webClientId)
+            .build()
+    }
+
+    suspend fun doGoogleSignIn(
+        context: Context,
+        onAccountAddRequired: () -> Unit = {},
+        onSuccess: (GoogleUserData) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val googleIdOption = getGoogleIdOption(context)
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+
+        try {
+            val result = credentialManager.getCredential(context = context, request = request)
+            handleSignInResponse(result, onSuccess, onError)
+        } catch (e: GetCredentialCancellationException) {
+            Log.i(TAG, "User cancelled Google Sign-In process.")
+            onError("Sign-in cancelled")
+        } catch (e: NoCredentialException) {
+            Log.w(TAG, "NoCredentialException: type=${e.type}, message=${e.message}", e)
+            onError("No Google credential returned. Please check if your Play Store App Signing SHA-1 fingerprint is added in Firebase Console.")
+        } catch (e: GetCredentialException) {
+            Log.e(TAG, "GetCredentialException: type=${e.type}, message=${e.message}", e)
+            onError(e.message ?: "Google Sign-In failed (${e.type})")
+        } catch (e: Exception) {
+            Log.e(TAG, "Unexpected error during Google Sign-In: ${e.message}", e)
+            onError(e.message ?: "Something went wrong during Google Sign-In")
+        }
+    }
+
+    private fun handleSignInResponse(
+        result: GetCredentialResponse,
+        onSuccess: (GoogleUserData) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val credential = result.credential
+        if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+            try {
+                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                val userData = GoogleUserData(
+                    googleIdToken = googleIdTokenCredential.idToken,
+                    email = googleIdTokenCredential.id,
+                    displayName = googleIdTokenCredential.displayName,
+                    firstName = googleIdTokenCredential.givenName,
+                    lastName = googleIdTokenCredential.familyName,
+                    profilePictureUrl = googleIdTokenCredential.profilePictureUri
+                )
+                onSuccess(userData)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error parsing GoogleIdTokenCredential", e)
+                onError("Failed to parse Google account credentials")
+            }
+        } else {
+            Log.e(TAG, "Unexpected credential type: ${credential.type}")
+            onError("Unexpected credential type received")
+        }
+    }
+
+    suspend fun signOut() {
+        try {
+            credentialManager.clearCredentialState(ClearCredentialStateRequest())
+        } catch (e: Exception) {
+            Log.e(TAG, "Error clearing credential state: ${e.message}", e)
+        }
     }
 }

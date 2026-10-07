@@ -1,11 +1,9 @@
 package com.aditya.expensetracker.presentation.Screens.utils
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,25 +16,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import android.widget.Toast
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.aditya.expensetracker.common.ResultState
 import com.aditya.expensetracker.data.ViewModel.AuthViewModel
 import com.aditya.expensetracker.data.ViewModel.PaymentViewModel
 import com.aditya.expensetracker.data.ViewModel.TransactionVm
-import com.aditya.expensetracker.data.model.TransactionResponse
-import com.aditya.expensetracker.presentation.components.shimmer
-import com.aditya.expensetracker.presentation.navigation.Routes
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -51,16 +41,13 @@ fun AddSaving(
     navController: NavController
 ) {
     val symbol by paymentViewModel.preferredPaymentMethod.collectAsState()
-
     val transactionVm : TransactionVm = hiltViewModel()
     val preferredPaymentMethod by paymentViewModel.preferredPaymentMethod.collectAsState()
-    val addSavingState by transactionVm.transactionState.collectAsState()
-    val context = LocalContext.current
 
     var amount by remember { mutableStateOf("") }
     var dateMillis by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
     var savedFor by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf<String?>(null) }
+    var category by remember { mutableStateOf<String?>("Other") }
     var paymentMethod by remember { mutableStateOf("Cash") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -69,27 +56,6 @@ fun AddSaving(
     LaunchedEffect(preferredPaymentMethod) {
         if (preferredPaymentMethod != null) {
             paymentMethod = preferredPaymentMethod!!
-        }
-    }
-
-    LaunchedEffect(addSavingState) {
-        when(val state = addSavingState){
-            is ResultState.Success -> {
-                val response = state.data as? TransactionResponse
-                if (response?.message?.contains("Offline", ignoreCase = true) == true) {
-                    Toast.makeText(context, response.message, Toast.LENGTH_LONG).show()
-                }
-                transactionVm.resetTransactionState()
-                navController.navigate(Routes.HomeUi)
-                scope.launch {
-                    sheetState.hide()
-                    onDismiss()
-                }
-            }
-            is ResultState.Error -> {
-                snackbarHostState.showSnackbar(state.message)
-            }
-            else -> {}
         }
     }
 
@@ -111,7 +77,6 @@ fun AddSaving(
             bottomBar = {
                 Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                     Button(
-                        enabled = addSavingState !is ResultState.Loading,
                         onClick = {
                             val currAmount = amount.toDoubleOrNull()
                             if(currAmount != null){
@@ -125,6 +90,10 @@ fun AddSaving(
                                     receivedFrom = "",
                                     paymentMethod = paymentMethod
                                 )
+                                scope.launch {
+                                    sheetState.hide()
+                                    onDismiss()
+                                }
                             } else {
                                 scope.launch { snackbarHostState.showSnackbar("Invalid amount") }
                             }
@@ -132,15 +101,7 @@ fun AddSaving(
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                         modifier = Modifier.weight(1f).height(50.dp)
                     ) {
-                        if(addSavingState is ResultState.Loading){
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text("Add Saving")
-                        }
+                        Text("Add Saving")
                     }
                 }
             }
@@ -224,7 +185,7 @@ fun AddSaving(
                 val categories = listOf("Emergency Fund", "Retirement", "Vacation", "Car", "Other")
                 Box {
                     SimpleRow(
-                        leftText = category ?: "Category",
+                        leftText = category ?: "Other",
                         onClick = { categoryMenuOpen = true }
                     ) {
                         Box {
