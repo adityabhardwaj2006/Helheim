@@ -1,8 +1,10 @@
 # ⚡ Helheim — AI-Powered Expense Tracker
 
-**Take control of your finances with intelligent expense tracking, automated transaction detection, and personalized AI-powered financial insights.**
+**Take control of your finances with intelligent expense tracking, automated transaction detection, and AI-powered financial insights.**
 
-Helheim is a modern, offline-first Android application built with **Kotlin, Jetpack Compose, Clean Architecture, and MVVM**. It simplifies personal finance management by combining automated transaction tracking, interactive financial analytics, multi-currency support, and an AI-powered financial assistant in a single application.
+Helheim is an Android expense-tracking application designed to simplify personal finance management through transaction tracking, financial analytics, multi-currency support, and an AI-powered financial assistant.
+
+Built primarily with **Kotlin and modern Android development technologies**, Helheim brings essential financial tools together in a clean, dark-themed interface.
 
 > 🚀 **Project Status:** Available on Google Play through Closed Testing.
 
@@ -13,11 +15,10 @@ Helheim is a modern, offline-first Android application built with **Kotlin, Jetp
 - [Overview](#-overview)
 - [Key Features](#-key-features)
 - [Screenshots](#-screenshots)
-- [Architecture](#-architecture)
-- [Technology Stack](#-technology-stack)
+- [Architecture](#️-architecture)
+- [Technology Stack](#️-technology-stack)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
-- [Configuration](#-configuration)
 - [Build and Run](#-build-and-run)
 - [Permissions and Privacy](#-permissions-and-privacy)
 - [Future Enhancements](#-future-enhancements)
@@ -29,18 +30,17 @@ Helheim is a modern, offline-first Android application built with **Kotlin, Jetp
 
 ## 🌟 Overview
 
-Managing personal finances manually can be time-consuming and makes it difficult to understand spending patterns. Helheim addresses this problem by bringing transaction management, financial analytics, and AI-powered assistance together in one application.
-
-Designed with modern Android development practices, Helheim focuses on usability, maintainability, offline accessibility, and reliable synchronization between local storage and a remote backend.
+Managing personal finances manually can be time-consuming and make it difficult to understand spending patterns. Helheim aims to simplify this process by combining transaction management, financial analytics, and conversational AI assistance in one application.
 
 ### What makes Helheim different?
 
-- **Automated transaction tracking** — Detect supported banking and UPI transaction notifications and extract relevant financial details.
-- **AI financial assistant** — Ask questions about spending habits, financial summaries, and budgeting.
-- **Insightful analytics** — Visualize income, expenses, savings, and category-wise spending.
-- **Offline-first experience** — Access locally stored financial information even without an internet connection.
-- **Modern Android UI** — Built using Jetpack Compose and Material Design 3.
-- **Scalable architecture** — Organized into presentation, domain, and data layers for easier maintenance and testing.
+- **Automated transaction tracking** — Detect supported financial notifications to help reduce manual transaction entry.
+- **AI Financial Guide** — Ask questions about financial activity and explore transaction summaries.
+- **Financial analytics** — Review income, expenses, savings, and spending trends.
+- **Transaction management** — Keep track of transaction amounts, dates, and financial activity.
+- **Multi-currency support** — Select a preferred currency for displaying financial values.
+- **Personalized profile** — Manage profile information and application preferences.
+- **Modern Android interface** — A consistent dark-themed experience designed for convenient navigation.
 
 ---
 
@@ -48,433 +48,387 @@ Designed with modern Android development practices, Helheim focuses on usability
 
 ### 📲 1. Automated Transaction Detection
 
-Reduce manual data entry with intelligent transaction detection.
+Reduce manual data entry with notification-based transaction tracking.
 
-- **Notification-based monitoring:** Uses Android's `NotificationListenerService` to monitor supported financial notifications, including bank and UPI transaction alerts.
-- **Smart transaction parsing:** Extracts relevant information such as transaction amount, debit or credit type, merchant name, and payment method when available.
-- **Transaction classification:** Helps organize supported transactions into categories such as income and expenses.
-- **Duplicate prevention:** Uses caching and transaction-handling logic to reduce duplicate entries.
-- **User-controlled tracking:** Review detected transaction details and confirm them according to the application's workflow.
+- Monitors supported financial notifications when notification access is enabled.
+- Helps extract transaction details such as amounts and transaction types from supported notifications.
+- Supports tracking income and expenses.
+- Uses the information available in notifications to assist with transaction recording.
+- Provides a user-controlled setting for automatic transaction tracking.
 
-Supported notification formats and the availability of extracted fields depend on the originating bank, payment application, and notification content.
+*Detection accuracy and available details depend on the notification format and the originating banking or payment application.*
 
-### 🤖 2. AI-Powered Financial Assistant
+### 🤖 2. AI-Powered Financial Guide
 
-Make financial information easier to understand with an integrated conversational assistant.
+Make financial information easier to understand with a conversational assistant.
 
-- Ask questions about your financial activity.
-- Understand spending patterns and expense categories.
-- Get personalized budgeting suggestions.
-- Explore financial summaries through natural-language conversations.
-- Make financial data more accessible without manually navigating multiple screens.
+- Ask questions about recent transactions.
+- Review summaries of income and expenses.
+- Explore spending activity using natural-language questions.
+- Get financial guidance based on the information available to the assistant.
+- Interact with financial information through a dedicated chat interface.
 
-The assistant uses the application's available financial context and configured AI backend to generate relevant responses.
+AI responses depend on the financial context available to the application and the configured AI backend.
 
-### 📊 3. Interactive Financial Analytics
+### 📊 3. Financial Analytics
 
-Understand where your money goes with clear visualizations and financial summaries.
+Understand your financial activity through a dedicated statistics screen.
 
-- **Income and expense summaries:** Review financial activity over selected periods.
-- **Category-wise breakdowns:** Identify major spending categories.
-- **Monthly comparisons:** Compare income, expenses, and savings with previous months.
-- **Spending trends:** Explore changes in financial activity over time.
-- **Financial overview:** Access key metrics through a centralized dashboard.
+- Review financial summaries over weekly, monthly, and yearly periods.
+- Switch between income, expenses, and savings views.
+- Explore spending trends through charts.
+- Identify major transactions contributing to spending.
+- Access key financial information from the dashboard.
 
-### 🔄 4. Offline-First Data Management
+### 💳 4. Transaction Management
 
-Stay productive even when your internet connection is unavailable.
+Keep financial activity organized in one place.
 
-- **Local persistence:** Room Database stores locally available application data.
-- **Offline access:** Work with cached financial information without requiring a continuous internet connection.
-- **Background synchronization:** Synchronize supported local changes with the backend when connectivity is restored.
-- **Connectivity monitoring:** A `ConnectivityObserver` helps the application respond to network availability.
-- **Repository-based data access:** Separates data sources from the presentation layer.
+- View recent transactions from the dashboard.
+- Review transaction amounts and dates.
+- Distinguish income and expenses through visual indicators.
+- Monitor changes in your overall balance.
+- Use transaction information to better understand spending habits.
 
-Synchronization behavior depends on the configured backend and the operation being performed.
+### 👤 5. Profile and Account Management
 
-### 🔐 5. Authentication and Profile Management
+Manage account information and personal application settings.
 
-Access personal financial information through supported authentication methods.
+- View profile information.
+- Access profile-editing options.
+- Access password-management options.
+- Select a preferred currency.
+- Enable or disable automatic transaction tracking.
+- Access the application's privacy policy.
 
-- Google sign-in integration.
-- Firebase Authentication integration where configured.
-- Email and password authentication.
-- Profile information management.
-- Profile picture support.
-- Password management through the supported authentication workflow.
-
-Authentication providers and backend configuration must be set up correctly before these features can be used.
+Available account features depend on the configured authentication workflow.
 
 ### 💱 6. Multi-Currency Support
 
-Manage financial information using supported currencies.
+Helheim includes a currency-selection option to help users manage financial information using their preferred currency.
 
-- Select a preferred currency.
-- Display financial values using the selected currency.
-- Support currency conversion where the configured conversion functionality is available.
-- Present monetary values consistently throughout the application.
+- Select a supported currency.
+- Display monetary values using the selected currency.
+- Keep financial values consistent throughout the application.
 
-Real-time conversion depends on the availability and configuration of the relevant exchange-rate source.
+### 🎨 7. Modern Android UI
 
-### 📱 7. Adaptive and Responsive UI
+The application uses a dark-themed interface with dedicated screens for its main financial features.
 
-Helheim uses modern Android UI technologies to provide an adaptable user experience.
-
-- Declarative UI with Jetpack Compose.
-- Material Design 3 components and styling.
-- Navigation using Navigation Compose.
-- Reusable UI components.
-- Adaptive navigation patterns, including bottom navigation and navigation rail where appropriate.
-- Layouts designed to accommodate phones, foldables, and tablet-sized screens.
+- Dashboard with balance and recent transactions.
+- Statistics screen with time-period and financial-category filters.
+- AI Financial Guide with conversational interaction.
+- Profile screen with account and utility settings.
+- Bottom navigation for accessing primary sections.
 
 ---
 
 ## 📱 Screenshots
 
-Screenshots of the actual application can be added below to showcase its interface and core functionality.
+The following screenshots show the actual Helheim application interface.
 
-| Home Dashboard | Analytics & Statistics |
-|:---:|:---:|
-| *Add dashboard screenshot* | *Add analytics screenshot* |
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7b852b7d-e9e2-4f23-b5ca-df2e23f9ebba" alt="Helheim Home Dashboard" width="230" />
+  &nbsp;&nbsp;
+  <img src="https://github.com/user-attachments/assets/c0a333af-d29f-4cb5-b965-b777ed33ea33" alt="Helheim Statistics and Analytics" width="230" />
+</p>
 
-| AI Financial Assistant | Transaction History |
-|:---:|:---:|
-| *Add AI assistant screenshot* | *Add transaction history screenshot* |
+<p align="center">
+  <strong>Home Dashboard</strong>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <strong>Statistics and Analytics</strong>
+</p>
 
-### Adding your screenshots
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/ba262fe8-e98d-4c0f-ae57-830c77a56fec" alt="Helheim AI Financial Guide" width="230" />
+  &nbsp;&nbsp;
+  <img src="https://github.com/user-attachments/assets/003f95b6-f714-4906-97c5-5c3c594d9f8d" alt="Helheim Profile and Settings" width="230" />
+</p>
 
-Create a `screenshots/` directory in the repository and place your actual application screenshots inside it.
-
-Replace the placeholders above with Markdown image references, for example:
-
-`![Home Dashboard](screenshots/home-dashboard.png)`
-
-Use screenshots captured from the real application so that the documentation accurately reflects its current functionality.
+<p align="center">
+  <strong>AI Financial Guide</strong>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <strong>Profile and Settings</strong>
+</p>
 
 ---
 
 ## 🏗️ Architecture
 
-Helheim follows **Clean Architecture principles and the MVVM (Model–View–ViewModel) pattern** to separate UI rendering, business logic, and data management.
+Helheim's Android implementation uses Kotlin and separates application functionality into components for user-interface presentation, data handling, and communication with remote services.
 
-The architecture is organized into three primary layers.
+The diagram below illustrates a **conceptual architecture**. Keep the specific layers and libraries aligned with the code currently implemented in the repository.
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│                    PRESENTATION LAYER                       │
-│                                                             │
-│  Jetpack Compose │ Material 3 │ Navigation Compose          │
-│  Screens │ Reusable Components │ ViewModels                 │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                       DOMAIN LAYER                           │
-│                                                             │
-│  Repository Interfaces │ Business Rules │ Use Cases         │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                        DATA LAYER                            │
-│                                                             │
-│  Repository Implementations │ Room Database │ Retrofit      │
-│  DataStore Preferences │ DTOs │ Remote Data Sources         │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  EXTERNAL SERVICES                           │
-│                                                             │
-│  REST API Backend │ Authentication Services │ AI Services   │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│             PRESENTATION LAYER              │
+│                                             │
+│       Screens · UI Components · State       │
+│           Navigation · ViewModels           │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│              BUSINESS LOGIC                 │
+│                                             │
+│      Validation · Rules · Use Cases         │
+│       Where implemented in the app          │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│                 DATA LAYER                  │
+│                                             │
+│    Repositories · Local Data · API Calls    │
+│       Models · Data Sources · Storage       │
+└──────────────────────┬──────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────┐
+│              EXTERNAL SERVICES              │
+│                                             │
+│       Backend API · Authentication          │
+│           Configured AI Services            │
+└─────────────────────────────────────────────┘
 ```
 
 ### Architectural Responsibilities
 
-| Layer | Responsibility |
+| Component | Responsibility |
 |---|---|
-| **Presentation** | Renders Compose UI, manages screen state, and handles user interactions through ViewModels. |
-| **Domain** | Defines business rules, repository contracts, and use cases where implemented. |
-| **Data** | Coordinates local and remote data sources, repositories, persistence, and API communication. |
-| **External Services** | Provides backend APIs, authentication, and AI functionality. |
-
-### Design Principles
-
-- **Separation of concerns:** Each layer has a defined responsibility.
-- **Maintainability:** UI, business logic, and data operations are organized separately.
-- **Reusability:** Shared UI components and data-handling logic can be reused.
-- **Reactive state management:** Kotlin Flow APIs support observing asynchronous data and state changes.
-- **Dependency injection:** Hilt helps manage dependencies and application components.
-- **Offline-first data access:** Local persistence supports access to cached information when network connectivity is unavailable.
+| Presentation | Displays screens and handles user interactions. |
+| Business logic | Contains application rules and operations where implemented. |
+| Data | Manages available local data, repositories, and network communication. |
+| External services | Provide configured backend, authentication, and AI functionality. |
 
 ---
 
 ## 🛠️ Technology Stack
 
-Helheim is developed primarily with Kotlin and modern Android development libraries.
+Helheim is developed for Android using Kotlin. The libraries below describe the intended areas of the technology stack; verify the project's Gradle configuration before treating each library as a confirmed dependency.
 
 ### Android Development
 
 | Technology | Purpose |
 |---|---|
-| **Kotlin** | Primary application programming language |
-| **Jetpack Compose** | Declarative UI development |
-| **Material Design 3** | UI components and visual styling |
-| **Navigation Compose** | In-app navigation |
-| **ViewModel** | UI state and lifecycle-aware state management |
-| **Kotlin Coroutines** | Asynchronous programming |
-| **StateFlow / SharedFlow** | Reactive state and event streams |
-| **Hilt / Dagger** | Dependency injection |
+| **Kotlin** | Primary programming language |
+| **Android SDK** | Android application development |
+| **Gradle** | Build automation and dependency management |
+| **Jetpack Compose** | Declarative UI, if enabled in the current build |
+| **Material Design 3** | UI components and styling, if configured |
 
 ### Data and Networking
 
 | Technology | Purpose |
 |---|---|
-| **Room Database** | Local structured data persistence |
-| **DataStore Preferences** | Storage of application preferences |
-| **Retrofit** | REST API communication |
-| **OkHttp** | HTTP client and network interceptors |
-| **ConnectivityObserver** | Network connectivity monitoring |
+| **Room Database** | Local database persistence, if configured |
+| **DataStore** | Application preferences, if configured |
+| **Retrofit / OkHttp** | REST API communication, if configured |
+| **Kotlin Coroutines / Flow** | Asynchronous operations and reactive data, if configured |
 
-### Authentication and Supporting Libraries
+### Authentication and Supporting Services
 
 | Technology | Purpose |
 |---|---|
-| **Firebase Authentication** | Authentication integration |
-| **Google Credential Manager** | Modern credential and sign-in integration |
-| **Coil 3** | Image loading |
-| **Lottie Compose** | Animated UI assets |
-
-### Backend Integration
-
-The Android application communicates with a remote REST API for supported operations such as authentication, transaction management, and AI chat.
-
-The backend and its external integrations must be configured separately. Refer to the backend project's documentation for its runtime requirements, environment variables, and deployment instructions.
+| **Google Sign-In** | Google account authentication, where configured |
+| **Firebase** | Firebase-related integration, where configured |
+| **Backend REST API** | Remote application operations |
+| **AI service** | Conversational financial assistance |
 
 ---
 
 ## 📁 Project Structure
 
-The main application code is organized under the `com.aditya.expensetracker` package.
+The main Android application uses the package name:
+
+`com.aditya.expensetracker`
+
+A simplified example of how an Android project can be organized is shown below. The actual directory and file names should match the repository.
 
 ```text
-com.aditya.expensetracker/
-│
-├── BaseApplication.kt
-├── MainActivity.kt
-│
-├── common/
-│   └── UI result and shared utility classes
-│
-├── data/
-│   ├── Api/
-│   │   └── Retrofit API interfaces
-│   ├── DAO/
-│   │   └── Room data access objects
-│   ├── Database/
-│   │   └── Local database configuration
-│   ├── Di/
-│   │   └── Dependency injection modules
-│   ├── ViewModel/
-│   │   └── ViewModels and UI state
-│   ├── connectivity/
-│   │   └── Network connectivity monitoring
-│   └── model/
-│       └── Data models and DTOs
-│
-├── domain/
-│   └── Repository interfaces and domain logic
-│
-├── presentation/
-│   ├── Screens/
-│   │   └── Dashboard, statistics, history, profile, chat
-│   ├── components/
-│   │   └── Reusable Compose UI components
-│   └── navigation/
-│       └── Navigation routes and host
-│
-├── service/
-│   └── Transaction notification listener
-│
-└── ui/
-    └── theme/
-        └── Material 3 colors, typography, and shapes
+Helheim/
+├── app/
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/
+│   │       │   └── com/aditya/expensetracker/
+│   │       └── AndroidManifest.xml
+│   ├── build.gradle.kts
+│   └── google-services.json
+├── gradle/
+├── build.gradle.kts
+├── settings.gradle.kts
+├── local.properties
+├── README.md
+├── LICENSE
+└── screenshots/
 ```
 
-*Note: This tree is a high-level overview. Actual filenames and package contents may vary as the project evolves.*
+> **Note:** `local.properties`, Firebase configuration files, and other environment-specific files should not be committed if they contain private configuration or are excluded by the project's `.gitignore`.
 
 ---
 
 ## 🚀 Getting Started
 
-Follow these steps to configure and run Helheim locally.
+Follow these steps to set up the project locally.
 
 ### Prerequisites
 
-Ensure that your development environment includes:
-
-- **Android Studio:** Ladybug (2024.2.1) or a compatible newer release.
-- **JDK:** 17 recommended, subject to the project's Gradle configuration.
-- **Android SDK:** Installed SDK platforms and build tools required by the project.
-- **Minimum Android version:** API 26 (Android 8.0).
-- **Target Android version:** API 36 in the current configuration.
-- **Git:** To clone and manage the repository.
-- **Backend API:** A reachable backend instance for features that require remote services.
+- Android Studio
+- Git
+- An Android SDK compatible with the project
+- A compatible JDK and Gradle version
+- A physical Android device or emulator
+- Backend access and API configuration for features requiring remote services
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/aditya-bhardwaj/Helheim.git
-
+git clone https://github.com/adityabhardwaj2006/Helheim.git
 cd Helheim
 ```
 
-### 2. Configure Local Properties
+### 2. Open the Project
 
-Create or update `local.properties` in the project root.
+1. Launch Android Studio.
+2. Select **Open** and choose the cloned `Helheim` folder.
+3. Allow Gradle to synchronize dependencies.
+4. Resolve any SDK or build configuration prompts.
+
+### 3. Configure Application Properties
+
+If the project reads configuration from `local.properties`, create or update the file in the project root using the property names expected by the Gradle configuration.
+
+For example:
 
 ```properties
 GOOGLE_CLIENT_ID=your_google_oauth_client_id
 BASE_URL=https://your-backend-url.com/
 ```
 
-Replace the example values with your actual configuration.
+Replace the example values with your own configuration.
 
-- `GOOGLE_CLIENT_ID` should match the OAuth client configuration expected by the Android application's authentication implementation.
-- `BASE_URL` should point to your deployed backend API, including the appropriate trailing slash if required by your Retrofit configuration.
+- `GOOGLE_CLIENT_ID` must match the OAuth configuration required by the application's sign-in implementation.
+- `BASE_URL` should point to the backend API used by the application.
 
-**Important:** Do not commit real credentials, private keys, access tokens, or other secrets to GitHub.
+**Important:** Keep private keys, server credentials, access tokens, and other secrets out of source control.
 
-### 3. Configure Firebase
+### 4. Configure Firebase and Authentication
 
-Obtain the appropriate `google-services.json` file from your Firebase project and place it in the Android application module:
+If Firebase or Google authentication is enabled in your build:
 
-```text
-Helheim/
-├── app/
-│   └── google-services.json
-├── build.gradle.kts
-├── settings.gradle.kts
-└── local.properties
-```
+1. Register the Android application in the appropriate project.
+2. Verify that the application ID is `com.aditya.expensetracker`.
+3. Configure the required authentication providers.
+4. Place the appropriate `google-services.json` in the Android app module when required by the Google Services Gradle plugin.
+5. Verify that the authentication configuration matches the installed build and signing certificates.
 
-Ensure the Firebase Android app is registered with the correct application ID:
+Firebase client configuration alone does not replace backend authorization, token verification, or appropriate security rules.
 
-```text
-com.aditya.expensetracker
-```
+### 5. Configure the Backend
 
-If Google sign-in is enabled, verify that the authentication configuration matches the sign-in implementation and the certificates used for the relevant build variant.
+For features that depend on remote services:
 
-**Security note:** The Firebase client configuration is intended for use by the client application, but it does not replace appropriate Firebase security rules, backend authorization, or API-side token verification.
+- Configure the backend URL.
+- Set up the required server-side environment variables.
+- Configure authentication and token verification.
+- Configure any AI service credentials on the server.
+- Confirm that the backend is accessible from your device or emulator.
 
-### 4. Configure the Backend
-
-Helheim depends on a separately configured backend for supported remote features.
-
-Before testing the complete application:
-
-- Deploy or start the backend service.
-- Configure the required server-side environment variables.
-- Set up authentication and token verification.
-- Configure any required AI service credentials on the server.
-- Confirm that the API URL is accessible from your device or emulator.
-
-Refer to the backend repository's documentation for the exact environment variable names and setup instructions.
-
-### 5. Sync and Build
-
-Open the project in Android Studio and allow Gradle to synchronize dependencies.
-
-Alternatively, build the debug APK from the terminal:
-
-```bash
-./gradlew assembleDebug
-```
-
-To run the project's available unit tests:
-
-```bash
-./gradlew test
-```
-
-The exact tasks available depend on the Gradle configuration.
+Follow the backend project's own documentation for the exact configuration requirements.
 
 ---
 
 ## 🔧 Build and Run
 
-### Run on an Android Device or Emulator
+### Run the Application
 
 1. Open the project in Android Studio.
 2. Wait for Gradle synchronization to finish.
-3. Configure Firebase and the backend URL.
-4. Connect an Android device or start an emulator.
-5. Select the appropriate run configuration.
-6. Click **Run** to build and launch the application.
+3. Configure the required application properties and services.
+4. Start an Android emulator or connect a device.
+5. Select the application run configuration.
+6. Click **Run**.
 
-### Generate a Release Build
+### Build a Debug APK
 
-To generate a release Android App Bundle:
+From the project root, run:
+
+```bash
+./gradlew assembleDebug
+```
+
+### Run Unit Tests
+
+```bash
+./gradlew test
+```
+
+The tests executed depend on the tasks configured in the project.
+
+### Build a Release App Bundle
+
+To generate a release Android App Bundle, run:
 
 ```bash
 ./gradlew bundleRelease
 ```
 
-The generated bundle is typically located at:
+The output is typically placed under:
 
 ```text
 app/build/outputs/bundle/release/
 ```
 
-The precise output location depends on the project's Gradle configuration.
+The precise output location may vary with the build configuration.
 
-Before distributing a release, verify signing configuration, API endpoints, authentication behavior, privacy disclosures, and required runtime permissions.
+Before distributing a release, verify signing configuration, authentication, backend endpoints, privacy disclosures, and runtime permissions.
 
 ---
 
 ## 🔒 Permissions and Privacy
 
-Helheim uses certain Android capabilities to support its features.
+Helheim may use Android capabilities to support its functionality.
 
 ### Notification Access
 
-Notification access enables the application to detect supported financial transaction alerts from compatible banking and payment applications.
+Notification access can enable transaction detection from supported banking and payment notifications.
 
-- Notification access must be explicitly granted by the user through Android settings.
-- Transaction extraction depends on the information available in notifications.
-- Notification access can expose sensitive information, so its use should be clearly explained to users.
-- Access should be limited to the data required for the application's stated functionality.
+- The user must grant notification access through Android settings.
+- Extracted information depends on the contents of supported notifications.
+- Notification access can expose sensitive information and should be used only with the user's informed consent.
+- Only information required for the application's stated functionality should be processed.
 
 ### Internet Access
 
-Network access supports communication with the configured backend and other remote services.
+Network access supports communication with configured backend services and other remote functionality.
 
 ### Data Handling
 
-The application combines local storage with remote services for supported features. Users should review the application's privacy policy for details about collected information, synchronization, authentication, and data deletion.
+The application may process account details, financial transaction information, and messages submitted to its AI assistant, depending on enabled features.
 
-**For contributors:** Never add real user financial information, production credentials, private keys, or personal notification contents to source control, issue reports, logs, or test fixtures.
+Review the application's privacy policy for information about data collection, processing, synchronization, retention, and deletion.
+
+**For contributors:** Never commit real financial records, private credentials, authentication tokens, or personal notification contents to the repository.
 
 ---
 
 ## 🗺️ Future Enhancements
 
-Potential areas for continued development include:
+Potential areas for future development include:
 
-- [ ] Advanced budgeting and category-specific spending limits.
-- [ ] Custom financial goals and progress tracking.
+- [ ] Budget planning and category-specific spending limits.
+- [ ] Savings goals and progress tracking.
 - [ ] Recurring transaction detection and reminders.
-- [ ] Exportable financial reports in CSV or PDF format.
-- [ ] Enhanced transaction search and filtering.
-- [ ] Improved automated transaction categorization.
-- [ ] Expanded analytics and customizable date ranges.
+- [ ] Exportable financial reports in CSV or PDF formats.
+- [ ] Improved transaction search and filtering.
+- [ ] Enhanced automated transaction categorization.
+- [ ] More detailed financial analytics and date filters.
 - [ ] Additional accessibility and localization improvements.
-- [ ] Expanded automated unit and UI test coverage.
-- [ ] Further improvements to synchronization and conflict handling.
+- [ ] Expanded automated testing.
+- [ ] Improvements to synchronization and conflict handling.
 
-*This list represents potential improvements, not a claim that these features are already implemented.*
+*These are potential enhancements, not a statement that every item is currently implemented.*
 
 ---
 
@@ -482,43 +436,36 @@ Potential areas for continued development include:
 
 Contributions, bug reports, suggestions, and feature requests are welcome.
 
-If you would like to contribute:
-
 ### Contribution Workflow
 
-1. **Fork** the repository.
+1. Fork the repository.
 2. Create a feature branch.
 3. Implement your changes.
-4. Test the changes locally.
-5. Commit your work with a clear message.
+4. Test your changes locally.
+5. Commit your work with a descriptive message.
 6. Push the branch to your fork.
-7. Open a Pull Request describing your changes.
+7. Open a Pull Request.
 
 Example:
 
 ```bash
 git checkout -b feature/your-feature-name
-
 git add .
-
-git commit -m "feat: add your feature"
-
+git commit -m "feat: describe your change"
 git push origin feature/your-feature-name
 ```
-
-Then open a Pull Request against the original repository.
 
 ### Reporting Issues
 
 Before opening an issue:
 
-- Check whether the issue has already been reported.
+- Check whether it has already been reported.
 - Include steps to reproduce the problem.
 - Describe the expected and actual behavior.
-- Include relevant, sanitized logs when necessary.
-- Remove API keys, authentication tokens, and personal financial information.
+- Provide relevant logs after removing sensitive information.
+- Never include API keys, authentication tokens, or personal financial data.
 
-Report bugs and request features through the [GitHub Issues page](https://github.com/aditya-bhardwaj/Helheim/issues).
+Report bugs and request features through the [Helheim GitHub Issues page](https://github.com/adityabhardwaj2006/Helheim/issues).
 
 ---
 
@@ -526,12 +473,10 @@ Report bugs and request features through the [GitHub Issues page](https://github
 
 **Aditya Bhardwaj**
 
-Android Developer | Kotlin | Jetpack Compose | Software Engineering
+Android Development · Kotlin · Personal Finance Applications
 
-Helheim is a personal project focused on modern Android development, personal finance management, offline-first data handling, and AI-powered application experiences.
-
-- **GitHub:** [@aditya-bhardwaj](https://github.com/aditya-bhardwaj)
-- **Repository:** [Helheim — AI Expense Tracker](https://github.com/aditya-bhardwaj/Helheim)
+- **GitHub Profile:** [@adityabhardwaj2006](https://github.com/adityabhardwaj2006)
+- **Repository:** [Helheim — AI Expense Tracker](https://github.com/adityabhardwaj2006/Helheim)
 - **Platform:** Android
 - **Distribution:** Google Play Closed Testing
 
@@ -541,14 +486,14 @@ If you find this project useful, consider giving the repository a ⭐ on GitHub.
 
 ## 📄 License
 
-This project is distributed under the MIT License.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-See the [`LICENSE`](LICENSE) file for the complete license terms.
+*Keep this section if you have added an MIT `LICENSE` file to your repository.*
 
 ---
 
 <p align="center">
-  <b>Built with ❤️ using Kotlin and Jetpack Compose</b>
-  <br>
+  <strong>Built with ❤️ using Kotlin</strong>
+  <br/>
   <sub>Helheim — Smarter insights. Better financial awareness.</sub>
 </p>
